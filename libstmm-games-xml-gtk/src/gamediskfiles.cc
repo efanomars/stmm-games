@@ -106,7 +106,7 @@ static bool checkCanHomeLocal(bool bIncludeHomeLocal)
 	if (! bIncludeHomeLocal) {
 		return false; //--------------------------------------------------------
 	}
-	const std::string sHomeRelDir = libconfig::xml::getUserDataHomeRelDirPath();
+	const std::string sHomeRelDir = libconfig::xmlgtk::getUserDataHomeRelDirPath();
 	const std::string sSnapName = getEnvString("SNAP_NAME");
 	if (sSnapName.empty() || sHomeRelDir.empty()) {
 		return false; //--------------------------------------------------------
