@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100px" height="100px" version="1.1"
+     xmlns="http://www.w3.org/2000/svg">
+  <desc>Cracks mask 2</desc>
+  <path fill="black"  d="M 40,0   L 25,35  55,25  40,55  15,70  0,40  0,0
+                                  z"/>
+  <path fill="black"  d="M 44,0   L 29,31  59,21  44,55  55,60  75,75  85,30  100,40  100,0
+                                  z"/>
+  <path fill="black"  d="M 0,44   L 15,74  40,59  55,64  30,85  50,90  40,100  0,100
+                                  z"/>
+  <path fill="black"  d="M 44,100 L 54,90  34,85  59,64  75,79  85,34  100,44  100,100
+                                  z"/>
+</svg>

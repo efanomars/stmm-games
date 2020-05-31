@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<Theme _ign_version="1" internalName="Dummy">
+	<Description>Dummy theme</Description>
+	<Supports>omni</Supports>
+	<Extends>Simple</Extends>
+	<Images>
+		<Image imgId="PlayerColor" imgFile="player/colorC.png"/>
+	</Images>
+	<ImageArrays>
+		<FileArray arrayId="coloSquares" imgFile="color%%.png" sobstStr="%%" fromChar="A" toChar="D"
+					defaultImgFile="colorB.png"/>
+	</ImageArrays>
+	<DrawTile><Next/></DrawTile>
+</Theme>

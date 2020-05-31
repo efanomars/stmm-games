@@ -1,0 +1,216 @@
+<?xml version="1.0" ?>
+<!--
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program; if not, see <http://www.gnu.org/licenses/>
+-->
+<Theme _ign_version="1" internalName="Simple">
+	<Description>This is a test theme</Description>
+	<Colors>
+		<Color pal="3" rgb="#00FF00"/>
+		<StdColor />
+	</Colors>
+	<Fonts>
+		<DefaultFont define="Arial Bold"/>
+	</Fonts>
+	<Images>
+		<Image imgId="Background0" imgFile="background0.svg"/>
+		<Image imgId="Background1" imgFile="background1.svg"/>
+		<Image imgId="Background2" imgFile="background2.svg"/>
+		<Image imgId="Background3" imgFile="background3.svg"/>
+		<Image imgId="Background4" imgFile="background4.svg"/>
+		<Image imgId="Background5" imgFile="background5.svg"/>
+		<Image imgId="Background6" imgFile="background6.svg"/>
+		<Image imgId="Background7" imgFile="background7.svg"/>
+		<Image imgId="Background8" imgFile="background8.svg"/>
+		<Image imgId="IconLeft" imgFile="iconLeft.svg"/>
+		<Image imgId="IconRight" imgFile="iconRight.svg"/>
+		<Image imgId="IconDown" imgFile="iconDown.svg"/>
+		<!--Image imgId="IconRotate" imgFile="iconRotate.svg"/-->
+		<Image imgId="Gradient0" imgFile="gradient_0.svg"/>
+		<Image imgId="Gradient1" imgFile="gradient_1.svg"/>
+		<Image imgId="Gradient2" imgFile="gradient_2.svg"/>
+		<Image imgId="Gradient3" imgFile="gradient_3.svg"/>
+		<Image imgId="Gradient5" imgFile="gradient_5.svg"/>
+		<Image imgId="Gradient6" imgFile="gradient_6.svg"/>
+		<Image imgId="Gradient7" imgFile="gradient_7.svg"/>
+	</Images>
+	<Sounds>
+		<Sound sndId="SystemTest" sndFile="systemtest.mp3"/>
+		<Sound sndId="Tic"        sndFile="tic.mp3"/>
+		<Sound sndId="Tac"        sndFile="tac.mp3"/>
+		<Sound sndId="Toc"        sndFile="toc.mp3"/>
+		<Sound sndId="Hat"        sndFile="hat.mp3"/>
+		<Sound sndId="Bonc"       sndFile="bonc.mp3"/>
+		<Sound sndId="Explosion"  sndFile="explosion.mp3"/>
+		<Sound sndId="Wrong"      sndFile="wrong.mp3"/>
+		<Sound sndId="GameOver"   sndFile="gameover.mp3"/>
+		<Sound sndId="N00" sndFile="n00.mp3"/>
+		<Sound sndId="N01" sndFile="n01.mp3"/>
+		<Sound sndId="N02" sndFile="n02.mp3"/>
+		<Sound sndId="N03" sndFile="n03.mp3"/>
+		<Sound sndId="N04" sndFile="n04.mp3"/>
+		<Sound sndId="N05" sndFile="n05.mp3"/>
+		<Sound sndId="N06" sndFile="n06.mp3"/>
+		<Sound sndId="N07" sndFile="n07.mp3"/>
+		<Sound sndId="N08" sndFile="n08.mp3"/>
+		<Sound sndId="N09" sndFile="n09.mp3"/>
+		<Sound sndId="N10" sndFile="n10.mp3"/>
+		<Sound sndId="N11" sndFile="n11.mp3"/>
+		<Sound sndId="N12" sndFile="n12.mp3"/>
+		<Sound sndId="N13" sndFile="n13.mp3"/>
+		<Sound sndId="N14" sndFile="n14.mp3"/>
+		<Sound sndId="N15" sndFile="n15.mp3"/>
+		<Sound sndId="N16" sndFile="n16.mp3"/>
+		<Sound sndId="N17" sndFile="n17.mp3"/>
+		<Sound sndId="N18" sndFile="n18.mp3"/>
+		<Sound sndId="N19" sndFile="n19.mp3"/>
+		<Sound sndId="N20" sndFile="n20.mp3"/>
+		<Sound sndId="N21" sndFile="n21.mp3"/>
+		<Sound sndId="N22" sndFile="n22.mp3"/>
+		<Sound sndId="N23" sndFile="n23.mp3"/>
+		<Sound sndId="N24" sndFile="n24.mp3"/>
+		<Sound sndId="N25" sndFile="n25.mp3"/>
+		<Sound sndId="N26" sndFile="n26.mp3"/>
+		<Sound sndId="N27" sndFile="n27.mp3"/>
+		<Sound sndId="N28" sndFile="n28.mp3"/>
+		<Sound sndId="N29" sndFile="n29.mp3"/>
+		<Sound sndId="N30" sndFile="n30.mp3"/>
+	</Sounds>
+	<ImageArrays>
+		<FileArray arrayId="squareP" imgFile="squareplayer%%.svg" sobstStr="%%" fromInt="0" toInt="4"/>
+	</ImageArrays>
+	<Animations>
+		<PlainText name="Plain" center="true" colorName="black"/>
+		<PlainText name="Faded" center="true" colorName="darkblue" fadeInFactor="25%" fadeOutFactor="20%"/>
+		<ImageSequence name="PlainExplosion">
+			<Image imgFile="explosion1.svg" duration="50" priority="70"/>
+			<Image imgFile="explosion2.svg" duration="50" priority="80"/>
+			<Image imgFile="explosion3.svg" duration="100" priority="100"/>
+			<Image imgFile="explosion2.svg" duration="150" priority="70"/>
+			<Image imgFile="explosion4.svg" duration="200" priority="80"/>
+		</ImageSequence>
+		<ExplosionIsImageSequence name="PlainEx" imageSequenceName="PlainExplosion" _ign_widthPerc="200" _ign_heightPerc="200"/>
+		<Background name="standard-bg"/>
+		<StaticGrid name="standard-sg" opacity="90%"/>
+	</Animations>
+	<TileAnimations>
+		<TileAnimation aniId="Cracks">
+			<Image duration="15" imgFile="cracksmask1.svg"/>
+			<Image duration="85" imgFile="cracksmask2.svg"/>
+		</TileAnimation>
+	</TileAnimations>
+	<WidgetFactories>
+		<ActionsBoxFactory name="Simple:ActionsBox" _ign_beware="This element must precede BoxFactory"/>
+		<InputBoxFactory name="Simple:InputBox" _ign_beware="This element must precede BoxFactory"/>
+		<BoxFactory name="Simple:Box"/>
+		<BackgroundFactory name="Simple:Background"/>
+		<LevelShowFactory name="Simple:LevelShow" _ign_minTop="50%">
+			<Frame left="1" right="1" top="1" bottom="1">
+				<LeftImg imgFile="framelinev.svg"/>
+				<RightImg imgFile="framelinev.svg"/>
+				<TopImg imgFile="framelineh.svg"/>
+				<BottomImg imgFile="framelineh.svg"/>
+			</Frame>
+		</LevelShowFactory>
+		<VarFactory name="Simple:Var">
+			<Title colorName="red"/>
+			<Value colorRgb="#10EE00"/>
+		</VarFactory>
+		<PreviewFactory name="Simple:Preview"/>
+		<ActionFactory name="Simple:Action">
+			<!--TextAsIcon text="Left" imgFile="iconLeft.svg"/>
+			<TextAsIcon text="Right" imgFile="iconRight.svg"/>
+			<TextAsIcon text="Down" imgFile="iconDown.svg"/-->
+			<Frame left="3" right="3" top="3" bottom="3">
+				<TopLeftImg imgFile="cmdframe-tl.svg"/>
+				<TopImg imgFile="cmdframe-t.svg"/>
+				<TopRightImg imgFile="cmdframe-tr.svg"/>
+				<RightImg imgFile="cmdframe-r.svg"/>
+				<BottomRightImg imgFile="cmdframe-br.svg"/>
+				<BottomImg imgFile="cmdframe-b.svg"/>
+				<BottomLeftImg imgFile="cmdframe-bl.svg"/>
+				<LeftImg imgFile="cmdframe-l.svg"/>
+			</Frame>
+		</ActionFactory>
+		<TransparentFactory name="Simple:Transparent"/>
+		<ProgressFactory name="Simple:Progress">
+			<Normal colorName="green"/>
+			<Danger colorName="red"/>
+			<Frame left="3" right="3" top="3" bottom="3">
+				<TopLeftImg imgFile="cmdframe-tl.svg"/>
+				<TopImg imgFile="cmdframe-t.svg"/>
+				<TopRightImg imgFile="cmdframe-tr.svg"/>
+				<RightImg imgFile="cmdframe-r.svg"/>
+				<BottomRightImg imgFile="cmdframe-br.svg"/>
+				<BottomImg imgFile="cmdframe-b.svg"/>
+				<BottomLeftImg imgFile="cmdframe-bl.svg"/>
+				<LeftImg imgFile="cmdframe-l.svg"/>
+			</Frame>
+		</ProgressFactory>
+		<VolatileFactory  name="Simple:Volatile"/>
+	</WidgetFactories>
+	<Assigns>
+		<Assign idAss="squareP" arrayId="squareP" imgFromIdx="0">
+			<Players fromPlayer="0" toPlayer="4"/>
+		</Assign>
+		<Assign idAss="squarsorP" arrayId="squareP">
+			<Chars charName="SQUARSOR:SEL"/>
+			<!-- Player -1 means the tile's block is not controlled by any player -->
+			<Players fromPlayer="-1" toPlayer="3"/>
+		</Assign>
+		<!--Tiles idAss="bomb" imgFile="bomb.svg" charName="BOMB"/-->
+	</Assigns>
+	<DrawTile>
+		<Conditional>
+			<If><Char charName="SQUARSOR:SEL"/></If>
+				<Select>
+					<Case idAss="squarsorP">
+						<SelectedImage/>
+					</Case>
+				</Select>
+			<Elsif><Char charName="BOMB"/></Elsif>
+				<Mask aniId="Cracks" aniName="TILEANI:REMOVING"     _ign_aniFactor="10%" _ign_invert="true">
+					<Mask imgFile="squaremask.svg">
+						<Alpha>
+							<Fill/>
+						</Alpha>
+						<!--SelectCase idAss="bomb"/>
+							<SelectedImage/>
+						</SelectCase-->
+						<Rotate aniName="TILEANI:BOMB">
+							<Image imgFile="bomb.svg"/>
+						</Rotate>
+					</Mask>
+				</Mask>
+				<SelectCase idAss="squareP">
+					<SelectedImage/>
+				</SelectCase>
+			<Else/>
+				<Rotate aniName="TILEANI:REMOVING"      _ign_invert="true" _ign_aniFactor="2%">
+							<Rotate aniName="TILEANI:BOMB">
+					<Mask imgFile="squaremask.svg">
+						<Alpha>
+							<Fill/>
+							<Text sizeFactor="100%"/>
+						</Alpha>
+					</Mask>
+							</Rotate>
+				</Rotate>
+				<SelectCase idAss="squareP">
+					<SelectedImage/>
+				</SelectCase>
+		</Conditional>
+	</DrawTile>
+</Theme>

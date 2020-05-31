@@ -1,0 +1,4 @@
+usr/include/stmm-games-fake
+usr/lib/libstmm-games-fake.so.*
+usr/lib/libstmm-games-fake.so
+usr/lib/pkgconfig/stmm-games-fake.pc

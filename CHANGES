@@ -1,0 +1,231 @@
+stmm-games (0.23) unstable; urgency=low
+
+  * Add environment var STMM_GAMES_EXTRA_BASE_PATH
+  * Remove .local base path when within snap
+  * Split libstmm-games-gtk and libstmm-games-gtk projects
+  * Allow no image in a theme TileAnimation
+  * Fix doxy comments
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 01 Jun 2020 19:29:39 +0100
+
+stmm-games (0.22) unstable; urgency=low
+
+  * Rename snapcraft personal-files plug
+  * Fix minimum interval sudden game over bug.
+  * Cache BackgroundEvent images for faster drawing.
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 11 May 2020 19:29:39 +0100
+
+stmm-games (0.21) unstable; urgency=low
+
+  * Fix Highscores dialog
+  * Use snapctl is-connected to warn user
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Thu, 30 Apr 2020 19:29:39 +0100
+
+stmm-games (0.20) unstable; urgency=low
+
+  * Website section
+  * SNAP folder
+  * Fix getenv config bugs
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Sat, 25 Apr 2020 19:29:39 +0100
+
+stmm-games (0.19) unstable; urgency=low
+
+  * Fix cmake add_custom_target bug
+  * Add pylint3 to checkcode test
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Fri, 10 Apr 2020 19:29:39 +0100
+
+stmm-games (0.18) unstable; urgency=low
+
+  * Use stmi::SndMgmtCapability device manager capability
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 09 Mar 2020 19:29:39 +0100
+
+stmm-games (0.17) unstable; urgency=low
+
+  * Fix ActionBoxWidget bug
+  * Fix preferences AI and device bug
+  * Fix preferences loading bug
+  * PlayersDialog: move renaming to main tab
+  * All dialogs: make buttons somewhat consistent
+  * Eliminate smaller dialog boxes
+  * Multi-master slave options
+  * Built-in sound options
+  * Add omni example (allows to test configurations)
+  * Add dependency to libstmm-input-au
+  * Add sound event
+  * Add sound functionality in view and theme
+  * Add common number sounds
+  * Add DelayedQueueEvent
+  * Add Named indexes to ArrayEvent values
+  * PlayersDialog: add per player "playback device" and "volume" choice
+  * Fix numeric_limits<>::min() vs. ::lowest() potential bugs
+  * Fix theme parsing bug
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 02 Mar 2020 19:29:39 +0100
+
+stmm-games (0.16) unstable; urgency=low
+
+  * Separate board and block drawing with modifiers
+  * Fix initial game problem
+  * Order games by difficulty in GameDialog
+  * Add SelectAniModifier
+  * Fix SelectCaseModifier
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 02 Dec 2019 19:29:39 +0100
+
+stmm-games (0.15) unstable; urgency=low
+
+  * Fix BackgroundEvent bug
+  * Add new input messages to CumulCmpEvent
+  * Add ArrayEvent: multi dimensional array indexed by trigger value and variables
+  * Add watch file to deb packaging
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Sat, 16 Nov 2019 19:29:39 +0100
+
+stmm-games (0.14) unstable; urgency=low
+
+  * Apply iwyu
+  * Adapt build script to tarball deployment
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Thu, 24 Oct 2019 19:29:39 +0100
+
+stmm-games (0.13) unstable; urgency=low
+
+  * Fix hard coded user bug
+  * Improve build scripts
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Fri, 13 Sep 2019 19:29:39 +0100
+
+stmm-games (0.12) unstable; urgency=low
+
+  * Add event priority
+  * Improve xml parsing API
+  * Modify CumulCmpEvent output
+  * ShowTextEvent can be positioned
+  * VariableEvent supports reset increase decrease messages
+  * RandomEvent new message GENERATE_ADD
+  * Improve LogEvent
+  * Bug fixes
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 02 Sep 2019 19:29:39 +0100
+
+stmm-games (0.11) unstable; urgency=low
+
+  * Fix parsing bugs
+  * Add game option conditions to game constraints
+  * Improve xml parsing
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Fri, 16 Aug 2019 19:29:39 +0100
+
+stmm-games (0.10) unstable; urgency=low
+
+  * Fix theme and game dialog bugs
+  * Reduce code bloat by adding noexpect to methods
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Thu, 04 Jul 2019 19:29:39 +0100
+
+stmm-games (0.9) unstable; urgency=low
+
+  * Improve drawing API and performance
+  * Eliminate commands, add message to event action
+  * CircularBuffer: noexcept and test
+  * IntSet: improve API, noexcept and test
+  * HighscoresDialog: fix selection bug and set focus
+  * Create NewRows and simplify RandomTiles
+  * Move ScrollerEvent from Swapper project
+  * ScrollerEvent uses NewRows class
+  * Fix LevelShowWidget interactive bug
+  * Fix StaticGridAnimation defaults bug
+  * Move some files to util folder
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Sun, 02 Jun 2019 19:29:39 +0100
+
+stmm-games (0.8) unstable; urgency=low
+
+  * Fix theme
+  * Improve RandomEvent (support permutations of a range)
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 08 Apr 2019 19:29:39 +0100
+
+stmm-games (0.7) unstable; urgency=low
+
+  * Fix TileCoords and Coords bugs
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Tue, 02 Apr 2019 19:29:39 +0100
+
+stmm-games (0.6) unstable; urgency=low
+
+  * Add ProgressWidget
+  * Fix Event handling bugs
+  * Improve CircularBuffer template class
+  * Fix bug (discovered with clang++)
+  * Add man page to source build
+  * Improve build scripts
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 25 Mar 2019 19:29:39 +0100
+
+stmm-games (0.5) unstable; urgency=low
+
+  * Make GameDiskFiles more testable
+  * Avoid throwing because of missing theme resources when parsing model
+  * Add arch PKGBUILD
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Wed, 13 Mar 2019 19:29:39 +0100
+
+stmm-games (0.4) unstable; urgency=low
+
+  * Add NPoint hash function
+  * Rename RandomRow to RandomTiles and add xml parser
+  * Fix Coords bug
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Wed, 06 Mar 2019 19:29:39 +0100
+
+stmm-games (0.3) unstable; urgency=low
+
+  * Improve initialization and xml parsing of RotateModifier, MaskModifier, TileAniModifier
+  * Add FadeModifier and corresponding xml parser
+  * Add GrowModifier and corresponding xml parser
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Sun, 24 Feb 2019 19:29:39 +0100
+
+stmm-games (0.2) unstable; urgency=low
+
+  * Jason Turner, C++ Weekly Ep.154, eliminate empty destructors
+  * Add virtual destructor to interfaces
+  * Improve LevelBlock and listeners API
+  * libstmm-games: create util subfolder
+  * Improve deb package creation script
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Tue, 12 Feb 2019 19:29:39 +0100
+
+stmm-games (0.1) unstable; urgency=low
+
+  * Initial release
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Thu, 24 Jan 2019 14:24:34 +0100

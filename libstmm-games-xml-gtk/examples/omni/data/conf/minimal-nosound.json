@@ -1,0 +1,36 @@
+{
+	  "deviceManager" :
+	{
+		  "enableEventClasses" : false
+		, "enDisableEventClasses" : []
+		, "plugins" :
+		{
+			  "enablePlugins" : false
+			, "enDisablePlugins" : []
+			, "groups" : ["gtk"]
+			, "verbose" : true
+		}
+	}
+	, "constraints" :
+	{
+		  "teamsMin" : 1
+		, "teamsMax" : 1
+		, "matesPerTeamMax" : 1
+		, "playersMax" : 1
+		, "aiMatesPerTeamMax" : 0
+		, "allowMixedAIHumanTeam" : false
+	}
+	, "assign" :
+	{
+		  "allCapabilityClasses" : true
+		, "capabilityClasses" : []
+		, "maxCapabilitiesExplicitlyAssignedToPlayer" : 0
+		, "moreCapabilitiesPerClassAssignedToPlayer" : false
+		, "capabilitiesAutoAssignedToActivePlayer" : true
+	}
+	, "keyActions" : []
+	, "options" : []
+	, "maxGamePlayedHistory" : 10
+	, "soundEnabled" : false
+	, "soundPerPlayerAllowed" : false
+}

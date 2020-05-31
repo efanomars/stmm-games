@@ -1,0 +1,17 @@
+# stmm-games pkg-config source file
+
+prefix=@STMMI_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: stmm-games
+Description: C++ games library
+Version: @STMM_GAMES_VERSION@
+URL: http://www.efanomars.com/libraries/stmm-games
+# Beware! The space between the library name and the comparison (>=) is necessary!
+Requires: stmm-input-ev >= @STMM_GAMES_REQ_STMM_INPUT_EV_VERSION@  stmm-input-au >= @STMM_GAMES_REQ_STMM_INPUT_AU_VERSION@
+Conflicts:
+Libs: -L${libdir} -lstmm-games
+Cflags: -I${includedir}/stmm-games -I${includedir}
+

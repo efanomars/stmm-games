@@ -1,0 +1,181 @@
+/*
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stmm-games-xml-gtk-config.cc
+ */
+
+#include "stmm-games-xml-gtk-config.h"
+
+#include <cassert>
+
+#include <stdlib.h>
+
+namespace stmg
+{
+
+namespace libconfig
+{
+
+namespace xmlgtk
+{
+
+static const char* const s_p0UserDataDir = "@STMMI_PKG_USER_DATA_DIR@";
+
+static const char* const s_p0EnvVarAdditionalPath = "STMM_GAMES_EXTRA_BASE_PATH";
+
+const std::string& getVersion()
+{
+	static const std::string s_sLibVersion = "@STMMI_PKG_VERSION@";
+	return s_sLibVersion;
+}
+
+static std::string getEnvString(const char* p0Name) noexcept
+{
+	const char* p0Value = ::secure_getenv(p0Name);
+	std::string sValue{(p0Value == nullptr) ? "" : p0Value};
+	return sValue;
+}
+
+std::string getUserDataHomeRelDirPath()
+{
+	static const std::string s_sHomeRelDir{"@STMMI_HOME_REL_DATA_DIR@"};
+	return s_sHomeRelDir;
+}
+
+std::string getUserDataDirPath()
+{
+	const std::string sUserDataDir{s_p0UserDataDir};
+	if (sUserDataDir.empty()) {
+		return sUserDataDir; //-------------------------------------------------
+	}
+	#ifdef STMM_SNAP_PACKAGING
+	// ex. /home/myusername/snap/mysnapname/x1
+	const std::string sHome = getEnvString("SNAP_USER_DATA");
+	#else
+	// ex. /home/myusername
+	const std::string sHome = getEnvString("HOME");
+	#endif //STMM_SNAP_PACKAGING
+	if (sHome.empty()) {
+		return sHome; //--------------------------------------------------------
+	}
+	return sHome + "/" + sUserDataDir;
+}
+
+const std::string getPackageDataDirPath()
+{
+	static const std::string s_sDataDir = "@STMMI_PKG_DATA_DIR@";
+
+	#ifdef STMM_SNAP_PACKAGING
+	const std::string sPrefix = getEnvString("SNAP");
+	#else
+	const std::string sPrefix;
+	#endif //STMM_SNAP_PACKAGING
+
+	return sPrefix + s_sDataDir;
+}
+
+std::vector<std::string> getDataDirPaths(bool bIncludeHomeLocal, bool bIncludeAdditionalEnvPath)
+{
+	static const std::string s_sDataDir1{"@STMMI_RO_DATA_DIR_1@"};
+	static const std::string s_sDataDir2{"@STMMI_RO_DATA_DIR_2@"};
+	static const std::string s_sDataDir3{"@STMMI_RO_DATA_DIR_3@"};
+
+	std::vector<std::string> aDataDirs;
+
+	std::string sHome = getEnvString("HOME");
+
+	if (bIncludeAdditionalEnvPath) {
+		std::string sAddiPath = getEnvString(s_p0EnvVarAdditionalPath);
+		if ((! sAddiPath.empty()) && (sAddiPath[0] == '/')) {
+			auto nAddiLen = sAddiPath.size();
+			// eliminate trailing slash
+			if (sAddiPath.substr(nAddiLen - 1, 1) == "/") {
+				sAddiPath = sAddiPath.substr(0, nAddiLen - 1);
+				--nAddiLen;
+			}
+			// can't be root directory
+			if (nAddiLen > 1) {
+				if (sAddiPath.find_first_not_of('/') != std::string::npos) {
+					#ifdef STMM_SNAP_PACKAGING
+					// perform additional checks (in user's home)
+					#endif //STMM_SNAP_PACKAGING
+					aDataDirs.push_back(sAddiPath);
+				}
+			}
+		}
+	}
+
+	#ifdef STMM_SNAP_PACKAGING
+	const std::string sPrefix = getEnvString("SNAP");
+	#else
+	const std::string sPrefix;
+	#endif //STMM_SNAP_PACKAGING
+
+	const std::string sUserDataDir = getUserDataDirPath();
+	if (bIncludeHomeLocal && ! sUserDataDir.empty()) {
+		aDataDirs.push_back(sUserDataDir);
+	}
+
+	assert(!s_sDataDir1.empty());
+	aDataDirs.push_back(sPrefix + s_sDataDir1);
+	if ((! s_sDataDir2.empty()) && (s_sDataDir2 != s_sDataDir1)) {
+		aDataDirs.push_back(sPrefix + s_sDataDir2);
+	}
+	if ((! s_sDataDir3.empty()) && (s_sDataDir3 != s_sDataDir1) && (s_sDataDir3 != s_sDataDir2)) {
+		aDataDirs.push_back(sPrefix + s_sDataDir3);
+	}
+
+	#ifdef STMM_SNAP_PACKAGING
+	const std::string sHomeRelDir = getUserDataHomeRelDirPath();
+	if ((! bIncludeHomeLocal) && (! sHomeRelDir.empty())) {
+		return aDataDirs; //----------------------------------------------------
+	}
+	// ex. sHomeRelDir = .local/share/stmm-games
+	if (sHome.substr(0, 6) == "/home/") {
+		// expected values:
+		//   /home/myuser
+		//   /home/myuser/snap/x8
+		// extract /home/myuser
+		const auto nThirdSlashPos = sHome.find('/', 6);
+		if (nThirdSlashPos != std::string::npos) {
+			if (sHome.substr(nThirdSlashPos + 1, 4) != "snap") {
+				sHome.clear();
+			} else {
+				sHome = sHome.substr(0, nThirdSlashPos);
+			}
+		} else if (sHome.size() == 6) {
+			sHome.clear();
+		}
+		if (! sHome.empty()) {
+			const std::string sRealUserDataDir = sHome + "/" + sHomeRelDir;
+			if (sUserDataDir != sRealUserDataDir) {
+				aDataDirs.push_back(sRealUserDataDir);
+			}
+		}
+	}
+	#endif //STMM_SNAP_PACKAGING
+
+	return aDataDirs;
+}
+
+
+} // namespace xmlgtk
+
+} // namespace libconfig
+
+} // namespace stmg
+

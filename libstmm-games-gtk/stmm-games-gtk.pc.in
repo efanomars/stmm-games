@@ -1,0 +1,17 @@
+# stmm-games-gtk pkg-config source file
+
+prefix=@STMMI_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: stmm-games-gtk
+Description: C++ games library - gtk view
+Version: @STMM_GAMES_GTK_VERSION@
+URL: http://www.efanomars.com/libraries/stmm-games
+# Beware! The space between the library name and the comparison (>=) is necessary!
+Requires: stmm-games-file >= @STMM_GAMES_GTK_REQ_STMM_GAMES_FILE_VERSION@  stmm-input-gtk >= @STMM_GAMES_GTK_REQ_STMM_INPUT_GTK_VERSION@  gtkmm-3.0 >= @STMM_GAMES_GTK_REQ_GTKMM_VERSION@  librsvg-2.0 >= @STMM_GAMES_GTK_REQ_LIBRSVG_VERSION@
+Conflicts:
+Libs: -L${libdir} -lstmm-games-gtk
+Cflags: -I${includedir}/stmm-games-gtk -I${includedir}
+

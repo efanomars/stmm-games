@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<!--
+ * Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program; if not, see <http://www.gnu.org/licenses/>
+-->
+<Game _ign_version="1" internalName="asound" testing="false">
+	<Description>A sound</Description>
+	<Author name="Stefano Marsili"  email="stemars@gmx.ch"/>
+	<Constraints teamsPerLevel="1" levelsMin="1" levelsMax="1" teamsMin="1" teamsMax="1" matesPerTeamMax="1"/>
+	<Variables>
+		<Var name="Points" owner="TEAM" initial="0"/>
+		<Var name="Time" owner="GAME" initial="180" subtractTime="true" timeBase="SEC"/>
+
+		<Var name="Direction" owner="GAME" initial="0"/>
+	</Variables>
+	<Level>
+		<Board width="5" height="5">
+			<!--Rect x="0" y="0" w="1" h="10" colorPal="2" alpha="240"/>
+			<Rect x="9" y="0" w="1" h="10" colorPal="3" alpha="200"/>
+			<Rect x="6" y="6" w="1" h="1" colorPal="4"/-->
+		</Board>
+	</Level>
+	<Layout>
+		<BackgroundWidget image="Background1">
+			<BoxWidget vertical="true" expandHoriz="true" expandVert="true" alignHoriz="FILL" alignVert="FILL">
+				<LevelShowWidget team="0" rightMargin="0" name="Main" interactive="false">
+					<AttrIf rightMargin="0.5">
+						<Teams from="2"/>
+					</AttrIf>
+				</LevelShowWidget>
+				<ActionWidget text="PLAY ONCE" _ign_textHeight="1.5" expandHoriz="true" alignHoriz="FILL" _ign_icon="IconDown"
+								refWFactor="0.5" refHFactor="0.15" event="EVID-SND" msgName="PLAY_FREE_ONCE">
+				</ActionWidget>
+				<TransparentWidget refWFactor="100%" refHFactor="2%"/>
+				<ActionWidget text="PLAY" _ign_textHeight="1.5" expandHoriz="true" alignHoriz="FILL" _ign_icon="IconDown"
+								refWFactor="0.5" refHFactor="0.15" event="EVID-SND" msgName="PLAY">
+				</ActionWidget>
+				<ActionWidget text="STOP" _ign_textHeight="1.5" expandHoriz="true" alignHoriz="FILL" _ign_icon="IconDown"
+								refWFactor="0.5" refHFactor="0.15" event="EVID-SND" msgName="STOP">
+				</ActionWidget>
+				<BoxWidget vertical="false" expandHoriz="true" expandVert="true" alignHoriz="FILL" alignVert="FILL">
+					<ActionWidget text="Go Left" _ign_textHeight="1.5" expandHoriz="true" alignHoriz="FILL" _ign_icon="IconDown"
+									refWFactor="0.5" refHFactor="0.15" event="EVID-VAR-DIR" msgName="SET_VALUE" value="-5">
+					</ActionWidget>
+					<ActionWidget text="Go Right" _ign_textHeight="1.5" expandHoriz="true" alignHoriz="FILL" _ign_icon="IconDown"
+									refWFactor="0.5" refHFactor="0.15" event="EVID-VAR-DIR" msgName="SET_VALUE" value="+5">
+					</ActionWidget>
+				</BoxWidget>
+				<BoxWidget vertical="false" expandHoriz="true" expandVert="true" alignHoriz="FILL" alignVert="FILL">
+					<ActionWidget text="Center" _ign_textHeight="1.5" expandHoriz="true" alignHoriz="FILL" _ign_icon="IconDown"
+									refWFactor="0.5" refHFactor="0.15" event="EVID-SND" msgName="SET_POS_X" value="0">
+					</ActionWidget>
+					<ActionWidget text="Quit" _ign_textHeight="1.5" expandHoriz="true" alignHoriz="FILL" _ign_icon="IconDown"
+									refWFactor="0.5" refHFactor="0.15" interrupt="ABORT_ASK">
+					</ActionWidget>
+				</BoxWidget>
+			</BoxWidget>
+		</BackgroundWidget>
+	</Layout>
+	<Blocks>
+	</Blocks>
+	<Events>
+		<VariableEvent evId="EVID-VAR-DIR" publish="true" name="Direction" start="0">
+			<Listener groupName="VAR_VALUE"    event="EVID-SND" msgName="ADD_PERC_TO_POS_X"/>
+		</VariableEvent>
+
+		<SoundEvent evId="EVID-SND" publish="true" loop="true" name="SystemTest" posX="0" listenerRealtive="true">
+			<Listener groupName="SOUND_FINISHED"    event="EVID-SHOW-FINISHED" msg="0"/>
+		</SoundEvent>
+
+		<ShowTextEvent evId="EVID-SHOW-FINISHED" token="%%" duration="600" posX="0" posY="0" width="2" height="2"
+							type="Faded" fontSizeInTiles="1.0">
+			<Line>FINISHED</Line>
+		</ShowTextEvent>
+
+		<AlarmsEvent evId="EVID-ALARM" publish="true" start="0">
+			<SetMillisec value="100" repeat="100000"/>
+			<Listener groupName="TIMEOUT"    event="EVID-VAR-DIR" msgName="VAR_GET_VALUE"/>
+			<Listener groupName="TIMEOUT"    event="EVID-ALARM" msgName="ALARMS_NEXT"/>
+		</AlarmsEvent>
+	</Events>
+</Game>

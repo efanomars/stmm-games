@@ -1,0 +1,70 @@
+<?xml version="1.0" ?>
+<!--
+ * Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program; if not, see <http://www.gnu.org/licenses/>
+-->
+<Game _ign_version="1" internalName="empty" testing="false">
+	<Description>EMPTY game description</Description>
+	<Author name="Stefano Marsili"  email="stemars@gmx.ch"/>
+	<Constraints teamsPerLevel="1" levelsMin="1" levelsMax="1" teamsMin="1" teamsMax="1" matesPerTeamMax="1"/>
+	<Variables>
+		<Var name="Time" owner="GAME" initial="180" subtractTime="true" timeBase="SEC"/>
+	</Variables>
+	<Level>
+		<Board width="5" height="5">
+			<!--Rect x="0" y="0" w="1" h="10" colorPal="2" alpha="240"/>
+			<Rect x="9" y="0" w="1" h="10" colorPal="3" alpha="200"/>
+			<Rect x="6" y="6" w="1" h="1" colorPal="4"/-->
+		</Board>
+	</Level>
+	<Layout>
+		<BackgroundWidget image="Background1">
+			<ActionsBoxWidget vertical="true" expandHoriz="true" expandVert="true" alignHoriz="FILL" alignVert="FILL">
+				<GridRow weight="10">
+					<Cell weight="5" interrupt="ABORT"/>
+					<Cell weight="5" interrupt="ABORT_ASK" _ign_keyAction="BlockEvent:Next"/>
+				</GridRow>
+				<GridRow weight="30">
+					<Cell interrupt="RESTART" _ign_keyAction="BlockEvent:Down"/>
+					<Cell interrupt="RESTART_ASK" _ign_keyAction="BlockEvent:Rotate"/>
+				</GridRow>
+				<GridRow weight="30">
+					<Cell interrupt="PAUSE" _ign_keyAction="BlockEvent:Down"/>
+					<!--Cell interrupt="RESTART_ASK" _ign_keyAction="BlockEvent:Rotate"/-->
+				</GridRow>
+				<GridRow weight="10">
+					<Cell _ign_interrupt="QUIT_APP" _ign_keyAction="BlockEvent:Left"/>
+					<Cell interrupt="QUIT_APP_ASK" _ign_keyAction="BlockEvent:Right"/>
+				</GridRow>
+				<LevelShowWidget team="0" rightMargin="0" name="Main" interactive="false">
+					<AttrIf rightMargin="0.5">
+						<Teams from="2"/>
+					</AttrIf>
+				</LevelShowWidget>
+				<BoxWidget vertical="false" expandVert="true">
+					<VarWidget title="Time" team="" variable="Time" refWFactor="0.25" refHFactor="0.1" valueDigits="5">
+						<ExistIf>
+							<Teams value="1"/>
+						</ExistIf>
+					</VarWidget>
+				</BoxWidget>
+			</ActionsBoxWidget>
+		</BackgroundWidget>
+	</Layout>
+	<Blocks>
+	</Blocks>
+	<Events>
+	</Events>
+</Game>

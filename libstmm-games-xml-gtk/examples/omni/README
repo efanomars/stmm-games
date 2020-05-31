@@ -1,0 +1,22 @@
+====
+omni
+====
+
+omni is a sample application that allows to test the stmm-games libraries
+by creating a pseudo game with custom configuration.
+
+
+Compile and run
+---------------
+
+mkdir build
+cd build
+
+cmake -D CMAKE_BUILD_TYPE=Debug ..
+
+make
+
+# try it
+./omni  generic-sound-ai.json
+
+

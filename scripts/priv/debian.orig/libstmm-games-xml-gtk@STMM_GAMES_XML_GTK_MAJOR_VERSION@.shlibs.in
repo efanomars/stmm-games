@@ -1,0 +1,1 @@
+libstmm-games-xml-gtk @STMM_GAMES_XML_GTK_MAJOR_VERSION@ libstmm-games-xml-gtk@STMM_GAMES_XML_GTK_MAJOR_VERSION@ (>= @STMM_GAMES_XML_GTK_MAJOR_VERSION@.0)

@@ -1,0 +1,118 @@
+{
+	  "deviceManager" :
+	{
+		  "enableEventClasses" : false
+		, "enDisableEventClasses" : []
+		, "plugins" :
+		{
+			  "enablePlugins" : false
+			, "enDisablePlugins" : []
+			, "groups" : ["gtk", "sound"]
+			, "verbose" : true
+		}
+	}
+	, "constraints" :
+	{
+		  "teamsMin" : 1
+		, "teamsMax" : 4
+		, "matesPerTeamMax" : 3
+		, "playersMax" : 12
+		, "aiMatesPerTeamMax" : 1
+		, "allowMixedAIHumanTeam" : false
+	}
+	, "assign" :
+	{
+		  "allCapabilityClasses" : true
+		, "capabilityClasses" : []
+		, "maxCapabilitiesExplicitlyAssignedToPlayer" : 10
+		, "moreCapabilitiesPerClassAssignedToPlayer" : false
+		, "capabilitiesAutoAssignedToActivePlayer" : true
+	}
+	, "keyActions" : [
+		{
+			  "keyActionNames" : ["MoveUp", "Rotate"]
+			, "keyActionDescription" : "Up or rotate"
+			, "keyActionDefaultClassKeys" : [
+				{
+					  "capabilityClassId" : "stmi::Keys"
+					, "defaultKeys" : ["UP", "W", "8"]
+				}, {
+					  "capabilityClassId" : "stmi::Joystick"
+					, "defaultKeys" : ["UP", "BTN_A"]
+				} 
+			]
+		}, {
+			  "keyActionNames" : ["MoveLeft"]
+			, "keyActionDescription" : "Left"
+			, "keyActionDefaultClassKeys" : [
+				{
+					  "capabilityClassId" : "stmi::Keys"
+					, "defaultKeys" : ["LEFT", "A", "4"]
+				}, {
+					  "capabilityClassId" : "stmi::Joystick"
+					, "defaultKeys" : ["LEFT", "BTN_X"]
+				} 
+			]
+		}
+	]
+	, "options" : [
+		{
+			  "optionType" : "bool"
+			, "ownerType" : "GAME"
+			, "name" : "Pinco"
+			, "defaultValue" : false
+			, "description" : "Pinco option"
+			, "readOnly" : false
+			, "visible" : true
+			, "masters" : []
+		}, {
+			  "optionType" : "int"
+			, "ownerType" : "GAME"
+			, "name" : "Pallo"
+			, "defaultValue" : 1
+			, "description" : "Pallo option"
+			, "readOnly" : false
+			, "visible" : true
+			, "masters" : [
+				{
+					  "masterName" : "Pinco"
+					, "masterValues" : [ false ]
+				}
+			]
+			, "min" : 1
+			, "max" : 6
+		}, {
+			  "optionType" : "enum"
+			, "ownerType" : "PLAYER"
+			, "name" : "Penno"
+			, "defaultValue" : 1
+			, "description" : "Penno option"
+			, "readOnly" : false
+			, "visible" : true
+			, "masters" : [
+				{
+					  "masterName" : "Pinco"
+					, "masterValues" : [ true ]
+				}
+			]
+			, "enums" : [
+				{
+					  "enumValue" : 1
+					, "enumName" : "VALUNO"
+					, "enumDesc" : "Value1"
+				}, {
+					  "enumValue" : 2
+					, "enumName" : "VALDUE"
+					, "enumDesc" : "Value2"
+				}, {
+					  "enumValue" : 4
+					, "enumName" : "VALQUATTRO"
+					, "enumDesc" : "Value4"
+				}
+			]
+		}
+	]
+	, "maxGamePlayedHistory" : 10
+	, "soundEnabled" : true
+	, "soundPerPlayerAllowed" : true
+}

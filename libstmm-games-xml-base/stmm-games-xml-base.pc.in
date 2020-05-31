@@ -1,0 +1,17 @@
+# stmm-games-xml-base pkg-config source file
+
+prefix=@STMMI_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: stmm-games-xml-base
+Description: C++ games library - xml common functionality
+Version: @STMM_GAMES_XML_BASE_VERSION@
+URL: http://www.efanomars.com/libraries/stmm-games
+# Beware! The space between the library name and the comparison (>=) is necessary!
+Requires: stmm-games >= @STMM_GAMES_XML_BASE_REQ_STMM_GAMES_VERSION@  libxml++-2.6 >= @STMM_GAMES_XML_BASE_REQ_LIBXMLPP_VERSION@
+Conflicts:
+Libs: -L${libdir} -lstmm-games-xml-base
+Cflags: -I${includedir}/stmm-games-xml-base -I${includedir}
+

@@ -1,0 +1,266 @@
+Source: stmm-games
+Priority: optional
+Maintainer: Stefano Marsili <efanomars@gmx.ch>
+Build-Depends: debhelper (>= 9)
+             , cmake
+             , python3
+             , doxygen
+             , graphviz
+             , libstmm-input-au-dev (>= @STMM_GAMES_REQ_STMM_INPUT_AU_VERSION@)
+             , libstmm-input-ev-dev (>= @STMM_GAMES_REQ_STMM_INPUT_EV_VERSION@)
+             , libstmm-input-gtk-dev (>= @STMM_GAMES_GTK_REQ_STMM_INPUT_GTK_VERSION@)
+             , libgtkmm-3.0-dev (>= @STMM_GAMES_GTK_REQ_GTKMM_VERSION@)
+             , librsvg2-dev (>= @STMM_GAMES_GTK_REQ_LIBRSVG_VERSION@)
+             , libxml++2.6-dev (>= @STMM_GAMES_XML_BASE_REQ_LIBXMLPP_VERSION@)
+Standards-Version: 3.9.8
+Section: libs
+Homepage: @STMMI_WEBSITE_SECTION@/stmm-games
+Vcs-Git: https://www.gitlab.com/efanomars/stmm-games.git
+#Vcs-Browser: https://www.gitlab.com/efanomars/stmm-games.git
+
+
+#---------------------------------------------------------------------
+Package: libstmm-games@STMM_GAMES_MAJOR_VERSION@
+Architecture: any
+Depends: libstmm-input-ev@STMM_GAMES_REQ_STMM_INPUT_EV_MAJOR_VERSION@ (>= @STMM_GAMES_REQ_STMM_INPUT_EV_VERSION@)
+       , libstmm-input-au@STMM_GAMES_REQ_STMM_INPUT_AU_MAJOR_VERSION@ (>= @STMM_GAMES_REQ_STMM_INPUT_AU_VERSION@)
+       , ${shlibs:Depends}, ${misc:Depends}
+Description: C++ 2D games library - model classes
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library defines a simple 2D game model based one or more boards of tiles,
+ blocks, trivial animations and game events.
+ It allows one to customize high scores, options and preferences.
+ It also defines interfaces for a view implementation.
+
+Package: libstmm-games-dev
+Section: libdevel
+Architecture: any
+Depends: libstmm-games@STMM_GAMES_MAJOR_VERSION@ (= ${binary:Version})
+       , libstmm-input-ev-dev (>= @STMM_GAMES_REQ_STMM_INPUT_EV_MAJOR_VERSION@)
+       , libstmm-input-au-dev (>= @STMM_GAMES_REQ_STMM_INPUT_AU_MAJOR_VERSION@)
+       , ${misc:Depends}
+Suggests: libstmm-games-doc
+Description: C++ 2D games library - model classes (develop)
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library defines a simple 2D game model based one or more boards of tiles,
+ blocks, trivial animations and game events.
+ It allows one to customize high scores, options and preferences.
+ It also defines interfaces for a view implementation.
+ .
+ This package contains the development headers for the library found in
+ libstmm-games@STMM_GAMES_MAJOR_VERSION@.
+ .
+ Beware! This library is not mature at all and is constantly changing its
+ API and ABI, even when only its minor version number increases.
+
+#---------------------------------------------------------------------
+Package: libstmm-games-fake-dev
+Section: libdevel
+Architecture: any
+Depends: libstmm-games-dev (>= @STMM_GAMES_FAKE_REQ_STMM_GAMES_VERSION@)
+       , ${misc:Depends}, ${shlibs:Depends}
+Suggests: libstmm-games-doc
+Description: C++ 2D games library - fakes (develop)
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library is for developers that need to test their
+ libstmm-games-dev based game.
+ .
+ Beware! This library is not mature at all and is constantly changing its
+ API and ABI, even when only its minor version number increases.
+
+
+#---------------------------------------------------------------------
+Package: libstmm-games-file@STMM_GAMES_FILE_MAJOR_VERSION@
+Architecture: any
+Depends: libstmm-games@STMM_GAMES_MAJOR_VERSION@ (>= @STMM_GAMES_FILE_REQ_STMM_GAMES_VERSION@)
+       , ${misc:Depends}, ${shlibs:Depends}
+Description: C++ 2D games library - file related classes
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library defines interface classes for i/o.
+ It is used by stmm-games view packages such as libstmm-games-gtk to read games,
+ and persist preferences a nd highscores.
+ 
+Package: libstmm-games-file-dev
+Section: libdevel
+Architecture: any
+Depends: libstmm-games-file@STMM_GAMES_FILE_MAJOR_VERSION@ (= ${binary:Version})
+       , libstmm-games-dev (>= @STMM_GAMES_FILE_REQ_STMM_GAMES_VERSION@)
+       , ${misc:Depends}
+Suggests: libstmm-games-doc
+Description: C++ 2D games library - file related classes (develop)
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library defines interface classes for i/o.
+ It is used by stmm-games view packages such as libstmm-games-gtk to read games,
+ and persist preferences a nd highscores.
+ .
+ This package contains the development headers for the library found in
+ libstmm-games-file@STMM_GAMES_FILE_MAJOR_VERSION@.
+ .
+ Beware! This library is not mature at all and is constantly changing its
+ API and ABI, even when only its minor version number increases.
+
+
+#---------------------------------------------------------------------
+Package: libstmm-games-gtk@STMM_GAMES_GTK_MAJOR_VERSION@
+Architecture: any
+Depends: libstmm-games-file@STMM_GAMES_FILE_MAJOR_VERSION@ (>= @STMM_GAMES_GTK_REQ_STMM_GAMES_FILE_VERSION@)
+       , libstmm-input-gtk@STMM_GAMES_GTK_REQ_STMM_INPUT_GTK_MAJOR_VERSION@ (>= @STMM_GAMES_GTK_REQ_STMM_INPUT_GTK_VERSION@)
+       , libgtkmm-3.0-1v5 (>= @STMM_GAMES_GTK_REQ_GTKMM_VERSION@)
+       , librsvg2-2 (>= @STMM_GAMES_GTK_REQ_LIBRSVG_VERSION@)
+       , ${misc:Depends}, ${shlibs:Depends}
+Description: C++ 2D games library - gtkmm view classes
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library implements the view interfaces with gtkmm.
+ It also provides a main window with preference and game choice dialogs
+ automatically constructed from the provided model.
+ 
+Package: libstmm-games-gtk-dev
+Section: libdevel
+Architecture: any
+Depends: libstmm-games-gtk@STMM_GAMES_GTK_MAJOR_VERSION@ (= ${binary:Version})
+       , libstmm-games-file-dev (>= @STMM_GAMES_GTK_REQ_STMM_GAMES_FILE_VERSION@)
+       , libstmm-input-gtk-dev (>= @STMM_GAMES_GTK_REQ_STMM_INPUT_GTK_VERSION@)
+       , libgtkmm-3.0-dev (>= @STMM_GAMES_GTK_REQ_GTKMM_VERSION@)
+       , librsvg2-dev (>= @STMM_GAMES_GTK_REQ_LIBRSVG_VERSION@)
+       , ${misc:Depends}
+Suggests: libstmm-games-doc
+Description: C++ 2D games library - gtkmm view classes (develop)
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library implements the view interfaces with gtkmm.
+ It also provides a main window with preference and game choice dialogs
+ automatically constructed from the provided model.
+ .
+ This package contains the development headers for the library found in
+ libstmm-games-gtk@STMM_GAMES_GTK_MAJOR_VERSION@.
+ .
+ Beware! This library is not mature at all and is constantly changing its
+ API and ABI, even when only its minor version number increases.
+
+
+#---------------------------------------------------------------------
+Package: libstmm-games-xml-base@STMM_GAMES_XML_BASE_MAJOR_VERSION@
+Architecture: any
+Depends: libstmm-games@STMM_GAMES_MAJOR_VERSION@ (>= @STMM_GAMES_XML_BASE_REQ_STMM_GAMES_VERSION@)
+       , libxml++2.6-2v5 (>= @STMM_GAMES_XML_BASE_REQ_LIBXMLPP_VERSION@)
+       , ${misc:Depends}, ${shlibs:Depends}
+Description: C++ 2D games library - xml loading base classes
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library provides common functionality for xml game and theme file loaders.
+ It is toolkit (gtk) independent.
+
+Package: libstmm-games-xml-base-dev
+Section: libdevel
+Architecture: any
+Depends: libstmm-games-xml-base@STMM_GAMES_XML_BASE_MAJOR_VERSION@ (= ${binary:Version})
+       , libstmm-games-dev (>= @STMM_GAMES_XML_BASE_REQ_STMM_GAMES_VERSION@)
+       , libxml++2.6-dev (>= @STMM_GAMES_XML_BASE_REQ_LIBXMLPP_VERSION@)
+       , ${misc:Depends}
+Suggests: libstmm-games-doc
+Description: C++ 2D games library - xml loading base classes (develop)
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library provides common functionality for xml game and theme file loaders.
+ It is toolkit (gtk) independent.
+ .
+ This package contains the development headers for the library found in
+ libstmm-games-xml-base@STMM_GAMES_XML_BASE_MAJOR_VERSION@.
+ .
+ Beware! This library is not mature at all and is constantly changing its
+ API and ABI, even when only its minor version number increases.
+
+
+#---------------------------------------------------------------------
+Package: libstmm-games-xml-game@STMM_GAMES_XML_GAME_MAJOR_VERSION@
+Architecture: any
+Depends: libstmm-games-xml-base@STMM_GAMES_XML_BASE_MAJOR_VERSION@ (>= @STMM_GAMES_XML_GAME_REQ_STMM_GAMES_XML_BASE_VERSION@)
+       , libstmm-games-file@STMM_GAMES_FILE_MAJOR_VERSION@ (>= @STMM_GAMES_XML_GAME_REQ_STMM_GAMES_FILE_VERSION@)
+       , ${misc:Depends}, ${shlibs:Depends}
+Description: C++ 2D games library - xml game, prefs and high scores loaders
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library provides an xml loader for games.
+ It also reads and writes preferences and high scores to xml files.
+
+Package: libstmm-games-xml-game-dev
+Section: libdevel
+Architecture: any
+Depends: libstmm-games-xml-game@STMM_GAMES_XML_GAME_MAJOR_VERSION@ (= ${binary:Version})
+       , libstmm-games-xml-base-dev (>= @STMM_GAMES_XML_GAME_REQ_STMM_GAMES_XML_BASE_VERSION@)
+       , libstmm-games-file-dev (>= @STMM_GAMES_XML_GAME_REQ_STMM_GAMES_FILE_VERSION@)
+       , ${misc:Depends}
+Suggests: libstmm-games-doc
+Description: C++ 2D games library - xml game, prefs and high scores loaders (develop)
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library provides an xml loader for games.
+ It also reads and writes preferences and high scores to xml files.
+ .
+ This package contains the development headers for the library found in
+ libstmm-games-xml-game@STMM_GAMES_XML_GAME_MAJOR_VERSION@.
+ .
+ Beware! This library is not mature at all and is constantly changing its
+ API and ABI, even when only its minor version number increases.
+
+
+#---------------------------------------------------------------------
+Package: libstmm-games-xml-gtk@STMM_GAMES_XML_GTK_MAJOR_VERSION@
+Architecture: any
+Depends: libstmm-games-xml-game@STMM_GAMES_XML_GAME_MAJOR_VERSION@ (>= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_XML_GAME_VERSION@)
+       , libstmm-games-gtk@STMM_GAMES_GTK_MAJOR_VERSION@ (>= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_GTK_VERSION@)
+       , ${misc:Depends}, ${shlibs:Depends}
+Description: C++ 2D games library - xml theme loader for gtk
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library provides an xml loader for themes.
+ The target toolkit is gtk.
+
+Package: libstmm-games-xml-gtk-dev
+Section: libdevel
+Architecture: any
+Depends: libstmm-games-xml-gtk@STMM_GAMES_XML_GTK_MAJOR_VERSION@ (= ${binary:Version})
+       , libstmm-games-xml-game-dev (>= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_XML_GAME_VERSION@)
+       , libstmm-games-gtk-dev (>= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_GTK_VERSION@)
+       , ${misc:Depends}
+Suggests: libstmm-games-doc
+Description: C++ 2D games library - xml theme loader for gtk (develop)
+ Extensible 2D game library for C++ (C++14).
+ .
+ This library provides an xml loader for themes.
+ The target toolkit is gtk.
+ .
+ This package contains the development headers for the library found in
+ libstmm-games-xml-gtk@STMM_GAMES_XML_GTK_MAJOR_VERSION@.
+ .
+ Beware! This library is not mature at all and is constantly changing its
+ API and ABI, even when only its minor version number increases.
+
+
+#---------------------------------------------------------------------
+Package: libstmm-games-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Suggests: libstmm-games-dev
+        , libstmm-games-fake-dev
+        , libstmm-games-gtk-dev
+        , libstmm-games-xml-dev
+Description: C++ 2D games library - documentation
+ Extensible device input event library for C++ (C++14).
+ .
+ This library provides the html API documentation for packages:
+   - libstmm-games-dev
+   - libstmm-games-fake-dev
+   - libstmm-games-gtk-dev
+   - libstmm-games-xml-dev
+ .
+ Beware! This library is not mature at all and is constantly changing its
+ API and ABI, even when only its minor version number increases.
+

@@ -1,0 +1,9 @@
+Document: stmm-games-doc-html
+Title: stmm-games libraries reference
+Author: Doxygen
+Abstract: Reference Manual for main libstmm-games libraries
+Section: Programming/C++
+
+Format: HTML
+Index: /usr/share/doc/libstmm-games-doc/html/index.html
+Files: /usr/share/doc/libstmm-games-doc/html/*.html

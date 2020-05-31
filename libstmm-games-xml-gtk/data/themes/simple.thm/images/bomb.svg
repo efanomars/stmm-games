@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100pt" height="100pt" viewBox="0 0 100 100" version="1.1">
+<g id="surface65">
+<path style="fill:none;stroke-width:0.05;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(10%,10%,10%);stroke-opacity:1;stroke-miterlimit:10;" d="M 0.5 0.5 L 0.722227 0.267422 " transform="matrix(100,0,0,100,0,0)"/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(10%,10%,10%);fill-opacity:1;" d="M 78 60 C 78 75.464844 65.464844 88 50 88 C 34.535156 88 22 75.464844 22 60 C 22 44.535156 34.535156 32 50 32 C 65.464844 32 78 44.535156 78 60 "/>
+<path style="fill:none;stroke-width:0.03;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(16%,16%,16%);stroke-opacity:1;stroke-miterlimit:10;" d="M 0.603086 0.860352 C 0.487266 0.906172 0.355078 0.870039 0.27875 0.771602 C 0.202422 0.673203 0.200273 0.536172 0.273477 0.43543 " transform="matrix(100,0,0,100,0,0)"/>
+<path style="fill:none;stroke-width:0.03;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(80%,80%,80%);stroke-opacity:1;stroke-miterlimit:10;" d="M 0.341602 0.441602 C 0.358242 0.425 0.377344 0.411094 0.39832 0.40043 " transform="matrix(100,0,0,100,0,0)"/>
+<path style="fill:none;stroke-width:0.04;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(90%,10%,10%);stroke-opacity:1;stroke-miterlimit:10;" d="M 0.762227 0.317422 L 0.882227 0.337422 " transform="matrix(100,0,0,100,0,0)"/>
+</g>
+</svg>

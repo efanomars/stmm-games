@@ -1,0 +1,16 @@
+# stmm-games-fake pkg-config source file
+
+prefix=@STMMI_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: stmm-games-fake
+Description: C++ games library - helper classes to test game components
+Version: @STMM_GAMES_FAKE_VERSION@
+URL: http://www.efanomars.com/libraries/stmm-games
+Requires: stmm-games >= @STMM_GAMES_FAKE_REQ_STMM_GAMES_VERSION@
+Conflicts:
+Libs: -L${libdir} -lstmm-games-fake
+Cflags: -I${includedir}/stmm-games-fake -I${includedir}
+

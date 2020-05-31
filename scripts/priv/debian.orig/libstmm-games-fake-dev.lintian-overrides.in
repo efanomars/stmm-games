@@ -1,0 +1,5 @@
+
+# !!! It's a package for developers only !!!
+libstmm-games-fake-dev: non-dev-pkg-with-shlib-symlink usr/lib/libstmm-games-fake.so.@STMM_GAMES_FAKE_VERSION@ usr/lib/libstmm-games-fake.so
+# !!! It's a package for developers only !!!
+libstmm-games-fake-dev: package-name-doesnt-match-sonames libstmm-games-fake0
