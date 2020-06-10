@@ -73,7 +73,7 @@ protected:
 		//
 		const int32_t nTotDevicesJoystick = FixtureVariantDevicesJoystick::getDevicesJoystick();
 		for (int32_t nIdx = 0; nIdx < nTotDevicesJoystick; ++nIdx) {
-			m_aKeyDeviceIds.push_back(m_refDM->simulateNewDevice<stmi::testing::FakeJoystickDevice>());
+			m_aJoystickDeviceIds.push_back(m_refDM->simulateNewDevice<stmi::testing::FakeJoystickDevice>());
 		}
 
 		m_refPrefs = std::make_shared<StdPreferences>(m_refStdConfig);

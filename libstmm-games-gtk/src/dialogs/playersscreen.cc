@@ -1,7 +1,7 @@
 /*
- * File:   playersdialog.cc
+ * File:   playersscreen.cc
  *
- * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,13 +17,15 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
 
-#include "playersdialog.h"
+#include "playersscreen.h"
 
 #include "inputstrings.h"
 #include "theme.h"
 #include "themecontext.h"
+#include "../gamewindow.h"
 
-#include <stmm-games/stdpreferences.h>
+#include <stmm-games-file/allpreferences.h>
+
 #include <stmm-games/ownertype.h>
 #include <stmm-games/option.h>
 #include <stmm-games/named.h>
@@ -64,9 +66,75 @@ static const std::string s_sTestSoundName = "SystemTest";
 
 static constexpr const int32_t s_nButtonLeftRightMargin = 20;
 
+PlayersScreen::KeysNotebook::KeysNotebook(PlayersScreen* p0Dialog) noexcept
+: Gtk::Notebook()
+, m_p0Dialog(p0Dialog)
+{
+	assert(p0Dialog != nullptr);
+}
+bool PlayersScreen::KeysNotebook::on_button_press_event(GdkEventButton* p0Event)
+{
+	if (m_p0Dialog->m_bExpectingKey) {
+		// allow button press to get to the device manager as a key
+		return false;
+	}
+	return Gtk::Notebook::on_button_press_event(p0Event);
+}
 
-PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
-: Gtk::Dialog("", true)
+////////////////////////////////////////////////////////////////////////////////
+PlayersScreen::KeysTreeView::KeysTreeView(PlayersScreen* p0Dialog, const Glib::RefPtr< Gtk::TreeModel >& refModel) noexcept
+: Gtk::TreeView(refModel)
+, m_p0Dialog(p0Dialog)
+{
+	set_enable_search(false);
+	assert(p0Dialog != nullptr);
+	const Gdk::EventMask oCurMask = get_events();
+	const Gdk::EventMask oNewMask = oCurMask | Gdk::FOCUS_CHANGE_MASK;
+	if (oNewMask != oCurMask) {
+		set_events(oNewMask);
+	}
+}
+bool PlayersScreen::KeysTreeView::on_key_press_event(GdkEventKey* p0Event)
+{
+	if (m_p0Dialog->m_bExpectingKey) {
+		return false;
+	}
+	if (p0Event->keyval == s_nModifyKeyVal1) {
+		return false;
+	}
+	if ((s_nModifyKeyVal2 != 0) && (p0Event->keyval == s_nModifyKeyVal2)) {
+		return false;
+	}
+	return Gtk::TreeView::on_key_press_event(p0Event);
+}
+bool PlayersScreen::KeysTreeView::on_button_press_event(GdkEventButton* p0Event)
+{
+	if (m_p0Dialog->m_bExpectingKey) {
+		// allow button press to get to the device manager as a key
+		return false;
+	}
+	return Gtk::TreeView::on_button_press_event(p0Event);
+}
+bool PlayersScreen::KeysTreeView::on_focus_in_event(GdkEventFocus* p0Event)
+{
+//std::cout << "KeysTreeView::on_focus_in_event()" << '\n';
+	// start listening to keys
+	m_p0Dialog->m_bListenToKey = true;
+	return Gtk::TreeView::on_focus_in_event(p0Event);
+}
+bool PlayersScreen::KeysTreeView::on_focus_out_event(GdkEventFocus* p0Event)
+{
+//std::cout << "KeysTreeView::on_focus_out_event()" << '\n';
+	// stop listening to keys
+	m_p0Dialog->m_bListenToKey = false;
+	m_p0Dialog->m_bExpectingKey = false;
+	m_p0Dialog->m_p0LabelKeysModifyKey->set_label(m_p0Dialog->m_sLabelKeysModifyKey);
+	return Gtk::TreeView::on_focus_out_event(p0Event);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+PlayersScreen::PlayersScreen(GameWindow& oGameWindow, const shared_ptr<StdConfig>& refStdConfig) noexcept
+: m_oGameWindow(oGameWindow)
 , m_sLabelKeysModifyKey(Glib::ustring::compose("(press '%1' to modify the selected action)", ::gdk_keyval_name(s_nModifyKeyVal1)))
 , m_refStdConfig(refStdConfig)
 , m_oCapabilityAssignment(m_refStdConfig->getCapabilityAssignment())
@@ -88,16 +156,13 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 , m_bExpectingKey(false)
 {
 	assert(refStdConfig);
-
-	//set_title("Choose players");
-	set_default_size(400, 300);
-
+}
+Gtk::Widget* PlayersScreen::init() noexcept
+{
 	m_bShowGameTab = (m_refStdConfig->getTotVisibleOptions(OwnerType::GAME) > 0) || m_refStdConfig->soundEnabled();
 
 	const auto& oAppConstraints = m_refStdConfig->getAppConstraints();
 	m_bAlwaysOnePlayer = (oAppConstraints.getMaxPlayers() == 1);
-
-	set_title(m_bAlwaysOnePlayer ?  "Player" : "Choose Players");
 
 	const bool bOneTeammatePerTeam = (oAppConstraints.getMaxTeammates() == 1);
 	// When both more than one team and more than one mate per team are true, the team name is needed
@@ -114,7 +179,7 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 	m_bShowKeyActions = (m_refStdConfig->getTotKeyActions() > 0);
 	m_bShowAssignedCapabilities = (m_oCapabilityAssignment.m_nMaxCapabilitiesExplicitlyAssignedToPlayer > 0);
 
-//std::cout << "PlayersDialog::PlayersDialog()" << '\n';
+//std::cout << "PlayersScreen::PlayersScreen()" << '\n';
 //std::cout << "    m_bShowTeamTreeNode        =" << m_bShowTeamTreeNode << '\n';
 //std::cout << "    m_bShowTeam                =" << m_bShowTeam << '\n';
 //std::cout << "    m_bShowPlayerOptions       =" << m_bShowPlayerOptions << '\n';
@@ -131,39 +196,29 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 	constexpr int32_t nTotTabs = sizeof(m_aPageIndex) / sizeof(m_aPageIndex[0]);
 	static_assert(nTotTabs == 5, "");
 
-	////////////////////////////////////////////////////////////////////////////
-	Gtk::Button* m_p0ButtonOk = add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
-	assert(m_p0ButtonOk != nullptr);
-		m_p0ButtonOk->signal_clicked().connect(
-						sigc::mem_fun(*this, &PlayersDialog::onButtonOK) );
-	Gtk::Button* m_p0ButtonCancel = add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	assert(m_p0ButtonCancel != nullptr);
-		m_p0ButtonCancel->signal_clicked().connect(
-						sigc::mem_fun(*this, &PlayersDialog::onButtonCancel) );
-
-	Gtk::ButtonBox* m_p0ButtonBoxActions = get_action_area();
-	m_p0ButtonBoxActions->set_layout(Gtk::ButtonBoxStyle::BUTTONBOX_EXPAND);
-	m_p0ButtonBoxActions->set_orientation(Gtk::Orientation::ORIENTATION_VERTICAL);
-	m_p0ButtonBoxActions->set_spacing(10);
-	m_p0ButtonBoxActions->set_margin_left(s_nButtonLeftRightMargin);
-	m_p0ButtonBoxActions->set_margin_right(s_nButtonLeftRightMargin);
-	m_p0ButtonBoxActions->set_margin_top(5);
-	m_p0ButtonBoxActions->set_margin_bottom(5);
-
-	Gtk::Box* m_p0BoxContent = get_content_area();
-	assert(m_p0BoxContent != nullptr);
-	m_p0BoxContent->set_orientation(Gtk::ORIENTATION_VERTICAL);
-
 	Glib::RefPtr<Gtk::TreeSelection> refTreeSelection;
 
 	m_refAdjustmentNrPlayers = Gtk::Adjustment::create(1, 1, 77, 1, 1, 0);
 	m_refAdjustmentNrTeams = Gtk::Adjustment::create(1, 1, 77, 1, 1, 0);
 
+	m_p0PlayersScreenBoxMain = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+
+	Gtk::Label* m_p0LabelTitle = Gtk::manage(new Gtk::Label(m_bAlwaysOnePlayer ?  "---- Player ----" : "---- Choose players ----"));
+	m_p0PlayersScreenBoxMain->pack_start(*m_p0LabelTitle, false, false);
+		m_p0LabelTitle->set_margin_top(3);
+		m_p0LabelTitle->set_margin_bottom(3);
+		{
+		Pango::AttrList oAttrList;
+		Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
+		oAttrList.insert(oAttrWeight);
+		m_p0LabelTitle->set_attributes(oAttrList);
+		}
+
 	m_p0NotebookPlayers = Gtk::manage(new KeysNotebook(this));
-	m_p0BoxContent->pack_start(*m_p0NotebookPlayers, true, true, 2);
+	m_p0PlayersScreenBoxMain->pack_start(*m_p0NotebookPlayers, true, true, 2);
 		m_p0NotebookPlayers->set_scrollable(true);
 		m_p0NotebookPlayers->signal_switch_page().connect(
-						sigc::mem_fun(*this, &PlayersDialog::onNotebookSwitchPage) );
+						sigc::mem_fun(*this, &PlayersScreen::onNotebookSwitchPage) );
 
 	Gtk::Label* m_p0TabLabelPlayersTeams = Gtk::manage(new Gtk::Label(m_bAlwaysOnePlayer ? "Player" : "Players"));
 	Gtk::Box* m_p0TabVBoxPlayersTeams = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
@@ -180,7 +235,7 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 				m_p0SpinNrPlayers = Gtk::manage(new Gtk::SpinButton(m_refAdjustmentNrPlayers));
 				m_p0HBoxNrPlayers->pack_start(*m_p0SpinNrPlayers);
 					m_p0SpinNrPlayers->signal_value_changed().connect(
-									sigc::mem_fun(*this, &PlayersDialog::onSpinNrPlayersChanged) );
+									sigc::mem_fun(*this, &PlayersScreen::onSpinNrPlayersChanged) );
 			Gtk::Box* m_p0HBoxNrTeams = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
 			m_p0HBoxNrPlayersTeams->pack_start(*m_p0HBoxNrTeams);
 				Gtk::Label* m_p0LabelNrTeams = Gtk::manage(new Gtk::Label("Teams:"));
@@ -188,7 +243,7 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 				m_p0SpinNrTeams = Gtk::manage(new Gtk::SpinButton(m_refAdjustmentNrTeams));
 				m_p0HBoxNrTeams->pack_start(*m_p0SpinNrTeams);
 					m_p0SpinNrTeams->signal_value_changed().connect(
-									sigc::mem_fun(*this, &PlayersDialog::onSpinNrTeamsChanged) );
+									sigc::mem_fun(*this, &PlayersScreen::onSpinNrTeamsChanged) );
 
 		//addSeparator(m_p0TabVBoxPlayersTeams, 5);
 		Gtk::Box* m_p0HBoxPlayersTeams = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
@@ -206,7 +261,7 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 					m_p0HBoxRename->pack_start(*m_p0EntryRename, true, true);
 						m_p0EntryRename->set_margin_end(5);
 						//m_p0EntryRename->signal_focus_out_event().connect(
-						//				sigc::mem_fun(*this, &PlayersDialog::onRenameChangedFocus) );
+						//				sigc::mem_fun(*this, &PlayersScreen::onRenameChangedFocus) );
 				Gtk::ScrolledWindow* m_p0ScrolledPlayers = Gtk::manage(new Gtk::ScrolledWindow());
 				m_p0VBoxPlayers->pack_start(*m_p0ScrolledPlayers, true, true);
 					m_p0ScrolledPlayers->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
@@ -218,7 +273,7 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 						m_p0TreeViewPlayers->append_column("Team/Player", m_oPlayersColumns.m_oColPlayer);
 						refTreeSelection = m_p0TreeViewPlayers->get_selection();
 						refTreeSelection->signal_changed().connect(
-										sigc::mem_fun(*this, &PlayersDialog::onPlayerSelectionChanged));
+										sigc::mem_fun(*this, &PlayersScreen::onPlayerSelectionChanged));
 			Gtk::Box* m_p0VBoxRenameMovePlayers = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
 			m_p0HBoxPlayersTeams->pack_start(*m_p0VBoxRenameMovePlayers, false, false);
 				m_p0ButtonRename = Gtk::manage(new Gtk::Button(s_sPlayerOrTeamRenameEllipsize));
@@ -226,25 +281,25 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 					m_p0ButtonRename->set_margin_top(3);
 					m_p0ButtonRename->set_margin_bottom(3);
 					m_p0ButtonRename->signal_clicked().connect(
-									sigc::mem_fun(*this, &PlayersDialog::onButtonRename) );
+									sigc::mem_fun(*this, &PlayersScreen::onButtonRename) );
 				m_p0VBoxMovePlayers = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
 				m_p0VBoxRenameMovePlayers->pack_start(*m_p0VBoxMovePlayers, true, true);
 					m_p0ButtonMoveUp = Gtk::manage(new Gtk::Button(Gtk::Stock::GO_UP));
 					m_p0VBoxMovePlayers->pack_start(*m_p0ButtonMoveUp, true, true);
 						m_p0ButtonMoveUp->signal_clicked().connect(
-										sigc::mem_fun(*this, &PlayersDialog::onButtonMoveUp) );
+										sigc::mem_fun(*this, &PlayersScreen::onButtonMoveUp) );
 					m_p0ButtonMoveDown = Gtk::manage(new Gtk::Button(Gtk::Stock::GO_DOWN));
 					m_p0VBoxMovePlayers->pack_start(*m_p0ButtonMoveDown, true, true);
 						m_p0ButtonMoveDown->signal_clicked().connect(
-										sigc::mem_fun(*this, &PlayersDialog::onButtonMoveDown) );
+										sigc::mem_fun(*this, &PlayersScreen::onButtonMoveDown) );
 					m_p0ButtonTeamUp = Gtk::manage(new Gtk::Button("Team Up"));
 					m_p0VBoxMovePlayers->pack_start(*m_p0ButtonTeamUp, true, true);
 						m_p0ButtonTeamUp->signal_clicked().connect(
-										sigc::mem_fun(*this, &PlayersDialog::onButtonTeamUp) );
+										sigc::mem_fun(*this, &PlayersScreen::onButtonTeamUp) );
 					m_p0ButtonTeamDown = Gtk::manage(new Gtk::Button("Team Down"));
 					m_p0VBoxMovePlayers->pack_start(*m_p0ButtonTeamDown, true, true);
 						m_p0ButtonTeamDown->signal_clicked().connect(
-										sigc::mem_fun(*this, &PlayersDialog::onButtonTeamDown) );
+										sigc::mem_fun(*this, &PlayersScreen::onButtonTeamDown) );
 
 
 	auto& oGameOptions = m_refStdConfig->getOptions(OwnerType::GAME);
@@ -269,7 +324,7 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 			m_p0ButtonPlayTestGlobalSound->set_margin_top(5);
 			m_p0ButtonPlayTestGlobalSound->set_margin_bottom(5);
 			m_p0ButtonPlayTestGlobalSound->signal_clicked().connect(
-							sigc::mem_fun(*this, &PlayersDialog::onButtonPlayTestGlobalSound) );
+							sigc::mem_fun(*this, &PlayersScreen::onButtonPlayTestGlobalSound) );
 
 	Gtk::Label* m_p0TabLabelTeamOptions = Gtk::manage(new Gtk::Label("Team"));
 	Gtk::Box* m_p0TabVBoxTeamOptions = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
@@ -306,12 +361,12 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 					refTreeSelection = m_p0TreeViewSoundCapabilities->get_selection();
 					refTreeSelection->set_mode(Gtk::SELECTION_SINGLE);
 					refTreeSelection->signal_changed().connect(
-										sigc::mem_fun(*this, &PlayersDialog::onSoundCapabilitiesSelectionChanged));
+										sigc::mem_fun(*this, &PlayersScreen::onSoundCapabilitiesSelectionChanged));
 			}
 		m_p0ButtonPlayTestPlayerSound = Gtk::manage(new Gtk::Button("Test sound"));
 		m_p0TabVBoxPlayerOptions->pack_start(*m_p0ButtonPlayTestPlayerSound, false, false, 3);
 			m_p0ButtonPlayTestPlayerSound->signal_clicked().connect(
-							sigc::mem_fun(*this, &PlayersDialog::onButtonPlayTestPlayerSound) );
+							sigc::mem_fun(*this, &PlayersScreen::onButtonPlayTestPlayerSound) );
 
 	Gtk::Label* m_p0TabLabelPlayerDeviceKeyActions = Gtk::manage(new Gtk::Label("Keys"));
 	Gtk::Box* m_p0TabVBoxPlayerDeviceKeyActions = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
@@ -342,7 +397,7 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 					if (m_bShowKeyActions) {
 						refTreeSelection = m_p0TreeViewKeys->get_selection();
 						refTreeSelection->signal_changed().connect(
-												sigc::mem_fun(*this, &PlayersDialog::onKeySelectionChanged));
+												sigc::mem_fun(*this, &PlayersScreen::onKeySelectionChanged));
 					} else {
 						m_p0ScrolledKeys->set_visible(false);
 					}
@@ -363,10 +418,25 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 					refTreeSelection = m_p0TreeViewAssignedCapabilities->get_selection();
 					refTreeSelection->set_mode(Gtk::SELECTION_MULTIPLE);
 					refTreeSelection->signal_changed().connect(
-										sigc::mem_fun(*this, &PlayersDialog::onAssignedCapabilitiesSelectionChanged));
+										sigc::mem_fun(*this, &PlayersScreen::onAssignedCapabilitiesSelectionChanged));
 			}
 
-	show_all_children();
+		Gtk::Button* m_p0ButtonOk = Gtk::manage(new Gtk::Button("Ok"));
+		m_p0PlayersScreenBoxMain->pack_start(*m_p0ButtonOk, false, false);
+			m_p0ButtonOk->set_margin_left(s_nButtonLeftRightMargin);
+			m_p0ButtonOk->set_margin_right(s_nButtonLeftRightMargin);
+			m_p0ButtonOk->set_margin_top(5);
+			m_p0ButtonOk->set_margin_bottom(5);
+			m_p0ButtonOk->signal_clicked().connect(
+							sigc::mem_fun(*this, &PlayersScreen::onButtonOk) );
+		Gtk::Button* m_p0ButtonCancel  = Gtk::manage(new Gtk::Button("Cancel"));
+		m_p0PlayersScreenBoxMain->pack_start(*m_p0ButtonCancel, false, false);
+			m_p0ButtonCancel->set_margin_left(s_nButtonLeftRightMargin);
+			m_p0ButtonCancel->set_margin_right(s_nButtonLeftRightMargin);
+			m_p0ButtonCancel->set_margin_top(5);
+			m_p0ButtonCancel->set_margin_bottom(5);
+			m_p0ButtonCancel->signal_clicked().connect(
+							sigc::mem_fun(*this, &PlayersScreen::onButtonCancel) );
 
 	m_refDM = m_refStdConfig->getDeviceManager();
 	m_refEventListener = std::make_shared<stmi::EventListener>(
@@ -379,8 +449,10 @@ PlayersDialog::PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept
 	#endif
 	m_refDM->addEventListener(m_refEventListener);
 	assert(bAdded);
+
+	return m_p0PlayersScreenBoxMain;
 }
-void PlayersDialog::reInit(shared_ptr<StdPreferences>& refPrefs, shared_ptr<Theme>& refTheme) noexcept
+bool PlayersScreen::changeTo(const shared_ptr<AllPreferences>& refPrefs, const shared_ptr<Theme>& refTheme) noexcept
 {
 	assert(refPrefs);
 	assert(m_refStdConfig == refPrefs->getStdConfig());
@@ -414,14 +486,16 @@ void PlayersDialog::reInit(shared_ptr<StdPreferences>& refPrefs, shared_ptr<Them
 	//
 	m_p0HBoxNrPlayersTeams->set_visible(! m_bAlwaysOnePlayer);
 	m_p0VBoxMovePlayers->set_visible(! m_bAlwaysOnePlayer);
+
+	return true;
 }
-void PlayersDialog::addOptions(const NamedObjIndex< shared_ptr<Option> >& oOptions, std::vector< std::function<void()> >& aWidgetSetters
+void PlayersScreen::addOptions(const NamedObjIndex< shared_ptr<Option> >& oOptions, std::vector< std::function<void()> >& aWidgetSetters
 								, OwnerType eOptionOwner, Gtk::Box* p0Box) noexcept
 {
 	assert(aWidgetSetters.size() == 0);
 	assert(p0Box != nullptr);
 	const int32_t nTotOptions = oOptions.size();
-//std::cout << "PlayersDialog::addOptions  nTotOptions=" << nTotOptions << '\n';
+//std::cout << "PlayersScreen::addOptions  nTotOptions=" << nTotOptions << '\n';
 	if (nTotOptions == 0) {
 		return;
 	}
@@ -455,7 +529,7 @@ void PlayersDialog::addOptions(const NamedObjIndex< shared_ptr<Option> >& oOptio
 		}
 	}
 }
-void PlayersDialog::createIntOptionWidget(IntOption* p0IntOption, OwnerType eOptionOwner, bool bReadOnly
+void PlayersScreen::createIntOptionWidget(IntOption* p0IntOption, OwnerType eOptionOwner, bool bReadOnly
 										, Gtk::Box* p0ContainerBox, std::function<void()>& oWidgetSetter) noexcept
 {
 //std::cout << "createIntOptionWidget(p0IntOption)" << '\n';
@@ -474,7 +548,7 @@ void PlayersDialog::createIntOptionWidget(IntOption* p0IntOption, OwnerType eOpt
 	p0HB->pack_start(*p0SB, false, false);
 	if (bSensitive) {
 		p0SB->signal_value_changed().connect(sigc::bind(
-						sigc::mem_fun(*this, &PlayersDialog::onIntOptionChanged), eOptionOwner, p0IntOption, p0SB));
+						sigc::mem_fun(*this, &PlayersScreen::onIntOptionChanged), eOptionOwner, p0IntOption, p0SB));
 	}
 	//
 	p0L->set_margin_start(3);
@@ -492,7 +566,7 @@ void PlayersDialog::createIntOptionWidget(IntOption* p0IntOption, OwnerType eOpt
 		p0HB->set_visible(bVisible);
 	};
 }
-void PlayersDialog::createBoolOptionWidget(BoolOption* p0BoolOption, OwnerType eOptionOwner, bool bReadOnly
+void PlayersScreen::createBoolOptionWidget(BoolOption* p0BoolOption, OwnerType eOptionOwner, bool bReadOnly
 										, Gtk::Box* p0ContainerBox, std::function<void()>& oWidgetSetter) noexcept
 {
 //std::cout << "createBoolOptionWidget(p0BoolOption)" << '\n';
@@ -504,7 +578,7 @@ void PlayersDialog::createBoolOptionWidget(BoolOption* p0BoolOption, OwnerType e
 	p0ContainerBox->pack_start(*p0CB, false, false, 5);
 	//
 	if (bSensitive) {
-		p0CB->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &PlayersDialog::onBoolOptionChanged), eOptionOwner, p0BoolOption, p0CB));
+		p0CB->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &PlayersScreen::onBoolOptionChanged), eOptionOwner, p0BoolOption, p0CB));
 	}
 	p0CB->set_sensitive(bSensitive);
 
@@ -516,7 +590,7 @@ void PlayersDialog::createBoolOptionWidget(BoolOption* p0BoolOption, OwnerType e
 		p0CB->set_visible(bVisible);
 	};
 }
-void PlayersDialog::createEnumOptionWidget(EnumOption* p0EnumOption, OwnerType eOptionOwner, bool bReadOnly
+void PlayersScreen::createEnumOptionWidget(EnumOption* p0EnumOption, OwnerType eOptionOwner, bool bReadOnly
 										, Gtk::Box* p0ContainerBox, std::function<void()>& oWidgetSetter) noexcept
 {
 //std::cout << "createEnumOptionWidget(p0EnumOption)" << '\n';
@@ -550,7 +624,7 @@ void PlayersDialog::createEnumOptionWidget(EnumOption* p0EnumOption, OwnerType e
 		}
 		if (bSensitive) {
 			p0RB->signal_clicked().connect(sigc::bind(
-						sigc::mem_fun(*this, &PlayersDialog::onEnumOptionChanged), eOptionOwner, p0EnumOption, p0RB, nEnumIdx));
+						sigc::mem_fun(*this, &PlayersScreen::onEnumOptionChanged), eOptionOwner, p0EnumOption, p0RB, nEnumIdx));
 		}
 		p0RB->set_sensitive(bSensitive);
 	}
@@ -567,7 +641,7 @@ void PlayersDialog::createEnumOptionWidget(EnumOption* p0EnumOption, OwnerType e
 		aRBs[nEnumIdx]->set_active(true);
 	};
 }
-bool PlayersDialog::isSlaveOptionVisible(Option* p0SlaveOption) noexcept
+bool PlayersScreen::isSlaveOptionVisible(Option* p0SlaveOption) noexcept
 {
 	assert(p0SlaveOption != nullptr);
 	const auto& aMastersValues = p0SlaveOption->getMastersValues();
@@ -588,7 +662,7 @@ bool PlayersDialog::isSlaveOptionVisible(Option* p0SlaveOption) noexcept
 	}
 	return true;
 }
-Variant PlayersDialog::getOptionValue(OwnerType eOptionOwner, const std::string& sOptionName) noexcept
+Variant PlayersScreen::getOptionValue(OwnerType eOptionOwner, const std::string& sOptionName) noexcept
 {
 	if (eOptionOwner == OwnerType::GAME) {
 		return m_refPrefs->getOptionValue(sOptionName); //---------------------------
@@ -602,7 +676,7 @@ Variant PlayersDialog::getOptionValue(OwnerType eOptionOwner, const std::string&
 	assert(m_nSelectedMate >= 0);
 	return refTeam->getMateFull(m_nSelectedMate)->getOptionValue(sOptionName);
 }
-void PlayersDialog::regenerateGameOptions() noexcept
+void PlayersScreen::regenerateGameOptions() noexcept
 {
 	if (!m_bShowGameTab) {
 		return;
@@ -614,7 +688,7 @@ void PlayersDialog::regenerateGameOptions() noexcept
 	}
 	m_bRegenerateOptionsInProgress = false;
 }
-void PlayersDialog::regenerateTeamOptions() noexcept
+void PlayersScreen::regenerateTeamOptions() noexcept
 {
 	if (! m_bShowTeamTab) {
 		return;
@@ -628,7 +702,7 @@ void PlayersDialog::regenerateTeamOptions() noexcept
 	}
 	m_bRegenerateOptionsInProgress = false;
 }
-void PlayersDialog::regeneratePlayerOptions() noexcept
+void PlayersScreen::regeneratePlayerOptions() noexcept
 {
 	if (! m_bShowPlayerTab) {
 		return;
@@ -644,13 +718,13 @@ void PlayersDialog::regeneratePlayerOptions() noexcept
 	m_bRegenerateOptionsInProgress = false;
 }
 
-void PlayersDialog::onIntOptionChanged(OwnerType eOptionOwner, IntOption* p0IntOption, Gtk::SpinButton* p0SB) noexcept
+void PlayersScreen::onIntOptionChanged(OwnerType eOptionOwner, IntOption* p0IntOption, Gtk::SpinButton* p0SB) noexcept
 {
 	const double fValue = p0SB->get_value();
 	const int32_t nValue = std::round<int32_t>(fValue);
 	setOptionValue(eOptionOwner, p0IntOption->getName(), Variant{nValue});
 }
-void PlayersDialog::onBoolOptionChanged(OwnerType eOptionOwner, BoolOption* p0BoolOption, Gtk::CheckButton* p0CB) noexcept
+void PlayersScreen::onBoolOptionChanged(OwnerType eOptionOwner, BoolOption* p0BoolOption, Gtk::CheckButton* p0CB) noexcept
 {
 	const bool bValue = p0CB->get_active();
 	const std::string& sOptionName = p0BoolOption->getName();
@@ -663,7 +737,7 @@ void PlayersDialog::onBoolOptionChanged(OwnerType eOptionOwner, BoolOption* p0Bo
 		refreshPlayTestGlobalSound();
 	}
 }
-void PlayersDialog::onEnumOptionChanged(OwnerType eOptionOwner, EnumOption* p0EnumOption, Gtk::RadioButton* p0RB, int32_t nEnumIdx) noexcept
+void PlayersScreen::onEnumOptionChanged(OwnerType eOptionOwner, EnumOption* p0EnumOption, Gtk::RadioButton* p0RB, int32_t nEnumIdx) noexcept
 {
 	const bool bSet = p0RB->get_active();
 	if (!bSet) {
@@ -673,7 +747,7 @@ void PlayersDialog::onEnumOptionChanged(OwnerType eOptionOwner, EnumOption* p0En
 	int32_t nValue = p0EnumOption->getEnum(nEnumIdx);
 	setOptionValue(eOptionOwner, p0EnumOption->getName(), Variant{nValue});
 }
-void PlayersDialog::setOptionValue(OwnerType eOptionOwner, const std::string& sOptionName, const Variant& oVar) noexcept
+void PlayersScreen::setOptionValue(OwnerType eOptionOwner, const std::string& sOptionName, const Variant& oVar) noexcept
 {
 	if (m_bRegenerateOptionsInProgress) {
 		return;
@@ -709,16 +783,16 @@ void PlayersDialog::setOptionValue(OwnerType eOptionOwner, const std::string& sO
 		}
 	}
 }
-void PlayersDialog::onButtonCancel() noexcept
+void PlayersScreen::onButtonOk() noexcept
 {
-	hide();
+	m_oGameWindow.afterChoosePlayers(m_refPrefs);
 }
-void PlayersDialog::onButtonOK() noexcept
+void PlayersScreen::onButtonCancel() noexcept
 {
-	hide();
+	m_oGameWindow.afterChoosePlayers(shared_ptr<AllPreferences>{});
 }
 
-void PlayersDialog::regeneratePlayersModel() noexcept
+void PlayersScreen::regeneratePlayersModel() noexcept
 {
 	if (!m_bPrefsInitialized) {
 		return;
@@ -784,7 +858,7 @@ void PlayersDialog::regeneratePlayersModel() noexcept
 
 	m_bRegeneratePlayersInProgress = false;
 }
-bool PlayersDialog::onDevicesTimeout() noexcept
+bool PlayersScreen::onDevicesTimeout() noexcept
 {
 	if (m_bShowAssignedCapabilities) {
 		regenerateAssignedDevicesList();
@@ -798,7 +872,7 @@ bool PlayersDialog::onDevicesTimeout() noexcept
 	const bool bContinue = false;
 	return bContinue;
 }
-void PlayersDialog::regenerateAssignedDevicesList() noexcept
+void PlayersScreen::regenerateAssignedDevicesList() noexcept
 {
 	if (!m_bPrefsInitialized) {
 		return;
@@ -862,7 +936,7 @@ void PlayersDialog::regenerateAssignedDevicesList() noexcept
 	}
 	m_bRegenerateAssignedDevicesInProgress = false;
 }
-std::string PlayersDialog::getCapabilityClassId(const stmi::Capability::Class& oClass) const noexcept
+std::string PlayersScreen::getCapabilityClassId(const stmi::Capability::Class& oClass) const noexcept
 {
 	std::string sCapaClassId = oClass.getId();
 	auto nLastPos = sCapaClassId.rfind("::");
@@ -871,7 +945,7 @@ std::string PlayersDialog::getCapabilityClassId(const stmi::Capability::Class& o
 	}
 	return sCapaClassId;
 }
-void PlayersDialog::onAssignedCapabilitiesSelectionChanged() noexcept
+void PlayersScreen::onAssignedCapabilitiesSelectionChanged() noexcept
 {
 	if (m_nSelectedMate < 0) {
 		return;
@@ -955,11 +1029,11 @@ void PlayersDialog::onAssignedCapabilitiesSelectionChanged() noexcept
 	}
 	regenerateAssignedDevicesList();
 }
-bool PlayersDialog::isPerPlayerSound() noexcept
+bool PlayersScreen::isPerPlayerSound() noexcept
 {
 	return (m_refPrefs->getOptionValue(m_refStdConfig->getPerPlayerSoundOptionName()) != Variant{false});
 }
-void PlayersDialog::regenerateSoundDevicesList() noexcept
+void PlayersScreen::regenerateSoundDevicesList() noexcept
 {
 	if (!m_bPrefsInitialized) {
 		return;
@@ -1031,7 +1105,7 @@ void PlayersDialog::regenerateSoundDevicesList() noexcept
 	}
 	m_bRegenerateSoundDevicesInProgress = false;
 }
-void PlayersDialog::onSoundCapabilitiesSelectionChanged() noexcept
+void PlayersScreen::onSoundCapabilitiesSelectionChanged() noexcept
 {
 	if (m_nSelectedMate < 0) {
 		return;
@@ -1109,7 +1183,7 @@ void PlayersDialog::onSoundCapabilitiesSelectionChanged() noexcept
 	}
 	regenerateSoundDevicesList();
 }
-void PlayersDialog::refreshPlayTestGlobalSound() noexcept
+void PlayersScreen::refreshPlayTestGlobalSound() noexcept
 {
 	const bool bPerPlayerSound = isPerPlayerSound();
 	const bool bTestGlobalSoundVisible = m_refStdConfig->soundEnabled() && ! bPerPlayerSound;
@@ -1118,7 +1192,7 @@ void PlayersDialog::refreshPlayTestGlobalSound() noexcept
 		m_p0ButtonPlayTestGlobalSound->set_sensitive(m_nSoundTestIdx >= 0);
 	}
 }
-void PlayersDialog::onNotebookSwitchPage(Gtk::Widget*, guint /*nPageNum*/) noexcept
+void PlayersScreen::onNotebookSwitchPage(Gtk::Widget*, guint /*nPageNum*/) noexcept
 {
 //std::cout << "onNotebookSwitchPage  nPageNum=" << nPageNum << '\n';
 	if (!m_bPrefsInitialized) {
@@ -1185,7 +1259,7 @@ void PlayersDialog::onNotebookSwitchPage(Gtk::Widget*, guint /*nPageNum*/) noexc
 	}
 }
 
-void PlayersDialog::onPlayerSelectionChanged() noexcept
+void PlayersScreen::onPlayerSelectionChanged() noexcept
 {
 //std::cout << "onPlayerSelectionChanged()" << '\n';
 	if (!m_bPrefsInitialized) {
@@ -1213,7 +1287,7 @@ void PlayersDialog::onPlayerSelectionChanged() noexcept
 	m_p0ButtonRename->set_sensitive(bSomethingSelected);
 	onChangedEditingMode();
 }
-void PlayersDialog::onChangedEditingMode() noexcept
+void PlayersScreen::onChangedEditingMode() noexcept
 {
 	m_p0ButtonRename->set_label(m_bEditingTeamOrPlayer ? s_sPlayerOrTeamRenameDoIt : s_sPlayerOrTeamRenameEllipsize);
 	m_p0HBoxRename->set_visible(m_bEditingTeamOrPlayer);
@@ -1225,7 +1299,7 @@ void PlayersDialog::onChangedEditingMode() noexcept
 	m_p0ButtonTeamUp->set_sensitive(! m_bEditingTeamOrPlayer);
 	m_p0ButtonTeamDown->set_sensitive(! m_bEditingTeamOrPlayer);
 }
-void PlayersDialog::onSpinNrPlayersChanged() noexcept
+void PlayersScreen::onSpinNrPlayersChanged() noexcept
 {
 	if (!m_bPrefsInitialized) {
 		return;
@@ -1241,7 +1315,7 @@ void PlayersDialog::onSpinNrPlayersChanged() noexcept
 
 	regeneratePlayersModel();
 }
-void PlayersDialog::onSpinNrTeamsChanged() noexcept
+void PlayersScreen::onSpinNrTeamsChanged() noexcept
 {
 	if (!m_bPrefsInitialized) {
 		return;
@@ -1257,7 +1331,7 @@ void PlayersDialog::onSpinNrTeamsChanged() noexcept
 
 	regeneratePlayersModel();
 }
-void PlayersDialog::onButtonRename() noexcept
+void PlayersScreen::onButtonRename() noexcept
 {
 //std::cout << "---" << '\n';
 	if (m_nSelectedTeam < 0) {
@@ -1295,7 +1369,7 @@ void PlayersDialog::onButtonRename() noexcept
 	m_p0EntryRename->set_text(sName);
 	m_p0EntryRename->grab_focus();
 }
-void PlayersDialog::onButtonMoveUp() noexcept
+void PlayersScreen::onButtonMoveUp() noexcept
 {
 	if (m_nSelectedMate == -1) {
 		return;
@@ -1309,7 +1383,7 @@ void PlayersDialog::onButtonMoveUp() noexcept
 
 	regeneratePlayersModel();
 }
-void PlayersDialog::onButtonMoveDown() noexcept
+void PlayersScreen::onButtonMoveDown() noexcept
 {
 	if (m_nSelectedMate == -1) {
 		return;
@@ -1323,7 +1397,7 @@ void PlayersDialog::onButtonMoveDown() noexcept
 
 	regeneratePlayersModel();
 }
-void PlayersDialog::onButtonTeamUp() noexcept
+void PlayersScreen::onButtonTeamUp() noexcept
 {
 	if (m_nSelectedMate == -1) {
 		return;
@@ -1337,7 +1411,7 @@ void PlayersDialog::onButtonTeamUp() noexcept
 
 	regeneratePlayersModel();
 }
-void PlayersDialog::onButtonTeamDown() noexcept
+void PlayersScreen::onButtonTeamDown() noexcept
 {
 	if (m_nSelectedMate == -1) {
 		return;
@@ -1351,17 +1425,17 @@ void PlayersDialog::onButtonTeamDown() noexcept
 
 	regeneratePlayersModel();
 }
-const shared_ptr<StdPreferences::Player>& PlayersDialog::getSelectedPlayer() const noexcept
+const shared_ptr<StdPreferences::Player>& PlayersScreen::getSelectedPlayer() const noexcept
 {
 	assert(m_nSelectedMate >= 0);
 	auto& refPlayer = m_refPrefs->getTeamFull(m_nSelectedTeam)->getMateFull(m_nSelectedMate);
 	return refPlayer;
 }
-const shared_ptr<stmi::Capability> PlayersDialog::getSelectedPlayerPlayback() const noexcept
+const shared_ptr<stmi::Capability> PlayersScreen::getSelectedPlayerPlayback() const noexcept
 {
 	return getPlayerPlayback(getSelectedPlayer());
 }
-const shared_ptr<stmi::Capability> PlayersDialog::getPlayerPlayback(const shared_ptr<StdPreferences::Player>& refPlayer) const noexcept
+const shared_ptr<stmi::Capability> PlayersScreen::getPlayerPlayback(const shared_ptr<StdPreferences::Player>& refPlayer) const noexcept
 {
 	std::vector<shared_ptr<stmi::Capability>> aCapas = refPlayer->getCapabilities();
 	const auto itFind = std::find_if(aCapas.begin(), aCapas.end(), [&](const shared_ptr<stmi::Capability>& refCapa)
@@ -1373,7 +1447,7 @@ const shared_ptr<stmi::Capability> PlayersDialog::getPlayerPlayback(const shared
 	}
 	return *itFind;
 }
-void PlayersDialog::onButtonPlayTestPlayerSound() noexcept
+void PlayersScreen::onButtonPlayTestPlayerSound() noexcept
 {
 	if (m_nSelectedMate < 0) {
 		return; //--------------------------------------------------------------
@@ -1392,7 +1466,7 @@ void PlayersDialog::onButtonPlayTestPlayerSound() noexcept
 	const double fVolume = 0.01 * refPlayer->getOptionValue(m_refStdConfig->getSoundVolumeOptionName()).getInt();
 	onButtonPlayTestSound(refCapa, fVolume);
 }
-void PlayersDialog::onButtonPlayTestGlobalSound() noexcept
+void PlayersScreen::onButtonPlayTestGlobalSound() noexcept
 {
 	if (m_nSoundTestIdx < 0) {
 		return; //--------------------------------------------------------------
@@ -1407,21 +1481,21 @@ void PlayersDialog::onButtonPlayTestGlobalSound() noexcept
 	const double fVolume = 0.01 * m_refPrefs->getOptionValue(m_refStdConfig->getSoundVolumeOptionName()).getInt();
 	onButtonPlayTestSound(refCapa, fVolume);
 }
-void PlayersDialog::onButtonPlayTestSound(const shared_ptr<stmi::Capability>& refCapa, double fVolume) noexcept
+void PlayersScreen::onButtonPlayTestSound(const shared_ptr<stmi::Capability>& refCapa, double fVolume) noexcept
 {
 	auto refPlayback = std::static_pointer_cast<stmi::PlaybackCapability>(refCapa);
 	refPlayback->setListenerVol(fVolume);
 
-	auto refThemeCtx = m_refTheme->createContext(NSize{10,10}, false, 1.0, 1.0, 1.0, get_pango_context());
+	auto refThemeCtx = m_refTheme->createContext(NSize{10,10}, false, 1.0, 1.0, 1.0, m_oGameWindow.get_pango_context());
 	auto refThemeSound = refThemeCtx->createSound(m_nSoundTestIdx, {refPlayback}, FPoint{}, 0.0, true, 1.0, false);
 	if (! refThemeSound) {
 		std::cout << "Couldn't play test sound '" << s_sTestSoundName << "'" << '\n';
 	}
 }
 
-bool PlayersDialog::onPlayerNameChanged(const Glib::ustring& sPlayerName) noexcept
+bool PlayersScreen::onPlayerNameChanged(const Glib::ustring& sPlayerName) noexcept
 {
-//std::cout << "PlayersDialog::onPlayerNameChanged()  sPlayerName=" << sPlayerName << '\n';
+//std::cout << "PlayersScreen::onPlayerNameChanged()  sPlayerName=" << sPlayerName << '\n';
 	auto& refTeam = m_refPrefs->getTeamFull(m_nSelectedTeam);
 	auto& refPlayer = refTeam->getMateFull(m_nSelectedMate);
 	if (sPlayerName.empty() || (static_cast<int32_t>(sPlayerName.size()) > m_refPrefs->getMaxPlayerNameLength())) {
@@ -1429,7 +1503,7 @@ bool PlayersDialog::onPlayerNameChanged(const Glib::ustring& sPlayerName) noexce
 		return true; //---------------------------------------------------------
 	}
 	const bool bDone = refPlayer->setName(sPlayerName);
-//std::cout << "PlayersDialog::onPlayerNameChanged  bDone=" << bDone << '\n';
+//std::cout << "PlayersScreen::onPlayerNameChanged  bDone=" << bDone << '\n';
 	if (!bDone) {
 		m_p0EntryRename->set_text(refPlayer->getName());
 		return true; //---------------------------------------------------------
@@ -1441,9 +1515,9 @@ bool PlayersDialog::onPlayerNameChanged(const Glib::ustring& sPlayerName) noexce
 	}
 	return true;
 }
-bool PlayersDialog::onTeamNameChanged(const Glib::ustring& sTeamName) noexcept
+bool PlayersScreen::onTeamNameChanged(const Glib::ustring& sTeamName) noexcept
 {
-//std::cout << "PlayersDialog::onTeamNameChanged()  sTeamName=" << sTeamName << '\n';
+//std::cout << "PlayersScreen::onTeamNameChanged()  sTeamName=" << sTeamName << '\n';
 	auto& refTeam = m_refPrefs->getTeamFull(m_nSelectedTeam);
 	if (sTeamName.empty() || (static_cast<int32_t>(sTeamName.size()) > m_refPrefs->getMaxTeamNameLength())) {
 		m_p0EntryRename->set_text(refTeam->getName());
@@ -1456,7 +1530,7 @@ bool PlayersDialog::onTeamNameChanged(const Glib::ustring& sTeamName) noexcept
 	}
 	return true;
 }
-void PlayersDialog::regenerateKeyActionRow(const std::string& sDesc, int32_t nKeyAction) noexcept
+void PlayersScreen::regenerateKeyActionRow(const std::string& sDesc, int32_t nKeyAction) noexcept
 {
 	Gtk::TreeModel::Row oRow;
 	oRow = *(m_refTreeModelKeys->append());
@@ -1476,7 +1550,7 @@ void PlayersDialog::regenerateKeyActionRow(const std::string& sDesc, int32_t nKe
 	oRow[m_oKeysColumns.m_oColCapabilityId] = p0Capability->getId();
 	oRow[m_oKeysColumns.m_oColKey] = hkToString(eKey);
 }
-void PlayersDialog::regenerateKeysModel() noexcept
+void PlayersScreen::regenerateKeysModel() noexcept
 {
 	if (m_nSelectedMate < 0) {
 		return;
@@ -1491,7 +1565,7 @@ void PlayersDialog::regenerateKeysModel() noexcept
 	}
 }
 
-void PlayersDialog::onKeySelectionChanged() noexcept
+void PlayersScreen::onKeySelectionChanged() noexcept
 {
 	if (!m_bPrefsInitialized) {
 		return;
@@ -1511,12 +1585,12 @@ void PlayersDialog::onKeySelectionChanged() noexcept
 	m_bExpectingKey = false;
 	m_p0LabelKeysModifyKey->set_label(m_sLabelKeysModifyKey);
 }
-void PlayersDialog::onStmiEvent(const shared_ptr<stmi::Event>& refEvent) noexcept
+void PlayersScreen::onStmiEvent(const shared_ptr<stmi::Event>& refEvent) noexcept
 {
 //std::cout << "onStmiEvent() " << refEvent->getEventClass().getId() << '\n';
 	const bool bDeviceMgmt = refEvent->getCapability()->getCapabilityClass().isDeviceManagerCapability();
 	if (bDeviceMgmt) {
-		Glib::signal_timeout().connect(sigc::mem_fun(*this, &PlayersDialog::onDevicesTimeout), 0);
+		Glib::signal_timeout().connect(sigc::mem_fun(*this, &PlayersScreen::onDevicesTimeout), 0);
 		// Since we don't know whether the m_refPrefs callback is called before
 		// this method by the device manager we update the device list later
 	}
@@ -1562,7 +1636,7 @@ void PlayersDialog::onStmiEvent(const shared_ptr<stmi::Event>& refEvent) noexcep
 	m_p0LabelKeysModifyKey->set_label(m_sLabelKeysModifyKey);
 	regenerateKeysModel();
 }
-bool PlayersDialog::on_key_press_event(GdkEventKey* p0Event)
+bool PlayersScreen::on_key_press_event(GdkEventKey* p0Event) noexcept
 {
 	// allows to get cursor, tab, control keys if m_bExpectingKey is true
 	if (m_bExpectingKey) {
@@ -1574,20 +1648,20 @@ bool PlayersDialog::on_key_press_event(GdkEventKey* p0Event)
 		return true; // don't propagate to device manager
 	}
 	// standard: tab, control and so on are used by Gtk
-	return Gtk::Dialog::on_key_press_event(p0Event);
+	return (&m_oGameWindow)->Gtk::Window::on_key_press_event(p0Event);
 }
-bool PlayersDialog::on_button_press_event(GdkEventButton* p0Event)
+bool PlayersScreen::on_button_press_event(GdkEventButton* p0Event) noexcept
 {
 	if (m_bExpectingKey) {
 		// allow button press to get to the device manager as a key
 		return false;
 	}
-	return Gtk::Dialog::on_button_press_event(p0Event);
+	return (&m_oGameWindow)->Gtk::Window::on_button_press_event(p0Event);
 }
 
 static const InputStrings s_oInputStrings{};
 
-Glib::ustring PlayersDialog::hkToString(stmi::HARDWARE_KEY eKey) noexcept
+Glib::ustring PlayersScreen::hkToString(stmi::HARDWARE_KEY eKey) noexcept
 {
 	if (eKey == stmi::HK_NULL) {
 		return "Undefined";

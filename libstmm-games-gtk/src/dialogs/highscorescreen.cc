@@ -1,7 +1,7 @@
 /*
- * File:   highscoredialog.cc
+ * File:   highscorescreen.cc
  *
- * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,12 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
 
-#include "highscoredialog.h"
-#include "allpreferences.h"
+#include "highscorescreen.h"
+#include "../gamewindow.h"
+
+#include "../gtkutil/gtkutilpriv.h"
+
+#include <stmm-games-file/allpreferences.h>
 
 #include <stmm-games/game.h>
 
@@ -36,78 +40,89 @@
 namespace stmg
 {
 
-static const std::string s_sHighScoreWindowTitle = "Highscores";
 static const std::string s_sHighScoreColumnTitleRank = "Rank";
 static const std::string s_sHighScoreColumnTitleName = "Name";
 
 static constexpr const int32_t s_nButtonLeftRightMargin = 20;
 
-HighscoreDialog::HighscoreDialog() noexcept
-: Gtk::Dialog(s_sHighScoreWindowTitle, true)
-, m_p0ButtonOk(nullptr)
-, m_p0BoxContent(nullptr)
-, m_p0NotebookHighscoreDesc(nullptr)
-, m_p0TreeViewHighscores(nullptr)
+HighscoreScreen::HighscoreScreen(GameWindow& oGameWindow) noexcept
+: m_oGameWindow(oGameWindow)
 , m_bRegenerateHighscoresListInProgress(false)
 , m_bEditableName(false)
 , m_bGameIncluded(false)
 , m_nCurrentPage(0)
 {
-	//set_title("Highscores");
-	set_default_size(150, 250);
-
-	////////////////////////////////////////////////////////////////////////////
-	m_p0ButtonOk = add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
-	assert(m_p0ButtonOk != nullptr);
-		m_p0ButtonOk->signal_clicked().connect(
-						sigc::mem_fun(*this, &HighscoreDialog::onHighscoreButtonOk) );
-
-	Gtk::ButtonBox* m_p0ButtonBoxActions = get_action_area();
-	m_p0ButtonBoxActions->set_layout(Gtk::ButtonBoxStyle::BUTTONBOX_EXPAND);
-	m_p0ButtonBoxActions->set_orientation(Gtk::Orientation::ORIENTATION_VERTICAL);
-	m_p0ButtonBoxActions->set_margin_left(s_nButtonLeftRightMargin);
-	m_p0ButtonBoxActions->set_margin_right(s_nButtonLeftRightMargin);
-
-	m_p0BoxContent = get_content_area();
-	assert(m_p0BoxContent != nullptr);
-	m_p0BoxContent->set_orientation(Gtk::ORIENTATION_VERTICAL);
-
+}
+Gtk::Widget* HighscoreScreen::init() noexcept
+{
 	Glib::RefPtr<Gtk::TreeSelection> refTreeSelection;
 
+	m_p0VBoxScores = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+		//m_p0VBoxScores->set_spacing(5);
+		addSmallSeparator(m_p0VBoxScores);
+
 		m_p0NotebookHighscoreDesc = Gtk::manage(new Gtk::Notebook());
-		m_p0BoxContent->pack_start(*m_p0NotebookHighscoreDesc, false, true);
+		m_p0VBoxScores->pack_start(*m_p0NotebookHighscoreDesc, false, true);
 			m_p0NotebookHighscoreDesc->signal_switch_page().connect(
-											sigc::mem_fun(*this, &HighscoreDialog::onNotebookSwitchPage) );
+											sigc::mem_fun(*this, &HighscoreScreen::onNotebookSwitchPage) );
 
 				//p0TabLabelDesc = Gtk::manage(new Gtk::Label(""));
 				//p0TabLabelInvisible = Gtk::manage(new Gtk::Label(""));
 
-		m_refTreeModelHighscores = Gtk::TreeStore::create(m_oHighscoresColumns);
-		m_p0TreeViewHighscores = Gtk::manage(new Gtk::TreeView(m_refTreeModelHighscores));
-		m_p0BoxContent->pack_start(*m_p0TreeViewHighscores, true, true);
-			m_p0TreeViewHighscores->append_column(s_sHighScoreColumnTitleRank, m_oHighscoresColumns.m_oColRank);
-			auto p0CellRenderer = m_p0TreeViewHighscores->get_column_cell_renderer(0);
-			if (p0CellRenderer != nullptr) {
-				p0CellRenderer->set_alignment(0.5, 0.5); // it's a number or time
-			}
-			refTreeSelection = m_p0TreeViewHighscores->get_selection();
-			refTreeSelection->signal_changed().connect(
-							sigc::mem_fun(*this, &HighscoreDialog::onHighscoreSelectionChanged));
+		Gtk::ScrolledWindow* m_p0ScrolledScores = Gtk::manage(new Gtk::ScrolledWindow());
+		m_p0VBoxScores->pack_start(*m_p0ScrolledScores, true, true);
+			m_p0ScrolledScores->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
+			m_refTreeModelHighscores = Gtk::TreeStore::create(m_oHighscoresColumns);
+			m_p0TreeViewHighscores = Gtk::manage(new Gtk::TreeView(m_refTreeModelHighscores));
+			m_p0ScrolledScores->add(*m_p0TreeViewHighscores);
+				m_p0TreeViewHighscores->append_column(s_sHighScoreColumnTitleRank, m_oHighscoresColumns.m_oColRank);
+				auto p0CellRenderer = m_p0TreeViewHighscores->get_column_cell_renderer(0);
+				if (p0CellRenderer != nullptr) {
+					p0CellRenderer->set_alignment(0.5, 0.5); // it's a number or time
+				}
+				refTreeSelection = m_p0TreeViewHighscores->get_selection();
+				refTreeSelection->signal_changed().connect(
+								sigc::mem_fun(*this, &HighscoreScreen::onHighscoreSelectionChanged));
+				m_p0TreeViewHighscores->set_margin_left(5);
+				m_p0TreeViewHighscores->set_margin_right(5);
 
-	show_all_children();
+		addSmallSeparator(m_p0VBoxScores);
+		m_p0ButtonOk = Gtk::manage(new Gtk::Button("Ok"));
+		m_p0VBoxScores->pack_start(*m_p0ButtonOk, false, false);
+			m_p0ButtonOk->set_margin_left(s_nButtonLeftRightMargin);
+			m_p0ButtonOk->set_margin_right(s_nButtonLeftRightMargin);
+			m_p0ButtonOk->set_margin_top(5);
+			m_p0ButtonOk->set_margin_bottom(5);
+			m_p0ButtonOk->signal_clicked().connect(
+							sigc::mem_fun(*this, &HighscoreScreen::onHighscoreButtonOk) );
+		m_p0ButtonCancel  = Gtk::manage(new Gtk::Button("Forget"));
+		m_p0VBoxScores->pack_start(*m_p0ButtonCancel, false, false);
+			m_p0ButtonCancel->set_margin_left(s_nButtonLeftRightMargin);
+			m_p0ButtonCancel->set_margin_right(s_nButtonLeftRightMargin);
+			m_p0ButtonCancel->set_margin_top(5);
+			m_p0ButtonCancel->set_margin_bottom(5);
+			m_p0ButtonCancel->signal_clicked().connect(
+							sigc::mem_fun(*this, &HighscoreScreen::onHighscoreButtonCancel) );
+		addSmallSeparator(m_p0VBoxScores);
+
+	return m_p0VBoxScores;
 }
-int HighscoreDialog::run(const shared_ptr<Highscore>& refHighscore, const shared_ptr<Game>& refGame, const shared_ptr<AllPreferences>& refPrefs) noexcept
+bool HighscoreScreen::changeTo(const shared_ptr<Highscore>& refHighscore, const shared_ptr<Game>& refGame, const shared_ptr<AllPreferences>& refPrefs) noexcept
 {
+	m_p0ButtonOk->set_label("Save");
+	m_p0ButtonCancel->set_visible(true);
 	assert(refGame);
-	return runInternal({refHighscore}, refGame, refPrefs);
+	return changeToInternal({refHighscore}, refGame, refPrefs);
 }
-int HighscoreDialog::run(const std::vector<shared_ptr<Highscore>>& aHighscores, const shared_ptr<AllPreferences>& refPrefs) noexcept
+bool HighscoreScreen::changeTo(const std::vector<shared_ptr<Highscore>>& aHighscores, const shared_ptr<AllPreferences>& refPrefs) noexcept
 {
+	m_p0ButtonOk->set_label("Ok");
+	m_p0ButtonCancel->set_visible(false);
 	static const shared_ptr<Game> s_refEmptyGame{};
-	return runInternal(aHighscores, s_refEmptyGame, refPrefs);
+	return changeToInternal(aHighscores, s_refEmptyGame, refPrefs);
 }
-int HighscoreDialog::runInternal(const std::vector<shared_ptr<Highscore>>& aHighscores
-								, const shared_ptr<Game>& refGame, const shared_ptr<AllPreferences>& refPrefs) noexcept
+bool HighscoreScreen::changeToInternal(const std::vector<shared_ptr<Highscore>>& aHighscores
+										, const shared_ptr<Game>& refGame, const shared_ptr<AllPreferences>& refPrefs) noexcept
 {
 	assert(! aHighscores.empty());
 	assert(refPrefs);
@@ -155,11 +170,11 @@ int HighscoreDialog::runInternal(const std::vector<shared_ptr<Highscore>>& aHigh
 	regenerateColumns();
 	const int32_t nTotAdded = regenerateHighscoresList();
 	if ((m_refGame.get() != nullptr) && (nTotAdded == 0)) {
-		return Gtk::RESPONSE_CANCEL;
+		return false;
 	}
-	return Gtk::Dialog::run();
+	return true;
 }
-void HighscoreDialog::onNotebookSwitchPage(Gtk::Widget*, guint nPageNum) noexcept
+void HighscoreScreen::onNotebookSwitchPage(Gtk::Widget*, guint nPageNum) noexcept
 {
 	if (m_nCurrentPage < 0) {
 		// initializing
@@ -172,7 +187,7 @@ void HighscoreDialog::onNotebookSwitchPage(Gtk::Widget*, guint nPageNum) noexcep
 	m_nCurrentPage = nPageNum;
 	regenerateHighscoresList();
 }
-void HighscoreDialog::regenerateColumns() noexcept
+void HighscoreScreen::regenerateColumns() noexcept
 {
 	assert(!m_aHighscores.empty());
 	//TODO just the newly added highscore row should be editable
@@ -210,7 +225,7 @@ void HighscoreDialog::regenerateColumns() noexcept
 		if (sVarDesc.empty()) {
 			continue; // for(nIdx) ----
 		}
-		if (nShown >= nMaxScoreElements) {
+		if (nShown >= s_nMaxScoreElements) {
 			continue; // for(nIdx) ----
 		}
 		m_p0TreeViewHighscores->append_column(sVarDesc, m_oHighscoresColumns.m_aScoreElems[nShown]);
@@ -230,9 +245,9 @@ void HighscoreDialog::regenerateColumns() noexcept
 		++nShown;
 	}
 }
-int32_t HighscoreDialog::regenerateHighscoresList() noexcept
+int32_t HighscoreScreen::regenerateHighscoresList() noexcept
 {
-//std::cout << "HighscoreDialog::regenerateHighscoresList()" << '\n';
+//std::cout << "HighscoreScreen::regenerateHighscoresList()" << '\n';
 	assert(!m_aHighscores.empty());
 
 	std::vector<int32_t> aNewlyAddedPositions;
@@ -282,7 +297,7 @@ int32_t HighscoreDialog::regenerateHighscoresList() noexcept
 	m_bRegenerateHighscoresListInProgress = false;
 	return static_cast<int32_t>(aNewlyAddedPositions.size());
 }
-void HighscoreDialog::onHighscoreSelectionChanged() noexcept
+void HighscoreScreen::onHighscoreSelectionChanged() noexcept
 {
 	//if (m_bRegenerateHighscoresListInProgress) {
 	//	return;
@@ -291,8 +306,18 @@ void HighscoreDialog::onHighscoreSelectionChanged() noexcept
 	//	return;
 	//}
 }
-void HighscoreDialog::onHighscoreButtonOk() noexcept
+void HighscoreScreen::onHighscoreButtonOk() noexcept
 {
+	if (m_refGame) {
+		m_oGameWindow.afterHighscores(m_aHighscores[0]);
+	} else {
+		m_oGameWindow.afterHighscores(shared_ptr<Highscore>{});
+	}
+}
+void HighscoreScreen::onHighscoreButtonCancel() noexcept
+{
+	assert(m_refGame);
+	m_oGameWindow.afterHighscores(shared_ptr<Highscore>{});
 }
 
 } // namespace stmg

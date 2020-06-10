@@ -159,8 +159,8 @@ struct hash<stmg::NPoint>
 	 */
     std::size_t operator()(const stmg::NPoint& oXY) const noexcept
     {
-		static_assert(sizeof(std::size_t) >= sizeof(uint64_t), "");
-		const std::size_t nHash = ((static_cast<std::size_t>(oXY.m_nX) << 32) & 0xFFFFFFFF00000000) | ((static_cast<std::size_t>(oXY.m_nX)) & 0x00000000FFFFFFFF);
+		static_assert(sizeof(std::size_t) >= sizeof(uint64_t), "Must be 64bit architecture");
+		const std::size_t nHash = ((static_cast<std::size_t>(oXY.m_nY) << 32) & 0xFFFFFFFF00000000) | ((static_cast<std::size_t>(oXY.m_nX)) & 0x00000000FFFFFFFF);
         return nHash;
     }
 };

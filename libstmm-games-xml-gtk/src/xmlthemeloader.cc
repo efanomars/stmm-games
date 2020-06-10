@@ -98,7 +98,8 @@ void XmlThemeLoader::loadThemeInfos()
 
 	Named oDummy;
 
-	for (auto oThemeFile : aFiles) {
+	for (const auto& oThemeFile : aFiles) {
+//std::cout << "XmlThemeLoader::loadThemeInfos() file " << oThemeFile.getFullPath() << '\n';
 		assert(oThemeFile.isDefined());
 		xmlpp::DomParser oParser;
 		//We just want the text to be resolved/unescaped automatically.

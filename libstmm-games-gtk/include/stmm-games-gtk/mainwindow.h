@@ -20,12 +20,12 @@
 #ifndef STMG_MAIN_WINDOW_H
 #define STMG_MAIN_WINDOW_H
 
-#include "gameloader.h"
 #include "themeloader.h"
-#include "highscoresloader.h"
-#include "allpreferencesloader.h"
 
+#include <stmm-games-file/highscoresloader.h>
+#include <stmm-games-file/allpreferencesloader.h>
 #include <stmm-games-file/file.h>
+#include <stmm-games-file/gameloader.h>
 
 #include <stmm-games/util/basictypes.h>
 

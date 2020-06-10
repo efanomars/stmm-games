@@ -485,10 +485,13 @@ const std::vector< std::pair<std::string, File> >& GameDiskFiles::getDefaultSoun
 
 void GameDiskFiles::getThemeFiles(const std::string& sThemesFolder, std::vector<std::string>& aFiles)
 {
+//std::cout << "GameDiskFiles::getThemeFiles()  sThemesFolder=" << sThemesFolder << '\n';
 	visitSysPathsAndSubdirs(sThemesFolder, true, aFiles, [](const std::string& sDirPath, const std::vector<std::string>& aSubDirNames
 													, std::vector<std::string>& aFiles)
 	{
+//std::cout << "GameDiskFiles::getThemeFiles()    sDirPath=" << sDirPath << '\n';
 		for (const std::string& sSubDirName : aSubDirNames) {
+//std::cout << "GameDiskFiles::getThemeFiles()      sSubDirName=" << sSubDirName << '\n';
 			const std::string sSubDirPath = sDirPath + "/" + sSubDirName;
 			if (Glib::str_has_suffix(Glib::ustring{sSubDirPath}.uppercase(), Glib::ustring{s_sThemeXmlFolderExt}.uppercase())) {
 				const std::string sThemeXmlPath = sSubDirPath + "/" + s_sThemeXmlFileName;

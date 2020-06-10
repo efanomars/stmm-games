@@ -1,7 +1,7 @@
 /*
- * File:  playersdialog.h
+ * File:  playersscreen.h
  *
- * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef STMG_PLAYERS_DIALOG_H
-#define STMG_PLAYERS_DIALOG_H
+#ifndef STMG_PLAYERS_SCREEN_H
+#define STMG_PLAYERS_SCREEN_H
 
 #include <stmm-games/ownertype.h>
 #include <stmm-games/util/variant.h>
@@ -46,25 +46,30 @@ namespace stmg { class Option; }
 namespace stmg { class Theme; }
 namespace stmg { template <class T> class NamedObjIndex; }
 namespace stmi { class Event; }
+namespace stmg { class GameWindow; }
+namespace stmg { class AllPreferences; }
 
 namespace stmg
 {
 
 using std::shared_ptr;
 
-class PlayersDialog  : public Gtk::Dialog
+class PlayersScreen
 {
 public:
-	explicit PlayersDialog(const shared_ptr<StdConfig>& refStdConfig) noexcept;
+	PlayersScreen(GameWindow& oGameWindow, const shared_ptr<StdConfig>& refStdConfig) noexcept;
 
-	void reInit(shared_ptr<StdPreferences>& refPrefs, shared_ptr<Theme>& refTheme) noexcept;
+	// returns widget to add to container
+	Gtk::Widget* init() noexcept;
 
-protected:
-	bool on_key_press_event(GdkEventKey* p0Event) override;
-	bool on_button_press_event(GdkEventButton* p0Event) override;
+	// returns whether could change to screen
+	bool changeTo(const shared_ptr<AllPreferences>& refPrefs, const shared_ptr<Theme>& refTheme) noexcept;
+
+	bool on_key_press_event(GdkEventKey* p0Event) noexcept;
+	bool on_button_press_event(GdkEventButton* p0Event) noexcept;
 
 private:
-	/** Creates (composite) widgets out of options and adds them to a box.
+	/* Creates (composite) widgets out of options and adds them to a box.
 	 * @param oOptions The options.
 	 * @param aWidgetSetters The widget setters.
 	 * @param eOptionOwner The owner type.
@@ -85,7 +90,7 @@ private:
 	void onIntOptionChanged(OwnerType eOptionOwner, IntOption* p0IntOption, Gtk::SpinButton* p0SB) noexcept;
 	void onBoolOptionChanged(OwnerType eOptionOwner, BoolOption* p0BoolOption, Gtk::CheckButton* p0CB) noexcept;
 	void onEnumOptionChanged(OwnerType eOptionOwner, EnumOption* p0EnumOption, Gtk::RadioButton* p0RB, int32_t nEnumIdx) noexcept;
-	void onButtonOK() noexcept;
+	void onButtonOk() noexcept;
 	void onButtonCancel() noexcept;
 	void onNotebookSwitchPage(Gtk::Widget*, guint nPageNum) noexcept;
 	void onSpinNrPlayersChanged() noexcept;
@@ -134,156 +139,104 @@ private:
 
 	std::string getCapabilityClassId(const stmi::Capability::Class& oClass) const noexcept;
 private:
+	GameWindow& m_oGameWindow;
+
 	class KeysNotebook : public Gtk::Notebook
 	{
 	public:
 		KeysNotebook() = delete;
-		explicit KeysNotebook(PlayersDialog* p0Dialog) noexcept
-		: Gtk::Notebook()
-		, m_p0Dialog(p0Dialog)
-		{
-			assert(p0Dialog != nullptr);
-		}
+		explicit KeysNotebook(PlayersScreen* p0Dialog) noexcept;
 	protected:
-		bool on_button_press_event(GdkEventButton* p0Event) override
-		{
-			if (m_p0Dialog->m_bExpectingKey) {
-				// allow button press to get to the device manager as a key
-				return false;
-			}
-			return Gtk::Notebook::on_button_press_event(p0Event);
-		}
+		bool on_button_press_event(GdkEventButton* p0Event) override;
 	private:
-		PlayersDialog* m_p0Dialog;
+		PlayersScreen* m_p0Dialog;
 	};
 	friend class KeysNotebook;
 	class KeysTreeView : public Gtk::TreeView
 	{
 	public:
 		KeysTreeView() = delete;
-		KeysTreeView(PlayersDialog* p0Dialog, const Glib::RefPtr< Gtk::TreeModel >& refModel) noexcept
-		: Gtk::TreeView(refModel)
-		, m_p0Dialog(p0Dialog)
-		{
-			set_enable_search(false);
-			assert(p0Dialog != nullptr);
-			const Gdk::EventMask oCurMask = get_events();
-			const Gdk::EventMask oNewMask = oCurMask | Gdk::FOCUS_CHANGE_MASK;
-			if (oNewMask != oCurMask) {
-				set_events(oNewMask);
-			}
-		}
+		KeysTreeView(PlayersScreen* p0Dialog, const Glib::RefPtr< Gtk::TreeModel >& refModel) noexcept;
 	protected:
-		bool on_key_press_event(GdkEventKey* p0Event) override
-		{
-			if (m_p0Dialog->m_bExpectingKey) {
-				return false;
-			}
-			if (p0Event->keyval == s_nModifyKeyVal1) {
-				return false;
-			}
-			if ((s_nModifyKeyVal2 != 0) && (p0Event->keyval == s_nModifyKeyVal2)) {
-				return false;
-			}
-			return Gtk::TreeView::on_key_press_event(p0Event);
-		}
-		bool on_button_press_event(GdkEventButton* p0Event) override
-		{
-			if (m_p0Dialog->m_bExpectingKey) {
-				// allow button press to get to the device manager as a key
-				return false;
-			}
-			return Gtk::TreeView::on_button_press_event(p0Event);
-		}
-		bool on_focus_in_event(GdkEventFocus* p0Event) override
-		{
-//std::cout << "KeysTreeView::on_focus_in_event()" << '\n';
-			// start listening to keys
-			m_p0Dialog->m_bListenToKey = true;
-			return Gtk::TreeView::on_focus_in_event(p0Event);
-		}
-		bool on_focus_out_event(GdkEventFocus* p0Event) override
-		{
-//std::cout << "KeysTreeView::on_focus_out_event()" << '\n';
-			// stop listening to keys
-			m_p0Dialog->m_bListenToKey = false;
-			m_p0Dialog->m_bExpectingKey = false;
-			m_p0Dialog->m_p0LabelKeysModifyKey->set_label(m_p0Dialog->m_sLabelKeysModifyKey);
-			return Gtk::TreeView::on_focus_out_event(p0Event);
-		}
+		bool on_key_press_event(GdkEventKey* p0Event) override;
+		bool on_button_press_event(GdkEventButton* p0Event) override;
+		bool on_focus_in_event(GdkEventFocus* p0Event) override;
+		bool on_focus_out_event(GdkEventFocus* p0Event) override;
 	private:
-		PlayersDialog* m_p0Dialog;
+		PlayersScreen* m_p0Dialog;
 	};
 	friend class KeysTreeView;
 
 	// Only keep a pointer to the following widgets if they are
 	// used past the constructor!
-	//Gtk::ButtonBox* m_p0ButtonBoxActions = nullptr;
-	//Gtk::Button* m_p0ButtonOk = nullptr;
-	//Gtk::Button* m_p0ButtonCancel = nullptr;
-	//Gtk::Box* m_p0BoxContent = nullptr;
-	KeysNotebook* m_p0NotebookPlayers = nullptr;
+	Gtk::Box* m_p0PlayersScreenBoxMain = nullptr;
+		//Gtk::Label* m_p0LabelTitle = nullptr;
 
-	Glib::RefPtr<Gtk::Adjustment> m_refAdjustmentNrPlayers;
-	Glib::RefPtr<Gtk::Adjustment> m_refAdjustmentNrTeams;
+		KeysNotebook* m_p0NotebookPlayers = nullptr;
 
-	static const int32_t s_nTabTeamPlayers = 0;
-	//Gtk::Label* m_p0TabLabelPlayersTeams = nullptr;
-	//Gtk::Box* m_p0TabVBoxPlayersTeams = nullptr;
-		Gtk::Box* m_p0HBoxNrPlayersTeams = nullptr;
-			//Gtk::Box* m_p0HBoxNrPlayers = nullptr;
-				//Gtk::Label* m_p0LabelNrPlayers = nullptr;
-				Gtk::SpinButton* m_p0SpinNrPlayers = nullptr;
-			//Gtk::Box* m_p0HBoxNrTeams = nullptr;
-				//Gtk::Label* m_p0LabelNrTeams = nullptr;
-				Gtk::SpinButton* m_p0SpinNrTeams = nullptr;
-		//Gtk::Box* m_p0HBoxPlayersTeams = nullptr;
-			//Gtk::Box* m_p0VBoxPlayers = nullptr;
-				Gtk::Box* m_p0HBoxRename = nullptr;
-					Gtk::Label* m_p0LabelRename = nullptr;
-					Gtk::Entry* m_p0EntryRename = nullptr;
-				//Gtk::ScrolledWindow* m_p0ScrolledPlayers = nullptr;
-					Gtk::TreeView* m_p0TreeViewPlayers = nullptr;
-			//Gtk::Box* m_p0VBoxRenameMovePlayers = nullptr;
-				Gtk::Button* m_p0ButtonRename = nullptr;
-				Gtk::Box* m_p0VBoxMovePlayers = nullptr;
-					Gtk::Button* m_p0ButtonMoveUp = nullptr;
-					Gtk::Button* m_p0ButtonMoveDown = nullptr;
-					Gtk::Button* m_p0ButtonTeamUp = nullptr;
-					Gtk::Button* m_p0ButtonTeamDown = nullptr;
-	//
-	static const int32_t s_nTabGameOptions = 1;
-	//Gtk::Label* m_p0TabLabelGameOptions = nullptr;
-	//Gtk::Box* m_p0TabVBoxGameOptions = nullptr;
-		//Gtk::Box* m_p0VBoxPGameOptions = nullptr;
-			//std::vector< Gtk::Widget* > m_aGameOptions;
-		Gtk::Button* m_p0ButtonPlayTestGlobalSound = nullptr;
-	//
-	static const int32_t s_nTabTeamOptions = 2;
-	//Gtk::Label* m_p0TabLabelTeamOptions = nullptr;
-	//Gtk::Box* m_p0TabVBoxTeamOptions = nullptr;
-		//Gtk::Box* m_p0VBoxTeamOptions = nullptr;
-			//std::vector< Gtk::Widget* > m_aTeamOptions;
-	//
-	static const int32_t s_nTabPlayerOptions = 3;
-	//Gtk::Label* m_p0TabLabelPlayerOptions = nullptr;
-	//Gtk::Box* m_p0TabVBoxPlayerOptions = nullptr;
-		//Gtk::Box* m_p0VBoxPlayerOptions = nullptr;
-			//std::vector< Gtk::Widget* > m_aPlayerOptions;
-		Gtk::ScrolledWindow* m_p0ScrolledSoundCapabilities = nullptr;
-			Gtk::TreeView* m_p0TreeViewSoundCapabilities = nullptr;
-		Gtk::Button* m_p0ButtonPlayTestPlayerSound = nullptr;
-	//
-	static const int32_t s_nTabPlayerDeviceKeyActions = 4;
-	//Gtk::Label* m_p0TabLabelPlayerDeviceKeyActions = nullptr;
-	//Gtk::Box* m_p0TabVBoxPlayerDeviceKeyActions = nullptr;
-		//Gtk::Box* m_p0VBoxKeyActionsKeys = nullptr;
-			Gtk::Label* m_p0LabelKeysModifyKey = nullptr;
-			const Glib::ustring m_sLabelKeysModifyKey = nullptr;
-			//Gtk::ScrolledWindow* m_p0ScrolledKeys = nullptr;
-				KeysTreeView* m_p0TreeViewKeys = nullptr;
-		//Gtk::ScrolledWindow* m_p0ScrolledAssignedCapabilities = nullptr;
-			Gtk::TreeView* m_p0TreeViewAssignedCapabilities = nullptr;
+			Glib::RefPtr<Gtk::Adjustment> m_refAdjustmentNrPlayers;
+			Glib::RefPtr<Gtk::Adjustment> m_refAdjustmentNrTeams;
+
+			static const int32_t s_nTabTeamPlayers = 0;
+			//Gtk::Label* m_p0TabLabelPlayersTeams = nullptr;
+			//Gtk::Box* m_p0TabVBoxPlayersTeams = nullptr;
+				Gtk::Box* m_p0HBoxNrPlayersTeams = nullptr;
+					//Gtk::Box* m_p0HBoxNrPlayers = nullptr;
+						//Gtk::Label* m_p0LabelNrPlayers = nullptr;
+						Gtk::SpinButton* m_p0SpinNrPlayers = nullptr;
+					//Gtk::Box* m_p0HBoxNrTeams = nullptr;
+						//Gtk::Label* m_p0LabelNrTeams = nullptr;
+						Gtk::SpinButton* m_p0SpinNrTeams = nullptr;
+				//Gtk::Box* m_p0HBoxPlayersTeams = nullptr;
+					//Gtk::Box* m_p0VBoxPlayers = nullptr;
+						Gtk::Box* m_p0HBoxRename = nullptr;
+							Gtk::Label* m_p0LabelRename = nullptr;
+							Gtk::Entry* m_p0EntryRename = nullptr;
+						//Gtk::ScrolledWindow* m_p0ScrolledPlayers = nullptr;
+							Gtk::TreeView* m_p0TreeViewPlayers = nullptr;
+					//Gtk::Box* m_p0VBoxRenameMovePlayers = nullptr;
+						Gtk::Button* m_p0ButtonRename = nullptr;
+						Gtk::Box* m_p0VBoxMovePlayers = nullptr;
+							Gtk::Button* m_p0ButtonMoveUp = nullptr;
+							Gtk::Button* m_p0ButtonMoveDown = nullptr;
+							Gtk::Button* m_p0ButtonTeamUp = nullptr;
+							Gtk::Button* m_p0ButtonTeamDown = nullptr;
+			//
+			static const int32_t s_nTabGameOptions = 1;
+			//Gtk::Label* m_p0TabLabelGameOptions = nullptr;
+			//Gtk::Box* m_p0TabVBoxGameOptions = nullptr;
+				//Gtk::Box* m_p0VBoxPGameOptions = nullptr;
+					//std::vector< Gtk::Widget* > m_aGameOptions;
+				Gtk::Button* m_p0ButtonPlayTestGlobalSound = nullptr;
+			//
+			static const int32_t s_nTabTeamOptions = 2;
+			//Gtk::Label* m_p0TabLabelTeamOptions = nullptr;
+			//Gtk::Box* m_p0TabVBoxTeamOptions = nullptr;
+				//Gtk::Box* m_p0VBoxTeamOptions = nullptr;
+					//std::vector< Gtk::Widget* > m_aTeamOptions;
+			//
+			static const int32_t s_nTabPlayerOptions = 3;
+			//Gtk::Label* m_p0TabLabelPlayerOptions = nullptr;
+			//Gtk::Box* m_p0TabVBoxPlayerOptions = nullptr;
+				//Gtk::Box* m_p0VBoxPlayerOptions = nullptr;
+					//std::vector< Gtk::Widget* > m_aPlayerOptions;
+				Gtk::ScrolledWindow* m_p0ScrolledSoundCapabilities = nullptr;
+					Gtk::TreeView* m_p0TreeViewSoundCapabilities = nullptr;
+				Gtk::Button* m_p0ButtonPlayTestPlayerSound = nullptr;
+			//
+			static const int32_t s_nTabPlayerDeviceKeyActions = 4;
+			//Gtk::Label* m_p0TabLabelPlayerDeviceKeyActions = nullptr;
+			//Gtk::Box* m_p0TabVBoxPlayerDeviceKeyActions = nullptr;
+				//Gtk::Box* m_p0VBoxKeyActionsKeys = nullptr;
+					Gtk::Label* m_p0LabelKeysModifyKey = nullptr;
+					const Glib::ustring m_sLabelKeysModifyKey = nullptr;
+					//Gtk::ScrolledWindow* m_p0ScrolledKeys = nullptr;
+						KeysTreeView* m_p0TreeViewKeys = nullptr;
+				//Gtk::ScrolledWindow* m_p0ScrolledAssignedCapabilities = nullptr;
+					Gtk::TreeView* m_p0TreeViewAssignedCapabilities = nullptr;
+
+		//Gtk::Button* m_p0ButtonOk = nullptr;
+		//Gtk::Button* m_p0ButtonCancel = nullptr;
 
 	// the vector index is the option index
 	std::vector< std::function<void()> > m_aGameOptionWidgetSetters;
@@ -360,7 +313,7 @@ private:
 	const StdConfig::CapabilityAssignment& m_oCapabilityAssignment;
 	shared_ptr<stmi::DeviceManager> m_refDM;
 	shared_ptr<stmi::EventListener> m_refEventListener;
-	shared_ptr<StdPreferences> m_refPrefs;
+	shared_ptr<AllPreferences> m_refPrefs;
 	shared_ptr<Theme> m_refTheme;
 	bool m_bPrefsInitialized;
 
@@ -397,5 +350,5 @@ private:
 
 } // namespace stmg
 
-#endif	/* STMG_LEVEL_DIALOG_H */
+#endif	/* STMG_LEVEL_SCREEN_H */
 

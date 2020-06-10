@@ -204,15 +204,7 @@ private:
 	void visitSysPathsAndSubdirs(const std::string& sShareMainDir, bool bDoSubDirs
 										, std::vector<std::string>& aFiles, Filter oFilter)
 	{
-//		std::string sPath = GameDiskFiles::getUserWritableDataDir();
 		std::vector<std::string> aSubDirNames;
-//		if (!sPath.empty()) {
-//			sPath = sPath + "/" + sShareMainDir;
-//			if (bDoSubDirs) {
-//				getDirSubTreeFiles(sPath, true, false, false, "", aSubDirNames);
-//			}
-//			oFilter(sPath, aSubDirNames, aFiles);
-//		}
 		for (const auto& sDataDirPath : m_aReadOnlyPaths) {
 			std::string sPath = sDataDirPath + "/" + sShareMainDir;
 			aSubDirNames.clear();

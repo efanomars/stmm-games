@@ -8,7 +8,10 @@ url='@STMMI_WEBSITE_SECTION@/@STMMI_SOURCE_PROJECT@'
 arch=('x86_64')
 license=('LGPL3')
 
-depends=('stmm-input-au' 'stmm-input' 'gtkmm3' 'librsvg' 'libxml++2.6')
+depends=(
+    'stmm-input-au>=@STMM_GAMES_REQ_STMM_INPUT_AU_VERSION@'
+    'stmm-input>=@STMM_GAMES_GTK_REQ_STMM_INPUT_GTK_VERSION@'
+    'gtkmm3' 'librsvg' 'libxml++2.6')
 makedepends=('cmake' 'gcc' 'doxygen' 'graphviz' 'python')
 optdepends=()
 

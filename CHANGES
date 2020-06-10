@@ -1,3 +1,13 @@
+stmm-games (0.24) unstable; urgency=low
+
+  * Fix NPoint hash formula
+  * Eliminate all modal dialogs
+  * Fix PKGBUILD
+  * Fix StdPreferencesFixture bug
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Mon, 10 Jun 2020 19:29:39 +0100
+
 stmm-games (0.23) unstable; urgency=low
 
   * Add environment var STMM_GAMES_EXTRA_BASE_PATH

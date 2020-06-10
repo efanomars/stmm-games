@@ -41,12 +41,12 @@
 #include <stdint.h>
 
 namespace stmg { class AllPreferencesLoader; }
-namespace stmg { class GameDialog; }
+namespace stmg { class GameScreen; }
 namespace stmg { class GameLoader; }
-namespace stmg { class HighscoreDialog; }
+namespace stmg { class HighscoreScreen; }
 namespace stmg { class HighscoresLoader; }
-namespace stmg { class PlayersDialog; }
-namespace stmg { class ThemeDialog; }
+namespace stmg { class PlayersScreen; }
+namespace stmg { class ThemeScreen; }
 namespace stmg { class ThemeLoader; }
 namespace stmg { class AllPreferences; }
 namespace stmg { class Game; }
@@ -54,6 +54,7 @@ namespace stmg { class GameGtkDrawingArea; }
 namespace stmg { class HighscoresDefinition; }
 namespace stmg { class StdConfig; }
 namespace stmg { class Theme; }
+namespace stmg { class AboutScreen; }
 namespace stmi { class Accessor; }
 namespace stmi { class GtkAccessor; }
 
@@ -95,10 +96,15 @@ private:
 	void onButtonNewGame() noexcept;
 	void onButtonNewGameOut() noexcept;
 	void onButtonHighscores() noexcept;
+	void afterHighscores(const shared_ptr<Highscore>& refHighscore) noexcept;
 	void onButtonChoosePlayers() noexcept;
+	void afterChoosePlayers(const shared_ptr<AllPreferences>& refNewPrefs) noexcept;
 	void onButtonChooseGame() noexcept;
+	void afterChooseGame(const std::string& sGameName) noexcept;
 	void onButtonChooseTheme() noexcept;
+	void afterChooseTheme(const std::string& sThemeName) noexcept;
 	void onButtonAbout() noexcept;
+	void afterAbout() noexcept;
 	void onButtonQuit() noexcept;
 	void onButtonResume() noexcept;
 		void onDrawingAreaSizeAllocate(Gtk::Allocation&) noexcept;
@@ -108,7 +114,6 @@ private:
 	void onButtonAnswerYes() noexcept;
 	void onButtonAnswerNo() noexcept;
 	void onButtonInfoOk() noexcept;
-	void onButtonAboutOk() noexcept;
 
 	void onActiveChanged() noexcept;
 
@@ -129,16 +134,13 @@ private:
 		, STATUS_MENU = 0
 		, STATUS_PLAY = 1
 		, STATUS_WAIT_1SEC = 2
-		, STATUS_HIGHSCORE = 3
-		, STATUS_WAIT_KEYPRESS = 4
-		, STATUS_ARE_YOU_SURE = 5
+		, STATUS_WAIT_KEYPRESS = 3
+		, STATUS_ARE_YOU_SURE = 4
 	};
 	void changeScreen(STATUS eStatus, int32_t nToScreen, const std::string& sMsg) noexcept;
-	void onChangedGame() noexcept;
 	void onChangedPlayers() noexcept;
+	void onChangedGame() noexcept;
 	void onChangedTheme() noexcept;
-
-	void gotoMainScreen() noexcept;
 
 	std::string getTheme() noexcept;
 	std::string getCouldNotLoadThemeString(const std::string& sThemeName) noexcept;
@@ -152,6 +154,7 @@ private:
 
 	void gameEnded() noexcept override;
 	void gameEndedOut() noexcept;
+	void gameEndedShowHighscore() noexcept;
 	void waitForKeypress() noexcept;
 	void gamePauseOut() noexcept;
 	void gameInterrupt(GameProxy::INTERRUPT_TYPE eInterruptType) noexcept override;
@@ -165,23 +168,13 @@ private:
 	int32_t getTotThemes() const noexcept;
 
 private:
-	const shared_ptr<StdConfig> m_refStdConfig;
+	MainWindowData m_oD;
 	const shared_ptr<stmi::DeviceManager> m_refDM;
-	const unique_ptr<GameLoader> m_refGameLoader;
-	const unique_ptr<HighscoresLoader> m_refHighscoresLoader;
-	const unique_ptr<ThemeLoader> m_refThemeLoader;
-	const unique_ptr<AllPreferencesLoader> m_refAllPreferencesLoader;
 
 	shared_ptr<stmi::EventListener> m_refEventListener;
 	shared_ptr<stmi::GtkAccessor> m_refAccessor;
 
-	const NSize m_oInitialSize;
 	const Glib::ustring m_sApplicationName;
-	const Glib::ustring m_sCopyright;
-	const std::vector<MainAuthorData> m_aAuthors;
-	const Glib::ustring m_sWebSite;
-	const File m_oIconFile;
-	const File m_oLogoFile;
 	Glib::RefPtr<Gdk::Pixbuf> m_refLogoPixbuf;
 
 	// the game model
@@ -194,8 +187,7 @@ private:
 
 	shared_ptr<AllPreferences> m_refPrefs;
 
-	bool m_bPauseIfWindowDeactivated;
-	bool m_bFullscreen;
+	bool m_bIsTestMode;
 
 	bool m_bGameIsTicking; // If true implies m_refGame not null
 
@@ -204,11 +196,14 @@ private:
 	// STATUS_MENU           m_bGameIsTicking == false, s_nScreenMain | s_nScreenPaused, -
 	// STATUS_PLAY           m_bGameIsTicking == true,  s_nScreenPlay                  , -
 	// STATUS_WAIT_1SEC      m_bGameIsTicking == true,  s_nScreenPlay                  , resize
-	// STATUS_HIGHSCORE      m_bGameIsTicking == true,  s_nScreenPlay                  , resize
 	// STATUS_WAIT_KEYPRESS  m_bGameIsTicking == true,  s_nScreenPlay                  , resize
 	// STATUS_MENU           m_bGameIsTicking == false, s_nScreenAnswer                , resize?
 	// STATUS_MENU           m_bGameIsTicking == false, s_nScreenInfo                  , -
 	// STATUS_MENU           m_bGameIsTicking == false, s_nScreenAbout                 , -
+	// STATUS_MENU           m_bGameIsTicking == false, s_nScreenHighscore             , -
+	// STATUS_MENU           m_bGameIsTicking == false, s_nScreenChooseGame            , -
+	// STATUS_MENU           m_bGameIsTicking == false, s_nScreenChooseTheme           , -
+	// STATUS_MENU           m_bGameIsTicking == false, s_nScreenChoosePlayers         , -
 	STATUS m_eStatus;
 	int32_t m_nCurrentScreen;
 	static constexpr const int32_t s_nScreenPlay = 0;
@@ -217,7 +212,11 @@ private:
 	static constexpr const int32_t s_nScreenAnswer = 3;
 	static constexpr const int32_t s_nScreenInfo = 4;
 	static constexpr const int32_t s_nScreenAbout = 5;
-	static constexpr const int32_t s_nTotScreens = 6;
+	static constexpr const int32_t s_nScreenHighscore = 6;
+	static constexpr const int32_t s_nScreenChooseGame = 7;
+	static constexpr const int32_t s_nScreenChooseTheme = 8;
+	static constexpr const int32_t s_nScreenChoosePlayers = 9;
+	static constexpr const int32_t s_nTotScreens = 10;
 
 	static constexpr const int32_t s_nGameEndedWaitMillisec = 1000;
 	bool m_bNextViewTickActive;
@@ -285,9 +284,6 @@ private:
 	static constexpr int32_t s_nResumeResizeMillisec = 0; // Time after resume the layout is recalculated once
 	bool m_bWaitingForDrawingAreaSizeAllocate;
 
-	//Gtk::Box* m_p0VBoxMain = nullptr;
-	//Gtk::VBox m_oMainBox;
-
 	Gtk::Stack* m_p0StackScreens = nullptr;
 		GameGtkDrawingArea* m_p0GameGtkDrawingArea = nullptr;
 			int32_t m_nDrawingAreaBaseX;
@@ -318,21 +314,33 @@ private:
 			//Gtk::Box* m_p0BoxInfo = nullptr;
 				Gtk::Label* m_p0LabelInfoText = nullptr;
 				//Gtk::Button* m_p0ButtonInfoOk = nullptr;
-		Gtk::Box* m_p0ScreenBoxAbout = nullptr;
+		Gtk::Widget* m_p0ScreenBoxAbout = nullptr;
 			//Gtk::Box* m_p0BoxAbout = nullptr;
-				//Gtk::Image* m_p0ImageAboutLogo = nullptr;
-				//Gtk::Label* m_p0LabelAboutAppName = nullptr;
-				//Gtk::Label* m_p0LabelAboutVersion = nullptr;
-				//Gtk::Label* m_p0LabelAboutCopyright = nullptr;
-				//Gtk::Button* m_p0ButtonAboutOk = nullptr;
 
-		Glib::RefPtr<PlayersDialog> m_refPlayersDialog;
-		shared_ptr<stmi::Accessor> m_refPlayersDialogAccessor;
-		Glib::RefPtr<GameDialog> m_refGameDialog;
-		Glib::RefPtr<HighscoreDialog> m_refHighscoreDialog;
-		Glib::RefPtr<ThemeDialog> m_refThemeDialog;
+		Gtk::Widget* m_p0ScreenBoxHighscores = nullptr;
+			//Gtk::Box* m_p0BoxHighscores = nullptr;
+
+		Gtk::Widget* m_p0ScreenBoxChooseGame = nullptr;
+			//Gtk::Box* m_p0BoxChooseGame = nullptr;
+
+		Gtk::Widget* m_p0ScreenBoxChooseTheme = nullptr;
+			//Gtk::Box* m_p0BoxChooseTheme = nullptr;
+
+		Gtk::Widget* m_p0ScreenBoxChoosePlayers = nullptr;
+			//Gtk::Box* m_p0BoxChooseTheme = nullptr;
 
 	Gtk::Widget* m_aScreens[s_nTotScreens]; // non owning pointers
+
+	friend class HighscoreScreen;
+	unique_ptr<HighscoreScreen> m_refHighscoreScreen;
+	friend class GameScreen;
+	unique_ptr<GameScreen> m_refChooseGameScreen;
+	friend class ThemeScreen;
+	unique_ptr<ThemeScreen> m_refChooseThemeScreen;
+	friend class PlayersScreen;
+	unique_ptr<PlayersScreen> m_refChoosePlayersScreen;
+	friend class AboutScreen;
+	unique_ptr<AboutScreen> m_refAboutScreen;
 };
 
 } // namespace stmg

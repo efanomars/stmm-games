@@ -22,7 +22,6 @@
 #include "mainwindow.h"
 #include "stdview.h"
 
-#include "allpreferences.h"
 #include "game.h"
 #include "gamegtkdrawingarea.h"
 #include "gameproxy.h"
@@ -30,17 +29,20 @@
 #include "level.h"
 #include "stdconfig.h"
 #include "theme.h"
-#include "allpreferencesloader.h"
-#include "gameloader.h"
-#include "highscoresloader.h"
 #include "themeloader.h"
 
-#include "dialogs/playersdialog.h"
-#include "dialogs/gamedialog.h"
-#include "dialogs/highscoredialog.h"
-#include "dialogs/themedialog.h"
+#include "dialogs/playersscreen.h"
+#include "dialogs/gamescreen.h"
+#include "dialogs/highscorescreen.h"
+#include "dialogs/themescreen.h"
+#include "dialogs/aboutscreen.h"
 
 #include "gtkutil/gtkutilpriv.h"
+
+#include <stmm-games-file/allpreferences.h>
+#include <stmm-games-file/gameloader.h>
+#include <stmm-games-file/allpreferencesloader.h>
+#include <stmm-games-file/highscoresloader.h>
 
 #include <stmm-games/util/util.h>
 #include <stmm-games/stdpreferences.h>
@@ -71,9 +73,10 @@ static const Glib::ustring s_sScreenNamePaused = "Paused";
 static const Glib::ustring s_sScreenNameAnswer = "Answer";
 static const Glib::ustring s_sScreenNameInfo = "Info";
 static const Glib::ustring s_sScreenNameAbout = "About";
-
-static const Glib::ustring s_sStmmGamesWebSite = "https://www.efanomars.com/libraries/stmm-games";
-static const Glib::ustring s_sStmmGamesCopyright = "stmm-games © 2019-2020 Stefano Marsili";
+static const Glib::ustring s_sScreenNameHighscore = "Highscores";
+static const Glib::ustring s_sScreenNameChooseGame = "ChooseGame";
+static const Glib::ustring s_sScreenNameChooseTheme = "ChooseTheme";
+static const Glib::ustring s_sScreenNameChoosePlayers = "ChoosePlayers";
 
 static constexpr int32_t s_nMinDefaultPixW = 100;
 static constexpr int32_t s_nMinDefaultPixH = 150;
@@ -87,34 +90,27 @@ std::pair<Glib::RefPtr<GameWindow>, std::string> GameWindow::create(MainWindowDa
 	auto refStdConfig = oMainWindowData.m_refStdConfig; // make copy
 	assert(refStdConfig);
 	auto refGameWin = Glib::RefPtr<GameWindow>(new GameWindow(std::move(oMainWindowData)));
-	const std::string sError = refGameWin->init();
+	std::string sError = refGameWin->init();
 	if (!sError.empty()) {
 		return std::make_pair(Glib::RefPtr<GameWindow>{}, sError); //-----------
 	}
 	refGameWin->m_refAccessor = std::make_shared<stmi::GtkAccessor>(refGameWin);
-	refStdConfig->getDeviceManager()->addAccessor(refGameWin->m_refAccessor);
+	const bool bAdded = refStdConfig->getDeviceManager()->addAccessor(refGameWin->m_refAccessor);
+	if (!bAdded) {
+		sError = "Couldn't add window accessor to device manager";
+		return std::make_pair(Glib::RefPtr<GameWindow>{}, sError); //-----------
+	}
 	return std::make_pair(std::move(refGameWin), "");
 }
 
 GameWindow::GameWindow(MainWindowData&& oMainWindowData) noexcept
-: m_refStdConfig(oMainWindowData.m_refStdConfig)
-, m_refDM(m_refStdConfig->getDeviceManager())
-, m_refGameLoader(std::move(oMainWindowData.m_refGameLoader))
-, m_refHighscoresLoader(std::move(oMainWindowData.m_refHighscoresLoader))
-, m_refThemeLoader(std::move(oMainWindowData.m_refThemeLoader))
-, m_refAllPreferencesLoader(std::move(oMainWindowData.m_refAllPreferencesLoader))
-, m_oInitialSize(oMainWindowData.m_oInitialSize)
-, m_sApplicationName(m_refStdConfig->getAppName())
-, m_sCopyright(oMainWindowData.m_sCopyright)
-, m_aAuthors(std::move(oMainWindowData.m_aAuthors))
-, m_sWebSite(std::move(oMainWindowData.m_sWebSite))
-, m_oIconFile(std::move(oMainWindowData.m_oIconFile))
-, m_oLogoFile(std::move(oMainWindowData.m_oLogoFile))
-, m_refPrefs((m_refAllPreferencesLoader.get() != nullptr)
-			? m_refAllPreferencesLoader->getPreferences()
-			: std::make_shared<AllPreferences>(m_refStdConfig))
-, m_bPauseIfWindowDeactivated(oMainWindowData.m_bPauseIfWindowDeactivated)
-, m_bFullscreen(oMainWindowData.m_bFullscreen)
+: m_oD(std::move(oMainWindowData))
+, m_refDM(m_oD.m_refStdConfig->getDeviceManager())
+, m_sApplicationName(m_oD.m_refStdConfig->getAppName())
+, m_refPrefs((m_oD.m_refAllPreferencesLoader.get() != nullptr)
+			? m_oD.m_refAllPreferencesLoader->getPreferences()
+			: std::make_shared<AllPreferences>(m_oD.m_refStdConfig))
+, m_bIsTestMode(m_oD.m_refStdConfig->isTestMode())
 , m_bGameIsTicking(false)
 , m_eStatus(STATUS_NONE)
 , m_nCurrentScreen(-1)
@@ -126,13 +122,14 @@ GameWindow::GameWindow(MainWindowData&& oMainWindowData) noexcept
 , m_nDrawingAreaBaseX(0)
 , m_nDrawingAreaBaseY(0)
 {
-	assert(m_refPrefs->getStdConfig() == m_refStdConfig);
-	if (m_bPauseIfWindowDeactivated) {
+	assert(m_refPrefs->getStdConfig() == m_oD.m_refStdConfig);
+	if (m_oD.m_bPauseIfWindowDeactivated) {
 		property_is_active().signal_changed().connect(sigc::mem_fun(this, &GameWindow::onActiveChanged));
 	}
 	const std::string sGameName = m_refPrefs->getGameName();
 	if (!sGameName.empty()) {
-		const auto& aValidGameNames = m_refGameLoader->getGameNames();
+		assert(m_oD.m_refGameLoader);
+		const auto& aValidGameNames = m_oD.m_refGameLoader->getGameNames();
 		const auto itFind = std::find(aValidGameNames.begin(), aValidGameNames.end(), sGameName);
 		if (itFind == aValidGameNames.end()) {
 			m_refPrefs->setGameName("");
@@ -166,19 +163,20 @@ Glib::RefPtr<Gdk::Pixbuf> GameWindow::loadFile(const File& oFile, const std::str
 std::string GameWindow::init() noexcept
 {
 	set_title(m_sApplicationName);
-	set_default_size(std::max(m_oInitialSize.m_nW, s_nMinDefaultPixW), std::max(m_oInitialSize.m_nH, s_nMinDefaultPixH));
+	set_default_size(std::max(m_oD.m_oInitialSize.m_nW, s_nMinDefaultPixW)
+					, std::max(m_oD.m_oInitialSize.m_nH, s_nMinDefaultPixH));
 	set_resizable(true);
 
-	Glib::RefPtr<Gdk::Pixbuf> refIconPixbuf = loadFile(m_oIconFile, "icon");
+	Glib::RefPtr<Gdk::Pixbuf> refIconPixbuf = loadFile(m_oD.m_oIconFile, "icon");
 	if (refIconPixbuf) {
 		set_icon(refIconPixbuf);
 	}
-	m_refLogoPixbuf = loadFile(m_oLogoFile, "logo");
+	m_refLogoPixbuf = loadFile(m_oD.m_oLogoFile, "logo");
 	if (!m_refLogoPixbuf) {
 		m_refLogoPixbuf = refIconPixbuf;
 	}
 
-	const int32_t nMaxPlayers = m_refStdConfig->getAppConstraints().getMaxPlayers();
+	const int32_t nMaxPlayers = m_oD.m_refStdConfig->getAppConstraints().getMaxPlayers();
 
 	m_refGameView = std::make_shared<StdView>();
 
@@ -314,99 +312,32 @@ std::string GameWindow::init() noexcept
 			addBigSeparator(m_p0BoxInfo);
 	m_aScreens[s_nScreenInfo] = m_p0ScreenBoxInfo;
 
-	m_p0ScreenBoxAbout = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+	m_refAboutScreen = std::make_unique<AboutScreen>(*this, m_oD, m_refLogoPixbuf);
+	m_p0ScreenBoxAbout = m_refAboutScreen->init();
 	m_p0StackScreens->add(*m_p0ScreenBoxAbout, s_sScreenNameAbout);
-		Gtk::Box* m_p0BoxAbout = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
-		m_p0ScreenBoxAbout->pack_start(*m_p0BoxAbout, true, true);
-			addBigSeparator(m_p0BoxAbout);
-			Gtk::Image* m_p0ImageAboutLogo = Gtk::manage(new Gtk::Image(m_refLogoPixbuf));
-			m_p0BoxAbout->pack_start(*m_p0ImageAboutLogo, false, true);
-				m_p0ImageAboutLogo->set_margin_top(5);
-				m_p0ImageAboutLogo->set_margin_bottom(5);
-			Gtk::Label* m_p0LabelAboutAppName = Gtk::manage(new Gtk::Label(m_sApplicationName));
-			m_p0BoxAbout->pack_start(*m_p0LabelAboutAppName, false, true);
-				m_p0LabelAboutAppName->set_margin_top(5);
-				m_p0LabelAboutAppName->set_margin_bottom(5);
-				{
-				Pango::AttrList oAttrList;
-				Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
-				oAttrList.insert(oAttrWeight);
-				Pango::AttrFloat oAttrScale = Pango::Attribute::create_attr_scale(1.8);
-				oAttrList.insert(oAttrScale);
-				m_p0LabelAboutAppName ->set_attributes(oAttrList);
-				}
-			Gtk::Label* m_p0LabelAboutVersion = Gtk::manage(new Gtk::Label(m_refStdConfig->getAppVersion()));
-			m_p0BoxAbout->pack_start(*m_p0LabelAboutVersion, false, true);
-				m_p0LabelAboutVersion->set_margin_top(5);
-				m_p0LabelAboutVersion->set_margin_bottom(5);
-			Gtk::Label* m_p0LabelAboutCopyright = Gtk::manage(new Gtk::Label(m_sCopyright.empty() ? s_sStmmGamesCopyright : m_sCopyright));
-			m_p0BoxAbout->pack_start(*m_p0LabelAboutCopyright, false, true);
-				m_p0LabelAboutCopyright->set_margin_top(3);
-				m_p0LabelAboutCopyright->set_margin_bottom(3);
-			if (! m_sWebSite.empty()) {
-				addBigSeparator(m_p0BoxAbout);
-				Gtk::Label* m_p0LabelAboutWebsite = Gtk::manage(new Gtk::Label("<i>Website</i>"));
-				m_p0BoxAbout->pack_start(*m_p0LabelAboutWebsite, false, true);
-					m_p0LabelAboutWebsite->set_use_markup(true);
-				Gtk::Label* m_p0LabelAboutWebsiteAdr = Gtk::manage(new Gtk::Label("<a href=\"" + m_sWebSite + "\">" + m_sWebSite + "</a>"));
-				m_p0BoxAbout->pack_start(*m_p0LabelAboutWebsiteAdr, false, true);
-					m_p0LabelAboutWebsiteAdr->set_use_markup(true);
-					m_p0LabelAboutWebsiteAdr->set_ellipsize(Pango::ELLIPSIZE_END);
-					m_p0LabelAboutWebsiteAdr->set_margin_bottom(5);
-			}
-			if (! m_aAuthors.empty()) {
-			addBigSeparator(m_p0BoxAbout);
-			Gtk::ScrolledWindow* m_p0ScrolledAuthors = Gtk::manage(new Gtk::ScrolledWindow());
-			m_p0BoxAbout->pack_start(*m_p0ScrolledAuthors, true, true);
-				m_p0ScrolledAuthors->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
-				Gtk::Box* m_p0VBoxScroller = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
-				m_p0ScrolledAuthors->add(*m_p0VBoxScroller);
-					Gtk::Label* m_p0LabelAboutAuthors = Gtk::manage(new Gtk::Label(Glib::ustring{"<big><b>Author"} + ((m_aAuthors.size() == 1) ? "" : "s") + "</b></big>"));
-					m_p0VBoxScroller->pack_start(*m_p0LabelAboutAuthors, false, true);
-						m_p0LabelAboutAuthors->set_use_markup(true);
-						m_p0LabelAboutAuthors->set_margin_top(3);
-						m_p0LabelAboutAuthors->set_margin_bottom(3);
-						//use text in scroller!
-					for (const MainAuthorData& oAuthor : m_aAuthors) {
-						addSmallSeparator(m_p0VBoxScroller);
-						assert(! oAuthor.m_sName.empty());
-						Gtk::Label* m_p0LabelAboutAuthorName = Gtk::manage(new Gtk::Label("<b>" + oAuthor.m_sName + "</b>"));
-						m_p0VBoxScroller->pack_start(*m_p0LabelAboutAuthorName, false, true);
-							m_p0LabelAboutAuthorName->set_use_markup(true);
-						if (! oAuthor.m_sEMail.empty()) {
-						Gtk::Label* m_p0LabelAboutAuthorEMail = Gtk::manage(new Gtk::Label("<a href=\"mailto:" + oAuthor.m_sEMail + "\">" + oAuthor.m_sEMail + "</a>"));
-						m_p0VBoxScroller->pack_start(*m_p0LabelAboutAuthorEMail, false, true);
-							m_p0LabelAboutAuthorEMail->set_use_markup(true);
-							m_p0LabelAboutAuthorEMail->set_ellipsize(Pango::ELLIPSIZE_END);
-						}
-						if (! oAuthor.m_sRole.empty()) {
-						Gtk::Label* m_p0LabelAboutAuthorRole = Gtk::manage(new Gtk::Label("<i>" + oAuthor.m_sRole + "</i>"));
-						m_p0VBoxScroller->pack_start(*m_p0LabelAboutAuthorRole, false, true);
-							m_p0LabelAboutAuthorRole->set_use_markup(true);
-							m_p0LabelAboutAuthorRole->set_ellipsize(Pango::ELLIPSIZE_END);
-						}
-					}
-			}
-
-			addBigSeparator(m_p0BoxAbout);
-			Gtk::Label* m_p0LabelAboutStmmGamesWebsite = Gtk::manage(new Gtk::Label("<i>Based on the stmm-games library</i>"));
-			m_p0BoxAbout->pack_start(*m_p0LabelAboutStmmGamesWebsite, false, true);
-				m_p0LabelAboutStmmGamesWebsite->set_use_markup(true);
-			Gtk::Label* m_p0LabelAboutStmmGamesWebsiteAdr = Gtk::manage(new Gtk::Label("<a href=\"" + s_sStmmGamesWebSite + "\">" + s_sStmmGamesWebSite + "</a>"));
-			m_p0BoxAbout->pack_start(*m_p0LabelAboutStmmGamesWebsiteAdr, false, true);
-				m_p0LabelAboutStmmGamesWebsiteAdr->set_use_markup(true);
-				m_p0LabelAboutStmmGamesWebsiteAdr->set_ellipsize(Pango::ELLIPSIZE_END);
-				m_p0LabelAboutStmmGamesWebsiteAdr->set_margin_bottom(5);
-
-			addBigSeparator(m_p0BoxAbout);
-			Gtk::Button* m_p0ButtonAboutOk = Gtk::manage(new Gtk::Button("Ok"));
-			m_p0BoxAbout->pack_start(*m_p0ButtonAboutOk, false, false);
-				m_p0ButtonAboutOk->set_margin_left(s_nButtonLeftRightMargin);
-				m_p0ButtonAboutOk->set_margin_right(s_nButtonLeftRightMargin);
-				m_p0ButtonAboutOk->signal_clicked().connect(
-								sigc::mem_fun(*this, &GameWindow::onButtonAboutOk) );
-			addBigSeparator(m_p0BoxAbout);
 	m_aScreens[s_nScreenAbout] = m_p0ScreenBoxAbout;
+
+	m_refHighscoreScreen = std::make_unique<HighscoreScreen>(*this);
+	m_p0ScreenBoxHighscores = m_refHighscoreScreen->init();
+	m_p0StackScreens->add(*m_p0ScreenBoxHighscores, s_sScreenNameHighscore);
+	m_aScreens[s_nScreenHighscore] = m_p0ScreenBoxHighscores;
+
+	m_refChooseGameScreen = std::make_unique<GameScreen>(*this, m_oD.m_refStdConfig
+														, *m_oD.m_refGameLoader);
+	m_p0ScreenBoxChooseGame = m_refChooseGameScreen->init();
+	m_p0StackScreens->add(*m_p0ScreenBoxChooseGame, s_sScreenNameChooseGame);
+	m_aScreens[s_nScreenChooseGame] = m_p0ScreenBoxChooseGame;
+
+	m_refChooseThemeScreen = std::make_unique<ThemeScreen>(*this, m_oD.m_refStdConfig
+														, *m_oD.m_refThemeLoader);
+	m_p0ScreenBoxChooseTheme = m_refChooseThemeScreen->init();
+	m_p0StackScreens->add(*m_p0ScreenBoxChooseTheme, s_sScreenNameChooseTheme);
+	m_aScreens[s_nScreenChooseTheme] = m_p0ScreenBoxChooseTheme;
+
+	m_refChoosePlayersScreen = std::make_unique<PlayersScreen>(*this, m_oD.m_refStdConfig);
+	m_p0ScreenBoxChoosePlayers = m_refChoosePlayersScreen->init();
+	m_p0StackScreens->add(*m_p0ScreenBoxChoosePlayers, s_sScreenNameChoosePlayers);
+	m_aScreens[s_nScreenChoosePlayers] = m_p0ScreenBoxChoosePlayers;
 
 	auto* p0VisibleWidget = m_p0StackScreens->get_visible_child();
 	constexpr int32_t nTotScreens = static_cast<int32_t>(sizeof(m_aScreens) / sizeof(m_aScreens[0]));
@@ -416,7 +347,7 @@ std::string GameWindow::init() noexcept
 			m_nCurrentScreen = nIdx;
 		}
 	}
-	if (m_bFullscreen) {
+	if (m_oD.m_bFullscreen) {
 		fullscreen();
 	}
 
@@ -445,11 +376,11 @@ void GameWindow::setUp() noexcept //TODO tearDown() ????
 }
 int32_t GameWindow::getTotGames() const noexcept
 {
-	const bool bIsTestMode = m_refStdConfig->isTestMode();
-	const auto& aValidGameNames = m_refGameLoader->getGameNames();
+	const bool bIsTestMode = m_bIsTestMode;
+	const auto& aValidGameNames = m_oD.m_refGameLoader->getGameNames();
 	int32_t nTotGames = 0;
 	for (const auto& sGameName : aValidGameNames) {
-		const GameLoader::GameInfo& oGameInfo = m_refGameLoader->getGameInfo(sGameName);
+		const GameLoader::GameInfo& oGameInfo = m_oD.m_refGameLoader->getGameInfo(sGameName);
 		if (oGameInfo.m_bTesting && ! bIsTestMode) {
 			continue;
 		}
@@ -459,11 +390,11 @@ int32_t GameWindow::getTotGames() const noexcept
 }
 int32_t GameWindow::getTotThemes() const noexcept
 {
-	const bool bIsTestMode = m_refStdConfig->isTestMode();
-	const auto& aValidThemeNames = m_refThemeLoader->getThemeNames();
+	const bool bIsTestMode = m_bIsTestMode;
+	const auto& aValidThemeNames = m_oD.m_refThemeLoader->getThemeNames();
 	int32_t nTotThemes = 0;
 	for (const auto& sThemeName : aValidThemeNames) {
-		const ThemeLoader::ThemeInfo& oThemeInfo = m_refThemeLoader->getThemeInfo(sThemeName);
+		const ThemeLoader::ThemeInfo& oThemeInfo = m_oD.m_refThemeLoader->getThemeInfo(sThemeName);
 		if (oThemeInfo.m_bTesting && ! bIsTestMode) {
 			continue;
 		}
@@ -477,14 +408,14 @@ void GameWindow::changeScreen(STATUS eStatus, int32_t nToScreen, const std::stri
 	if (m_nCurrentScreen == nToScreen) {
 		return;
 	}
-	const bool bIsTestMode = m_refStdConfig->isTestMode();
 
 	m_nCurrentScreen = nToScreen;
 	m_p0StackScreens->set_visible_child(*m_aScreens[m_nCurrentScreen]);
 	if (m_nCurrentScreen == s_nScreenPlay) {
 		//
 	} else if (m_nCurrentScreen == s_nScreenMain) {
-		const bool bHasHighscores = m_refHighscoresLoader.operator bool();
+		const bool bIsTestMode = m_bIsTestMode;
+		const bool bHasHighscores = m_oD.m_refHighscoresLoader.operator bool();
 		const bool bHasMoreThanOneGame = (getTotGames() > 1);
 		const bool bHasMoreThanOneTheme = (getTotThemes() > 1);
 		m_p0LabelCurrentGame->set_visible(bHasMoreThanOneGame || bIsTestMode);
@@ -497,6 +428,10 @@ void GameWindow::changeScreen(STATUS eStatus, int32_t nToScreen, const std::stri
 	} else if (m_nCurrentScreen == s_nScreenInfo) {
 		m_p0LabelInfoText->set_text(sMsg);
 	} else if (m_nCurrentScreen == s_nScreenAbout) {
+	} else if (m_nCurrentScreen == s_nScreenHighscore) {
+	} else if (m_nCurrentScreen == s_nScreenChooseGame) {
+	} else if (m_nCurrentScreen == s_nScreenChooseTheme) {
+	} else if (m_nCurrentScreen == s_nScreenChoosePlayers) {
 	} else {
 		assert(false);
 	}
@@ -552,42 +487,39 @@ void GameWindow::gameEnded() noexcept
 }
 void GameWindow::gameEndedOut() noexcept
 {
-	changeScreen(STATUS_HIGHSCORE, s_nScreenPlay, "");
+	waitForKeypress();
+}
+void GameWindow::gameEndedShowHighscore() noexcept
+{
+	gameViewEnded();
+	deactivateResizeTimer();
+	m_bGameIsTicking = false;
 
-	int32_t nWaitAgain = 0;
 	if (m_refHighscoresDefinition) {
-		if (m_refHighscoresLoader) {
-			shared_ptr<Highscore> refHighscore = m_refHighscoresLoader->getHighscore(m_refGame->getName(), *m_refPrefs, m_refHighscoresDefinition);
+		if (m_oD.m_refHighscoresLoader) {
+			shared_ptr<Highscore> refHighscore = m_oD.m_refHighscoresLoader->getHighscore(m_refGame->getName(), *m_refPrefs, m_refHighscoresDefinition);
 			if (refHighscore) {
 //std::cout << "GameWindow::gameEnded() before refHighscore->getTotScores()=" << refHighscore->getTotScores() << '\n';
-				if (!m_refHighscoreDialog) {
-					m_refHighscoreDialog = Glib::RefPtr<HighscoreDialog>(new HighscoreDialog());
-					m_refHighscoreDialog->set_default_size(get_width() / 1.0, get_height() / 1.0);
-					m_refHighscoreDialog->set_transient_for(*this);
-				}
-				auto& oHighscoreDialog = *(m_refHighscoreDialog.operator->());
-				const auto nRet = oHighscoreDialog.run(refHighscore, m_refGame, m_refPrefs);
-				if (Gtk::RESPONSE_CANCEL == nRet) {
-					nWaitAgain = s_nGameEndedWaitMillisec;
-				}
-				//
-				oHighscoreDialog.hide();
-				//
-				const bool bOk = m_refHighscoresLoader->updateHighscore(m_refGame->getName(), *m_refPrefs, *refHighscore);
-				if (!bOk) {
-					//msgWarningBox("Could not save highscores!");
-					std::cout << "Could not save highscores!" << '\n';
+				changeScreen(STATUS_MENU, s_nScreenHighscore, "");
+				const bool bOk = m_refHighscoreScreen->changeTo(refHighscore, m_refGame, m_refPrefs);
+				if (! bOk) {
+					changeScreen(STATUS_MENU, s_nScreenMain, "");
 				}
 			}
 		}
 	}
-	m_refHighscoresDefinition.reset();
-	if (nWaitAgain > 0) {
-		Glib::signal_timeout().connect_once(
-			sigc::mem_fun(*this, &GameWindow::waitForKeypress), nWaitAgain);
-	} else {
-		waitForKeypress();
+}
+void GameWindow::afterHighscores(const shared_ptr<Highscore>& refHighscore) noexcept
+{
+	const bool bWasPlaying = (refHighscore.get() != nullptr);
+	if (bWasPlaying) {
+		const bool bOk = m_oD.m_refHighscoresLoader->updateHighscore(m_refGame->getName(), *m_refPrefs, *refHighscore);
+		if (!bOk) {
+			std::cout << "Error: Could not save highscores!" << '\n';
+		}
 	}
+	m_refHighscoresDefinition.reset();
+	changeScreen(STATUS_MENU, s_nScreenMain, "");
 }
 void GameWindow::waitForKeypress() noexcept
 {
@@ -658,7 +590,7 @@ void GameWindow::gameInterruptOut(GameProxy::INTERRUPT_TYPE eInterruptType, bool
 std::string GameWindow::getCouldNotLoadThemeString(const std::string& sThemeName) noexcept
 {
 	return sThemeName.empty() ? "Could not load any theme!" : "Could not load theme: "
-							+ m_refThemeLoader->getThemeInfo(sThemeName).m_sThemeErrorString;
+							+ m_oD.m_refThemeLoader->getThemeInfo(sThemeName).m_sThemeErrorString;
 }
 bool GameWindow::startGame() noexcept
 {
@@ -672,8 +604,8 @@ bool GameWindow::startGame() noexcept
 	assert(!m_bGameIsTicking);
 	assert((!m_refGame) || !(m_refGame->isRunning()));
 
-	assert(m_refGameLoader);
-	assert(m_refThemeLoader);
+	assert(m_oD.m_refGameLoader);
+	assert(m_oD.m_refThemeLoader);
 	//
 	auto sThemeName = getTheme();
 	if (!m_refTheme) {
@@ -683,9 +615,9 @@ bool GameWindow::startGame() noexcept
 	//
 	std::string sGameName = m_refPrefs->getGameName();
 	if (sGameName.empty()) {
-		sGameName = m_refGameLoader->getDefaultGameName();
+		sGameName = m_oD.m_refGameLoader->getDefaultGameName();
 		if (sGameName.empty()) {
-			auto aNames = m_refGameLoader->getGameNames(*m_refPrefs);
+			auto aNames = m_oD.m_refGameLoader->getGameNames(*m_refPrefs);
 			if (! aNames.empty()) {
 				sGameName = aNames[0];
 			}
@@ -697,27 +629,27 @@ bool GameWindow::startGame() noexcept
 			}
 		}
 		m_refPrefs->setGameName(sGameName);
-		AllPreferencesLoader* p0TPL = m_refAllPreferencesLoader.get();
+		AllPreferencesLoader* p0TPL = m_oD.m_refAllPreferencesLoader.get();
 		if (p0TPL != nullptr) {
 			p0TPL->updatePreferences(m_refPrefs);
 		}
 		onChangedGame();
 	}
 	m_refPrefs->addGameToPlayedHistory(sGameName);
-	if (m_refAllPreferencesLoader) {
-		m_refAllPreferencesLoader->updatePreferences(m_refPrefs);
+	if (m_oD.m_refAllPreferencesLoader) {
+		m_oD.m_refAllPreferencesLoader->updatePreferences(m_refPrefs);
 	}
-	const auto& oGameInfo = m_refGameLoader->getGameInfo(sGameName);
+	const auto& oGameInfo = m_oD.m_refGameLoader->getGameInfo(sGameName);
 	shared_ptr<Highscore> refHighscore;
-	if (oGameInfo.m_refHighscoresDefinition && m_refHighscoresLoader) {
-		refHighscore = m_refHighscoresLoader->getHighscore(sGameName, *m_refPrefs, oGameInfo.m_refHighscoresDefinition);
+	if (oGameInfo.m_refHighscoresDefinition && m_oD.m_refHighscoresLoader) {
+		refHighscore = m_oD.m_refHighscoresLoader->getHighscore(sGameName, *m_refPrefs, oGameInfo.m_refHighscoresDefinition);
 		if (refHighscore) {
 			assert(refHighscore->getHighscoresDefinition() == oGameInfo.m_refHighscoresDefinition);
 		}
 	}
 //std::cout << "--->Highscore adr: " << reinterpret_cast<int64_t>(refHighscore.get()) << '\n';
 //std::cout << "--->HighscoreDefinition adr: " << reinterpret_cast<int64_t>(oGameInfo.m_refHighscoresDefinition.get()) << '\n';
-	auto oPairGame = m_refGameLoader->getNewGame(sGameName, *this, m_refPrefs, m_refTheme->getNamed(), refHighscore);
+	auto oPairGame = m_oD.m_refGameLoader->getNewGame(sGameName, *this, m_refPrefs, m_refTheme->getNamed(), refHighscore);
 	auto& refGame = oPairGame.first;
 	const bool bHighscoresIgnored = oPairGame.second;
 	if (!refGame) {
@@ -987,81 +919,66 @@ void GameWindow::onButtonNewGameOut() noexcept
 }
 void GameWindow::onButtonHighscores() noexcept
 {
-	if (m_refHighscoresLoader) {
-		const std::string& sGameName = (m_refPrefs->getGameName().empty() ? m_refGameLoader->getDefaultGameName() : m_refPrefs->getGameName());
+	if (m_oD.m_refHighscoresLoader) {
+		const std::string& sGameName = (m_refPrefs->getGameName().empty() ? m_oD.m_refGameLoader->getDefaultGameName() : m_refPrefs->getGameName());
 		if (sGameName.empty()) {
 			changeScreen(STATUS_MENU, s_nScreenInfo, "No game selected");
 			return; //----------------------------------------------------------
 		}
-		const auto& oGameInfo = m_refGameLoader->getGameInfo(sGameName);
+		const auto& oGameInfo = m_oD.m_refGameLoader->getGameInfo(sGameName);
 		if (!oGameInfo.m_refHighscoresDefinition) {
 			changeScreen(STATUS_MENU, s_nScreenInfo, std::string{"No highscores defined for game "} + sGameName);
 			return; //----------------------------------------------------------
 		}
-		auto aHighscores = m_refHighscoresLoader->getHighscores(sGameName, oGameInfo.m_refHighscoresDefinition);
+		auto aHighscores = m_oD.m_refHighscoresLoader->getHighscores(sGameName, oGameInfo.m_refHighscoresDefinition);
 		if (aHighscores.empty()) {
 			changeScreen(STATUS_MENU, s_nScreenInfo, std::string{"No highscores yet for game "} + sGameName);
 			return; //----------------------------------------------------------
 		}
-		if (!m_refHighscoreDialog) {
-			m_refHighscoreDialog = Glib::RefPtr<HighscoreDialog>(new HighscoreDialog());
-			m_refHighscoreDialog->set_default_size(get_width() / 1.0, get_height() / 1.0);
-			m_refHighscoreDialog->set_transient_for(*this);
+		changeScreen(STATUS_MENU, s_nScreenHighscore, "");
+		const bool bOk = m_refHighscoreScreen->changeTo(aHighscores, m_refPrefs);
+		if (! bOk) {
+			changeScreen(STATUS_MENU, s_nScreenMain, "");
 		}
-		auto& oHighscoreDialog = *(m_refHighscoreDialog.operator->());
-		oHighscoreDialog.run(aHighscores, m_refPrefs);
-		//
-		oHighscoreDialog.hide();
 	}
 }
 void GameWindow::onButtonChoosePlayers() noexcept
 {
-	if (!m_refPlayersDialog) {
-		m_refPlayersDialog = Glib::RefPtr<PlayersDialog>(new PlayersDialog(m_refStdConfig));
-		m_refPlayersDialog->set_default_size(get_width() / 1.0, get_height() / 1.0);
-		m_refPlayersDialog->set_transient_for(*this);
-		//
-		m_refPlayersDialogAccessor = std::make_shared<stmi::GtkAccessor>(m_refPlayersDialog);
-	}
-	auto& oPlayersDialog = *(m_refPlayersDialog.operator->());
-	AllPreferencesLoader* p0TPL = m_refAllPreferencesLoader.get();
+	AllPreferencesLoader* p0TPL = m_oD.m_refAllPreferencesLoader.get();
 	auto refNewPrefs = (p0TPL == nullptr ? std::make_shared<AllPreferences>(*m_refPrefs) : p0TPL->getPreferencesCopy(m_refPrefs));
-	auto refNewStdPrefs = std::static_pointer_cast<StdPreferences>(refNewPrefs);
 
-	m_refStdConfig->getDeviceManager()->addAccessor(m_refPlayersDialogAccessor);
 	// try to load a theme
 	auto sThemeName = getTheme();
 	if (! m_refTheme) {
-		const bool bPerPlayerSounds = m_refStdConfig->soundEnabled() && m_refStdConfig->canPlayPerPlayerSounds();
+		const bool bPerPlayerSounds = m_oD.m_refStdConfig->soundEnabled()
+									&& m_oD.m_refStdConfig->canPlayPerPlayerSounds();
 		if (bPerPlayerSounds) {
 			std::cout << "Sounds cannot be tested:\n  " << getCouldNotLoadThemeString(sThemeName) << '\n';
 		}
 	}
-	oPlayersDialog.reInit(refNewStdPrefs, m_refTheme);
-	const int nRet = oPlayersDialog.run();
-	oPlayersDialog.hide();
-	m_refStdConfig->getDeviceManager()->removeAccessor(m_refPlayersDialogAccessor);
-
-//std::cout << "onMenuChoosePlayers() nRet=" << nRet << '\n';
-	if (nRet == Gtk::RESPONSE_OK) {
+	changeScreen(STATUS_MENU, s_nScreenChoosePlayers, "");
+	const bool bOk = m_refChoosePlayersScreen->changeTo(refNewPrefs, m_refTheme);
+	if (! bOk) {
+		changeScreen(STATUS_MENU, s_nScreenMain, "");
+	}
+}
+void GameWindow::afterChoosePlayers(const shared_ptr<AllPreferences>& refNewPrefs) noexcept
+{
+	if (refNewPrefs) {
 		// Note: until the next game is started m_refGame and indirectly m_refGameView
 		//       still point to the old instance
 		m_refPrefs = refNewPrefs;
+		AllPreferencesLoader* p0TPL = m_oD.m_refAllPreferencesLoader.get();
 		if (p0TPL != nullptr) {
 			p0TPL->updatePreferences(m_refPrefs);
 		}
 		onChangedPlayers();
 	}
+	changeScreen(STATUS_MENU, s_nScreenMain, "");
 }
 void GameWindow::onButtonChooseGame() noexcept
 {
-	assert(m_refGameLoader);
-	if (!m_refGameDialog) {
-		m_refGameDialog = Glib::RefPtr<GameDialog>(new GameDialog(m_refStdConfig, *m_refGameLoader, *this));
-		m_refGameDialog->set_default_size(get_width() / 1.0, get_height() / 1.0);
-		m_refGameDialog->set_transient_for(*this);
-	}
-	auto& oGameDialog = *(m_refGameDialog.operator->());
+	assert(m_oD.m_refGameLoader);
 
 	auto sThemeName = getTheme();
 	if (!m_refTheme) {
@@ -1069,40 +986,53 @@ void GameWindow::onButtonChooseGame() noexcept
 		return; //--------------------------------------------------------------
 	}
 
-	const int nRet = oGameDialog.run(m_refPrefs, m_refTheme);
-	if (nRet == Gtk::RESPONSE_OK) {
-		AllPreferencesLoader* p0TPL = m_refAllPreferencesLoader.get();
+	changeScreen(STATUS_MENU, s_nScreenChooseGame, "");
+	const bool bOk = m_refChooseGameScreen->changeTo(m_refPrefs, m_refTheme);
+	if (! bOk) {
+		changeScreen(STATUS_MENU, s_nScreenMain, "");
+	}
+}
+void GameWindow::afterChooseGame(const std::string& sGameName) noexcept
+{
+	if (! sGameName.empty()) {
+		m_refPrefs->setGameName(sGameName);
+		AllPreferencesLoader* p0TPL = m_oD.m_refAllPreferencesLoader.get();
 		if (p0TPL != nullptr) {
 			p0TPL->updatePreferences(m_refPrefs);
 		}
 		onChangedGame();
 	}
-	//
-	oGameDialog.hide();
+	changeScreen(STATUS_MENU, s_nScreenMain, "");
 }
 void GameWindow::onButtonChooseTheme() noexcept
 {
-	if (!m_refThemeDialog) {
-		m_refThemeDialog = Glib::RefPtr<ThemeDialog>(new ThemeDialog(m_refStdConfig, *m_refThemeLoader, m_refTheme));
-		m_refThemeDialog->set_default_size(get_width() / 1.0, get_height() / 1.0);
-		m_refThemeDialog->set_transient_for(*this);
-	}
-	auto& oThemeDialog = *(m_refThemeDialog.operator->());
-	assert(m_refThemeLoader);
+	assert(m_oD.m_refThemeLoader);
 
-	const int nRet = oThemeDialog.run(m_refPrefs);
-	if (nRet == Gtk::RESPONSE_OK) {
-		AllPreferencesLoader* p0TPL = m_refAllPreferencesLoader.get();
+	changeScreen(STATUS_MENU, s_nScreenChooseTheme, "");
+	const bool bOk = m_refChooseThemeScreen->changeTo(m_refPrefs);
+	if (! bOk) {
+		changeScreen(STATUS_MENU, s_nScreenMain, "");
+	}
+}
+void GameWindow::afterChooseTheme(const std::string& sThemeName) noexcept
+{
+	if (! sThemeName.empty()) {
+		m_refPrefs->setThemeName(sThemeName);
+		AllPreferencesLoader* p0TPL = m_oD.m_refAllPreferencesLoader.get();
 		if (p0TPL != nullptr) {
 			p0TPL->updatePreferences(m_refPrefs);
 		}
+		onChangedTheme();
 	}
-	//
-	oThemeDialog.hide();
+	changeScreen(STATUS_MENU, s_nScreenMain, "");
 }
 void GameWindow::onButtonAbout() noexcept
 {
 	changeScreen(STATUS_MENU, s_nScreenAbout, "");
+}
+void GameWindow::afterAbout() noexcept
+{
+	changeScreen(STATUS_MENU, s_nScreenMain, "");
 }
 void GameWindow::onButtonQuit() noexcept
 {
@@ -1131,10 +1061,6 @@ void GameWindow::onButtonAnswerNo() noexcept
 void GameWindow::onButtonInfoOk() noexcept
 {
 	changeScreen(STATUS_MENU, s_nScreenMain, "");
-}
-void GameWindow::onButtonAboutOk() noexcept
-{
-	onButtonInfoOk();
 }
 
 void GameWindow::onDrawingAreaSizeAllocate(Gtk::Allocation& /*oAllocation*/) noexcept
@@ -1171,21 +1097,15 @@ std::string GameWindow::getTheme() noexcept
 	}
 	std::string sThemeName = m_refPrefs->getThemeName();
 	if (sThemeName.empty()) {
-		sThemeName = m_refThemeLoader->getDefaultThemeName();
+		sThemeName = m_oD.m_refThemeLoader->getDefaultThemeName();
 	}
-	m_refTheme = m_refThemeLoader->getTheme(sThemeName);
+	m_refTheme = m_oD.m_refThemeLoader->getTheme(sThemeName);
 	if (!m_refTheme) {
 		// loading error: return the offending theme name
 		return sThemeName;
 	}
 	// ok
 	return Util::s_sEmptyString;
-}
-void GameWindow::gotoMainScreen() noexcept
-{
-	deactivateResizeTimer();
-	m_bGameIsTicking = false;
-	changeScreen(STATUS_MENU, s_nScreenMain, "");
 }
 void GameWindow::gameViewEnded()
 {
@@ -1196,7 +1116,7 @@ bool GameWindow::on_key_press_event(GdkEventKey* p0GdkEvent)
 {
 //std::cout << "on_key_press_event kv=" << p0GdkEvent->keyval << " kc=" << p0GdkEvent->hardware_keycode << " --- st=" << p0GdkEvent->state << "------" << '\n';
 	#ifndef NDEBUG
-	if (m_refStdConfig->isTestMode()) {
+	if (m_bIsTestMode) {
 		if ((p0GdkEvent->keyval == GDK_KEY_F12) && ((p0GdkEvent->state & GDK_SHIFT_MASK) != 0)) {
 			if (m_refGame) {
 				m_refGame->level(0)->dump(true, true, true, true, false, true);
@@ -1210,9 +1130,11 @@ bool GameWindow::on_key_press_event(GdkEventKey* p0GdkEvent)
 		return false; //--------------------------------------------------------
 	}
 	if (m_eStatus == STATUS_WAIT_KEYPRESS) {
-		gameViewEnded();
-		gotoMainScreen();
+		gameEndedShowHighscore();
 		return true; //---------------------------------------------------------
+	}
+	if (m_nCurrentScreen == s_nScreenChoosePlayers) {
+		return m_refChoosePlayersScreen->on_key_press_event(p0GdkEvent);
 	}
 	return Gtk::Window::on_key_press_event(p0GdkEvent);
 }
@@ -1235,9 +1157,11 @@ bool GameWindow::on_button_press_event(GdkEventButton* p0GdkEvent)
 		return false; //--------------------------------------------------------
 	}
 	if (m_eStatus == STATUS_WAIT_KEYPRESS) {
-		gameViewEnded();
-		gotoMainScreen();
+		gameEndedShowHighscore();
 		return true; //---------------------------------------------------------
+	}
+	if (m_nCurrentScreen == s_nScreenChoosePlayers) {
+		return m_refChoosePlayersScreen->on_button_press_event(p0GdkEvent);
 	}
 	return Gtk::Window::on_button_press_event(p0GdkEvent);
 }
@@ -1265,9 +1189,7 @@ bool GameWindow::on_sig_touch_event(GdkEventTouch* p0TouchEvent)
 	}
 	if (m_eStatus == STATUS_WAIT_KEYPRESS) {
 		if (p0TouchEvent->type == GDK_TOUCH_BEGIN) {
-			gameViewEnded();
-			gotoMainScreen();
-			gotoMainScreen();
+			gameEndedShowHighscore();
 		}
 		return true; //---------------------------------------------------------
 	}

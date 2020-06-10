@@ -1,7 +1,7 @@
 /*
- * File:   gamedialog.cc
+ * File:   gamescreen.cc
  *
- * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,15 +17,16 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
 
-#include "gamedialog.h"
+#include "gamescreen.h"
 
-#include "allpreferences.h"
-#include "gameconstraints.h"
-#include "gameloader.h"
 #include "theme.h"
 #include "../gtkutil/gtkutilpriv.h"
+#include "../gamewindow.h"
 
 #include <stmm-games-file/file.h>
+#include <stmm-games-file/gameloader.h>
+#include <stmm-games-file/gameconstraints.h>
+#include <stmm-games-file/allpreferences.h>
 
 #include <stmm-games/appconstraints.h>
 #include <stmm-games/stdconfig.h>
@@ -39,6 +40,7 @@
 #include <numeric>
 #include <vector>
 #include <utility>
+#include <cassert>
 
 namespace stmg { class Highscore; }
 
@@ -50,159 +52,192 @@ static const Glib::ustring s_sGameScreenNameInfo = "Info";
 
 static constexpr const int32_t s_nButtonLeftRightMargin = 20;
 
-GameDialog::GameDialog(const shared_ptr<StdConfig>& refStdConfig, GameLoader& oGameLoader, GameOwner& oGameOwner) noexcept
-: Gtk::Dialog("Choose game", true)
+GameScreen::GamesTreeView::GamesTreeView(GameScreen* p0Dialog, const Glib::RefPtr< Gtk::TreeModel >& refModel) noexcept
+: Gtk::TreeView(refModel)
+, m_p0Dialog(p0Dialog)
+{
+	set_enable_search(false);
+	assert(p0Dialog != nullptr);
+}
+bool GameScreen::GamesTreeView::on_key_press_event(GdkEventKey* p0Event)
+{
+	if (m_p0Dialog->m_nCurrentScreen == s_nScreenGameChoose) {
+		if (p0Event->keyval == GDK_KEY_Return) {
+			m_p0Dialog->onButtonOk();
+			return true; //-----------------------------------------------------
+		} else if (p0Event->keyval == GDK_KEY_Escape) {
+			m_p0Dialog->onButtonCancel();
+			return true; //-----------------------------------------------------
+		}
+	}
+	return Gtk::TreeView::on_key_press_event(p0Event);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+GameScreen::GameScreen(GameWindow& oGameWindow, const shared_ptr<StdConfig>& refStdConfig
+						, GameLoader& oGameLoader) noexcept
+: m_oGameWindow(oGameWindow)
 , m_refStdConfig(refStdConfig)
 , m_oGameLoader(oGameLoader)
-, m_oGameOwner(oGameOwner)
+, m_oGameOwner(oGameWindow)
 , m_bRegenerateGamesListInProgress(false)
 , m_bShowAllGames(false)
 , m_bShowPlayedHistory(false)
-, m_bReRun(false)
 {
 	assert(refStdConfig);
+}
 
-	//set_title("Choose game");
-	set_default_size(400, 200);
-
+Gtk::Widget* GameScreen::init() noexcept
+{
 	static_assert(s_nTabGames < s_nTabDescription, "");
 	static_assert(s_nTabDescription < s_nTabLoading, "");
-
-	////////////////////////////////////////////////////////////////////////////
-	Gtk::Button* m_p0ButtonOk = add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
-	assert(m_p0ButtonOk != nullptr);
-		m_p0ButtonOk->signal_clicked().connect(
-						sigc::mem_fun(*this, &GameDialog::onButtonOk) );
-	Gtk::Button* m_p0ButtonCancel = add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	assert(m_p0ButtonCancel != nullptr);
-		m_p0ButtonCancel->signal_clicked().connect(
-						sigc::mem_fun(*this, &GameDialog::onButtonCancel) );
-
-	m_p0ButtonBoxActions = get_action_area();
-	m_p0ButtonBoxActions->set_layout(Gtk::ButtonBoxStyle::BUTTONBOX_EXPAND);
-	m_p0ButtonBoxActions->set_orientation(Gtk::Orientation::ORIENTATION_VERTICAL);
-	m_p0ButtonBoxActions->set_spacing(10);
-	m_p0ButtonBoxActions->set_margin_left(s_nButtonLeftRightMargin);
-	m_p0ButtonBoxActions->set_margin_right(s_nButtonLeftRightMargin);
-	m_p0ButtonBoxActions->set_margin_top(5);
-	m_p0ButtonBoxActions->set_margin_bottom(5);
-
-	Gtk::Box* m_p0BoxContent = get_content_area();
-	assert(m_p0BoxContent != nullptr);
-	m_p0BoxContent->set_orientation(Gtk::ORIENTATION_VERTICAL);
 
 	Glib::RefPtr<Gtk::TreeSelection> refTreeSelection;
 
+	m_p0GameScreenBoxMain = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+
+	Gtk::Label* m_p0LabelTitle = Gtk::manage(new Gtk::Label("---- Choose game ----"));
+	m_p0GameScreenBoxMain->pack_start(*m_p0LabelTitle, false, false);
+		m_p0LabelTitle->set_margin_top(3);
+		m_p0LabelTitle->set_margin_bottom(3);
+		{
+		Pango::AttrList oAttrList;
+		Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
+		oAttrList.insert(oAttrWeight);
+		m_p0LabelTitle->set_attributes(oAttrList);
+		}
+
 	m_p0StackGameScreens = Gtk::manage(new Gtk::Stack());
-	m_p0BoxContent->pack_start(*m_p0StackGameScreens, true, true);
+	m_p0GameScreenBoxMain->pack_start(*m_p0StackGameScreens, true, true);
 		m_p0StackGameScreens->set_transition_type(Gtk::StackTransitionType::STACK_TRANSITION_TYPE_NONE);
 
-	m_p0NotebookGames = Gtk::manage(new Gtk::Notebook());
-	m_p0StackGameScreens->add(*m_p0NotebookGames, s_sGameScreenNameChoose);
-		m_p0NotebookGames->signal_switch_page().connect(
-						sigc::mem_fun(*this, &GameDialog::onNotebookSwitchPage) );
+	Gtk::Box* m_p0GameScreenBoxGames = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+	m_p0StackGameScreens->add(*m_p0GameScreenBoxGames, s_sGameScreenNameChoose);
 
-	std::iota(std::begin(m_aPageIndex), std::end(m_aPageIndex), 0);
-	static_assert(s_nTabGames < s_nTabDescription, "");
-	static_assert(s_nTabDescription < s_nTabLoading, "");
-	constexpr int32_t nTotTabs = sizeof(m_aPageIndex) / sizeof(m_aPageIndex[0]);
-	static_assert(nTotTabs == 3, "");
+		m_p0NotebookGames = Gtk::manage(new Gtk::Notebook());
+		m_p0GameScreenBoxGames->pack_start(*m_p0NotebookGames, true, true);
+			m_p0NotebookGames->signal_switch_page().connect(
+							sigc::mem_fun(*this, &GameScreen::onNotebookSwitchPage) );
 
-	Gtk::Label* m_p0TabLabelGames = Gtk::manage(new Gtk::Label("Games"));
-	Gtk::Box* m_p0TabVBoxGamesShow = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
-	m_aPageIndex[s_nTabGames] = m_p0NotebookGames->append_page(*m_p0TabVBoxGamesShow, *m_p0TabLabelGames);
-		Gtk::ScrolledWindow* m_p0ScrolledGames = Gtk::manage(new Gtk::ScrolledWindow());
-		m_p0TabVBoxGamesShow->pack_start(*m_p0ScrolledGames, true, true);
-			m_refTreeModelGames = Gtk::TreeStore::create(m_oGamesColumns);
-			m_p0TreeViewGames = Gtk::manage(new GamesTreeView(this, m_refTreeModelGames));
-			m_p0ScrolledGames->add(*m_p0TreeViewGames);
-				m_p0TreeViewGames->append_column("Name", m_oGamesColumns.m_oColNameStatus);
-				m_p0TreeViewGames->append_column("Thumb", m_oGamesColumns.m_oColThumbnail);
-				refTreeSelection = m_p0TreeViewGames->get_selection();
-				refTreeSelection->signal_changed().connect(
-								sigc::mem_fun(*this, &GameDialog::onGameSelectionChanged));
-		m_p0CheckShowAllGames = Gtk::manage(new Gtk::CheckButton("All games"));
-		m_p0TabVBoxGamesShow->pack_start(*m_p0CheckShowAllGames, false, false, 5);
-			m_p0CheckShowAllGames->signal_clicked().connect(sigc::mem_fun(*this, &GameDialog::onShowAllGamesChanged));
-		m_p0CheckShowPlayedHistory = Gtk::manage(new Gtk::CheckButton("Show played games history"));
-		m_p0TabVBoxGamesShow->pack_start(*m_p0CheckShowPlayedHistory, false, false, 5);
-			m_p0CheckShowPlayedHistory->signal_clicked().connect(sigc::mem_fun(*this, &GameDialog::onShowPlayedHistoryChanged));
+		std::iota(std::begin(m_aPageIndex), std::end(m_aPageIndex), 0);
+		static_assert(s_nTabGames < s_nTabDescription, "");
+		static_assert(s_nTabDescription < s_nTabLoading, "");
+		constexpr int32_t nTotTabs = sizeof(m_aPageIndex) / sizeof(m_aPageIndex[0]);
+		static_assert(nTotTabs == 3, "");
 
-	Gtk::Label* m_p0TabLabelDescription = Gtk::manage(new Gtk::Label("Description"));
-	Gtk::Box* m_p0TabVBoxDescription = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
-	m_aPageIndex[s_nTabDescription] = m_p0NotebookGames->append_page(*m_p0TabVBoxDescription, *m_p0TabLabelDescription);
-		m_p0TabVBoxDescription->set_border_width(5);
-		m_p0ImageGameImage = Gtk::manage(new Gtk::Image());
-		m_p0TabVBoxDescription->pack_start(*m_p0ImageGameImage, false, true);
-		m_p0LabelGameName = Gtk::manage(new Gtk::Label("-"));
-		m_p0TabVBoxDescription->pack_start(*m_p0LabelGameName, false, true);
-			m_p0LabelGameName->set_margin_top(5);
-			m_p0LabelGameName->set_margin_bottom(5);
-			{
-			Pango::AttrList oAttrList;
-			Pango::AttrColor oAttrColor = Pango::Attribute::create_attr_foreground(std::numeric_limits<guint16>::max()
-																					, std::numeric_limits<guint16>::min()
-																					, std::numeric_limits<guint16>::min());
-			oAttrList.insert(oAttrColor);
-			Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
-			oAttrList.insert(oAttrWeight);
-			Pango::AttrFloat oAttrScale = Pango::Attribute::create_attr_scale(2.0);
-			oAttrList.insert(oAttrScale);
-			m_p0LabelGameName->set_attributes(oAttrList);
-			}
-		Gtk::ScrolledWindow* m_p0ScrolledDescription = Gtk::manage(new Gtk::ScrolledWindow());
-		m_p0TabVBoxDescription->pack_start(*m_p0ScrolledDescription, true, true);
-			m_p0ScrolledDescription->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-			Gtk::Box* m_p0VBoxScroller = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
-			m_p0ScrolledDescription->add(*m_p0VBoxScroller);
-				m_p0TextDescription = Gtk::manage(new Gtk::TextView());
-				m_p0VBoxScroller->pack_start(*m_p0TextDescription, true, true);
-					m_p0TextDescription->set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
-					m_p0TextDescription->set_left_margin(5);
-					m_p0TextDescription->set_right_margin(5);
-					m_refTextBufferDescription = m_p0TextDescription->get_buffer();
-				Gtk::Label* m_p0LabelConstraints = Gtk::manage(new Gtk::Label("Constraints:"));
-				m_p0VBoxScroller->pack_start(*m_p0LabelConstraints, true, true);
-					m_p0LabelConstraints->set_halign(Gtk::Align::ALIGN_START);
-					m_p0LabelConstraints->set_margin_top(8);
-					m_p0LabelConstraints->set_margin_bottom(3);
-					{
-					Pango::AttrList oAttrList;
-					Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
-					oAttrList.insert(oAttrWeight);
-					m_p0LabelConstraints->set_attributes(oAttrList);
-					}
-				m_p0TextConstraints = Gtk::manage(new Gtk::TextView());
-				m_p0VBoxScroller->pack_start(*m_p0TextConstraints, true, true);
-					m_p0TextConstraints->set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
-					m_refTextBufferConstraints = m_p0TextConstraints->get_buffer();
-				Gtk::Label* m_p0LabelAuthors = Gtk::manage(new Gtk::Label("Authors:"));
-				m_p0VBoxScroller->pack_start(*m_p0LabelAuthors, true, true);
-					m_p0LabelAuthors->set_halign(Gtk::Align::ALIGN_START);
-					m_p0LabelAuthors->set_margin_top(3);
-					m_p0LabelAuthors->set_margin_bottom(3);
-					{
-					Pango::AttrList oAttrList;
-					Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
-					oAttrList.insert(oAttrWeight);
-					m_p0LabelAuthors->set_attributes(oAttrList);
-					}
-				m_p0TextAuthors = Gtk::manage(new Gtk::TextView());
-				m_p0VBoxScroller->pack_start(*m_p0TextAuthors, true, true);
-					m_p0TextAuthors->set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
-					m_p0TextAuthors->set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_MINIMUM);
-					m_refTextBufferAuthors = m_p0TextAuthors->get_buffer();
+		Gtk::Label* m_p0TabLabelGames = Gtk::manage(new Gtk::Label("Games"));
+		Gtk::Box* m_p0TabVBoxGamesShow = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+		m_aPageIndex[s_nTabGames] = m_p0NotebookGames->append_page(*m_p0TabVBoxGamesShow, *m_p0TabLabelGames);
+			Gtk::ScrolledWindow* m_p0ScrolledGames = Gtk::manage(new Gtk::ScrolledWindow());
+			m_p0TabVBoxGamesShow->pack_start(*m_p0ScrolledGames, true, true);
+				m_p0ScrolledGames->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
+				m_refTreeModelGames = Gtk::TreeStore::create(m_oGamesColumns);
+				m_p0TreeViewGames = Gtk::manage(new GamesTreeView(this, m_refTreeModelGames));
+				m_p0ScrolledGames->add(*m_p0TreeViewGames);
+					m_p0TreeViewGames->append_column("Name", m_oGamesColumns.m_oColNameStatus);
+					m_p0TreeViewGames->append_column("Thumb", m_oGamesColumns.m_oColThumbnail);
+					refTreeSelection = m_p0TreeViewGames->get_selection();
+					refTreeSelection->signal_changed().connect(
+									sigc::mem_fun(*this, &GameScreen::onGameSelectionChanged));
+			m_p0CheckShowAllGames = Gtk::manage(new Gtk::CheckButton("All games"));
+			m_p0TabVBoxGamesShow->pack_start(*m_p0CheckShowAllGames, false, false, 5);
+				m_p0CheckShowAllGames->signal_clicked().connect(sigc::mem_fun(*this, &GameScreen::onShowAllGamesChanged));
+			m_p0CheckShowPlayedHistory = Gtk::manage(new Gtk::CheckButton("Show played games history"));
+			m_p0TabVBoxGamesShow->pack_start(*m_p0CheckShowPlayedHistory, false, false, 5);
+				m_p0CheckShowPlayedHistory->signal_clicked().connect(sigc::mem_fun(*this, &GameScreen::onShowPlayedHistoryChanged));
 
-	if (m_refStdConfig->isTestMode()) {
-		Gtk::Label* m_p0TabLabelLoading = Gtk::manage(new Gtk::Label("Test"));
-		Gtk::Box* m_p0TabVBoxLoading = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
-		m_aPageIndex[s_nTabLoading] = m_p0NotebookGames->append_page(*m_p0TabVBoxLoading, *m_p0TabLabelLoading);
-			m_p0TextLoadingError = Gtk::manage(new Gtk::TextView());
-			m_p0TabVBoxLoading->pack_start(*m_p0TextLoadingError, true, true);
-				m_p0TextLoadingError->set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
-				m_refTextBufferLoadingError = m_p0TextLoadingError->get_buffer();
-	}
-	m_aGameScreens[s_nScreenGameChoose] = m_p0NotebookGames;
+		Gtk::Label* m_p0TabLabelDescription = Gtk::manage(new Gtk::Label("Description"));
+		Gtk::Box* m_p0TabVBoxDescription = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+		m_aPageIndex[s_nTabDescription] = m_p0NotebookGames->append_page(*m_p0TabVBoxDescription, *m_p0TabLabelDescription);
+			m_p0TabVBoxDescription->set_border_width(5);
+			m_p0ImageGameImage = Gtk::manage(new Gtk::Image());
+			m_p0TabVBoxDescription->pack_start(*m_p0ImageGameImage, false, true);
+			m_p0LabelGameName = Gtk::manage(new Gtk::Label("-"));
+			m_p0TabVBoxDescription->pack_start(*m_p0LabelGameName, false, true);
+				m_p0LabelGameName->set_margin_top(5);
+				m_p0LabelGameName->set_margin_bottom(5);
+				{
+				Pango::AttrList oAttrList;
+				Pango::AttrColor oAttrColor = Pango::Attribute::create_attr_foreground(std::numeric_limits<guint16>::max()
+																						, std::numeric_limits<guint16>::min()
+																						, std::numeric_limits<guint16>::min());
+				oAttrList.insert(oAttrColor);
+				Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
+				oAttrList.insert(oAttrWeight);
+				Pango::AttrFloat oAttrScale = Pango::Attribute::create_attr_scale(2.0);
+				oAttrList.insert(oAttrScale);
+				m_p0LabelGameName->set_attributes(oAttrList);
+				}
+			Gtk::ScrolledWindow* m_p0ScrolledDescription = Gtk::manage(new Gtk::ScrolledWindow());
+			m_p0TabVBoxDescription->pack_start(*m_p0ScrolledDescription, true, true);
+				m_p0ScrolledDescription->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+				Gtk::Box* m_p0VBoxScroller = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+				m_p0ScrolledDescription->add(*m_p0VBoxScroller);
+					m_p0TextDescription = Gtk::manage(new Gtk::TextView());
+					m_p0VBoxScroller->pack_start(*m_p0TextDescription, true, true);
+						m_p0TextDescription->set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
+						m_p0TextDescription->set_left_margin(5);
+						m_p0TextDescription->set_right_margin(5);
+						m_refTextBufferDescription = m_p0TextDescription->get_buffer();
+					Gtk::Label* m_p0LabelConstraints = Gtk::manage(new Gtk::Label("Constraints:"));
+					m_p0VBoxScroller->pack_start(*m_p0LabelConstraints, true, true);
+						m_p0LabelConstraints->set_halign(Gtk::Align::ALIGN_START);
+						m_p0LabelConstraints->set_margin_top(8);
+						m_p0LabelConstraints->set_margin_bottom(3);
+						{
+						Pango::AttrList oAttrList;
+						Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
+						oAttrList.insert(oAttrWeight);
+						m_p0LabelConstraints->set_attributes(oAttrList);
+						}
+					m_p0TextConstraints = Gtk::manage(new Gtk::TextView());
+					m_p0VBoxScroller->pack_start(*m_p0TextConstraints, true, true);
+						m_p0TextConstraints->set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
+						m_refTextBufferConstraints = m_p0TextConstraints->get_buffer();
+					Gtk::Label* m_p0LabelAuthors = Gtk::manage(new Gtk::Label("Authors:"));
+					m_p0VBoxScroller->pack_start(*m_p0LabelAuthors, true, true);
+						m_p0LabelAuthors->set_halign(Gtk::Align::ALIGN_START);
+						m_p0LabelAuthors->set_margin_top(3);
+						m_p0LabelAuthors->set_margin_bottom(3);
+						{
+						Pango::AttrList oAttrList;
+						Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
+						oAttrList.insert(oAttrWeight);
+						m_p0LabelAuthors->set_attributes(oAttrList);
+						}
+					m_p0TextAuthors = Gtk::manage(new Gtk::TextView());
+					m_p0VBoxScroller->pack_start(*m_p0TextAuthors, true, true);
+						m_p0TextAuthors->set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
+						m_p0TextAuthors->set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_MINIMUM);
+						m_refTextBufferAuthors = m_p0TextAuthors->get_buffer();
+
+		if (m_refStdConfig->isTestMode()) {
+			Gtk::Label* m_p0TabLabelLoading = Gtk::manage(new Gtk::Label("Test"));
+			Gtk::Box* m_p0TabVBoxLoading = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+			m_aPageIndex[s_nTabLoading] = m_p0NotebookGames->append_page(*m_p0TabVBoxLoading, *m_p0TabLabelLoading);
+				m_p0TextLoadingError = Gtk::manage(new Gtk::TextView());
+				m_p0TabVBoxLoading->pack_start(*m_p0TextLoadingError, true, true);
+					m_p0TextLoadingError->set_wrap_mode(Gtk::WrapMode::WRAP_WORD);
+					m_refTextBufferLoadingError = m_p0TextLoadingError->get_buffer();
+		}
+
+		Gtk::Button* m_p0ButtonOk = Gtk::manage(new Gtk::Button("Ok"));
+		m_p0GameScreenBoxGames->pack_start(*m_p0ButtonOk, false, false);
+			m_p0ButtonOk->set_margin_left(s_nButtonLeftRightMargin);
+			m_p0ButtonOk->set_margin_right(s_nButtonLeftRightMargin);
+			m_p0ButtonOk->set_margin_top(5);
+			m_p0ButtonOk->set_margin_bottom(5);
+			m_p0ButtonOk->signal_clicked().connect(
+							sigc::mem_fun(*this, &GameScreen::onButtonOk) );
+		Gtk::Button* m_p0ButtonCancel  = Gtk::manage(new Gtk::Button("Cancel"));
+		m_p0GameScreenBoxGames->pack_start(*m_p0ButtonCancel, false, false);
+			m_p0ButtonCancel->set_margin_left(s_nButtonLeftRightMargin);
+			m_p0ButtonCancel->set_margin_right(s_nButtonLeftRightMargin);
+			m_p0ButtonCancel->set_margin_top(5);
+			m_p0ButtonCancel->set_margin_bottom(5);
+			m_p0ButtonCancel->signal_clicked().connect(
+							sigc::mem_fun(*this, &GameScreen::onButtonCancel) );
+	m_aGameScreens[s_nScreenGameChoose] = m_p0GameScreenBoxGames;
 
 	m_p0GameScreenBoxInfo = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
 	m_p0StackGameScreens->add(*m_p0GameScreenBoxInfo, s_sGameScreenNameInfo);
@@ -221,17 +256,17 @@ GameDialog::GameDialog(const shared_ptr<StdConfig>& refStdConfig, GameLoader& oG
 				m_p0ButtonGameInfoOk->set_margin_top(5);
 				m_p0ButtonGameInfoOk->set_margin_bottom(5);
 				m_p0ButtonGameInfoOk->signal_clicked().connect(
-								sigc::mem_fun(*this, &GameDialog::onButtonGameInfoOk) );
+								sigc::mem_fun(*this, &GameScreen::onButtonGameInfoOk) );
 			addBigSeparator(m_p0BoxInfo, true);
 	m_aGameScreens[s_nScreenGameInfo] = m_p0GameScreenBoxInfo;
 
-	show_all_children();
+	return m_p0GameScreenBoxMain;
 }
-void GameDialog::onButtonGameInfoOk() noexcept
+void GameScreen::onButtonGameInfoOk() noexcept
 {
 	changeScreen(s_nScreenGameChoose, "");
 }
-void GameDialog::changeScreen(int32_t nToScreen, const std::string& sMsg) noexcept
+void GameScreen::changeScreen(int32_t nToScreen, const std::string& sMsg) noexcept
 {
 	if (m_nCurrentScreen == nToScreen) {
 		return;
@@ -242,16 +277,14 @@ void GameDialog::changeScreen(int32_t nToScreen, const std::string& sMsg) noexce
 	m_p0StackGameScreens->set_visible_child(*m_aGameScreens[m_nCurrentScreen]);
 	if (m_nCurrentScreen == s_nScreenGameChoose) {
 		//
-		m_p0ButtonBoxActions->set_visible(true);
 	} else if (m_nCurrentScreen == s_nScreenGameInfo) {
 		m_p0LabelGameInfoText->set_text(sMsg);
-		m_p0ButtonBoxActions->set_visible(false);
 	} else {
 		assert(false);
 	}
 }
 
-int GameDialog::run(const shared_ptr<AllPreferences>& refPrefs, const shared_ptr<Theme>& refTheme) noexcept
+bool GameScreen::changeTo(const shared_ptr<AllPreferences>& refPrefs, const shared_ptr<Theme>& refTheme) noexcept
 {
 	assert(refPrefs);
 	assert(m_refStdConfig == refPrefs->getStdConfig());
@@ -260,8 +293,8 @@ int GameDialog::run(const shared_ptr<AllPreferences>& refPrefs, const shared_ptr
 	m_refPrefs = refPrefs;
 	m_refTheme = refTheme;
 
-	const std::string sSaveGameName = m_refPrefs->getGameName();
-	m_sSelectedGameName = sSaveGameName;
+	m_sOldGameName = m_refPrefs->getGameName();
+	m_sSelectedGameName = m_sOldGameName;
 
 	m_p0CheckShowAllGames->set_sensitive(true);
 	m_p0CheckShowAllGames->set_active(m_bShowAllGames);
@@ -279,39 +312,40 @@ int GameDialog::run(const shared_ptr<AllPreferences>& refPrefs, const shared_ptr
 
 	changeScreen(s_nScreenGameChoose, "");
 
-	int nRet;
-	while (true) {
-		do {
-			m_bReRun = false;
-			nRet = Gtk::Dialog::run();
-		} while (m_bReRun);
-		if (nRet != Gtk::RESPONSE_OK) {
-			m_refPrefs->setGameName(sSaveGameName);
-			break; // while --------
-		}
-		const std::string sNewGameName = m_refPrefs->getGameName();
-		if (sNewGameName == sSaveGameName) {
-			break; // while --------
-		}
+	return true;
+}
+void GameScreen::onButtonOk() noexcept
+{
+//std::cout << "GameScreen::onButtonOk()  m_sSelectedGameName=" << m_sSelectedGameName << '\n';
+	if (m_sSelectedGameName.empty()) {
+		changeScreen(s_nScreenGameInfo, "No game selected");
+		return; //--------------------------------------------------------------
+	}
+	std::string sNewGameName = m_sSelectedGameName;
+//std::cout << "GameScreen::onButtonOk() sNewGameName=" << sNewGameName << '\n';
+	if (sNewGameName != m_sOldGameName) {
 		// try to create the game instance
 		auto oPairGame = m_oGameLoader.getNewGame(sNewGameName, m_oGameOwner, m_refPrefs, m_refTheme->getNamed(), shared_ptr<Highscore>{});
 		auto& refGame = oPairGame.first;
-		if (!refGame) {
+		if (! refGame) {
 			const std::string& sErrorString = m_oGameLoader.getGameInfo(sNewGameName).m_sGameErrorString;
 			if (sErrorString.empty()) {
-				//msgWarningBox("This game is not compatible with the current preferences");
 				changeScreen(s_nScreenGameInfo, "This game is not compatible with the current preferences");
 			} else {
 				changeScreen(s_nScreenGameInfo, "Couldn't load game\n" + sErrorString);
 			}
-			//msgWarningBox("Couldn't load game\n" + m_oGameLoader.getGameInfo(sNewGameName).m_sGameErrorString);
-			continue; // while --------
+			return; //----------------------------------------------------------
 		}
-		break;  // while --------
-	};
-	return nRet;
+	} else {
+		sNewGameName.clear();
+	}
+	m_oGameWindow.afterChooseGame(sNewGameName);
 }
-void GameDialog::regenerateGamesList() noexcept
+void GameScreen::onButtonCancel() noexcept
+{
+	m_oGameWindow.afterChooseGame(Util::s_sEmptyString);
+}
+void GameScreen::regenerateGamesList() noexcept
 {
 	if (!m_refPrefs) {
 		return;
@@ -326,7 +360,7 @@ void GameDialog::regenerateGamesList() noexcept
 	std::vector<std::string> aNames = (m_bShowPlayedHistory ? m_refPrefs->getPlayedGameHistory() : m_oGameLoader.getGameNames());
 	int32_t nPosInList = 0;
 	for (const auto& sGameName : aNames) {
-//std::cout << "GameDialog::regenerateGamesList() sGameName=" << sGameName << '\n';
+//std::cout << "GameScreen::regenerateGamesList() sGameName=" << sGameName << '\n';
 		if (m_bShowPlayedHistory) {
 			const auto& aValidNames = m_oGameLoader.getGameNames();
 			const auto& itFoundName = std::find(aValidNames.begin(), aValidNames.end(), sGameName);
@@ -339,9 +373,9 @@ void GameDialog::regenerateGamesList() noexcept
 			continue; // for(sGameName) -------
 		}
 		const bool bGameIsSelectedByPrefs =  oGameInfo.m_oGameConstraints.isSelectedBy(*m_refPrefs);
-//std::cout << "GameDialog::regenerateGamesList() bGameIsSelectedByPrefs=" << bGameIsSelectedByPrefs<< '\n';
+//std::cout << "GameScreen::regenerateGamesList() bGameIsSelectedByPrefs=" << bGameIsSelectedByPrefs<< '\n';
 		const bool bLoadError = !oGameInfo.m_sGameErrorString.empty();
-//std::cout << "GameDialog::regenerateGamesList() bLoadError=" << bLoadError << '\n';
+//std::cout << "GameScreen::regenerateGamesList() bLoadError=" << bLoadError << '\n';
 		if ((!bGameIsSelectedByPrefs) && !m_bShowAllGames)  {
 			continue; // for(sGameName) -------
 		}
@@ -349,11 +383,11 @@ void GameDialog::regenerateGamesList() noexcept
 			assert(nSelectedPosInList < 0);
 			nSelectedPosInList = nPosInList;
 		}
-//std::cout << "GameDialog::regenerateGamesList() nSelectedPosInList=" << nSelectedPosInList << '\n';
+//std::cout << "GameScreen::regenerateGamesList() nSelectedPosInList=" << nSelectedPosInList << '\n';
 		Gtk::TreeModel::Row oRow = *(m_refTreeModelGames->append());
 		oRow[m_oGamesColumns.m_oColHiddenName] = sGameName;
 		const File& oFile = oGameInfo.m_oThumbnailFile;
-//std::cout << "GameDialog::regenerateGamesList() oGameInfo.m_oThumbnailFile.isDefined()=" << oFile.isDefined() << '\n';
+//std::cout << "GameScreen::regenerateGamesList() oGameInfo.m_oThumbnailFile.isDefined()=" << oFile.isDefined() << '\n';
 		if (oFile.isDefined()) {
 			try {
 				if (oFile.isBuffered()) {
@@ -395,7 +429,7 @@ void GameDialog::regenerateGamesList() noexcept
 	//
 	regenerateGameInfos();
 }
-void GameDialog::regenerateGameInfos() noexcept
+void GameScreen::regenerateGameInfos() noexcept
 {
 	if (m_sSelectedGameName.empty()) {
 		m_p0ImageGameImage->clear();
@@ -490,7 +524,7 @@ void GameDialog::regenerateGameInfos() noexcept
 		m_refTextBufferLoadingError->set_text(sError);
 	}
 }
-void GameDialog::onGameSelectionChanged() noexcept
+void GameScreen::onGameSelectionChanged() noexcept
 {
 	if (m_bRegenerateGamesListInProgress) {
 		return;
@@ -517,7 +551,7 @@ void GameDialog::onGameSelectionChanged() noexcept
 		regenerateGameInfos();
 	}
 }
-void GameDialog::onShowAllGamesChanged() noexcept
+void GameScreen::onShowAllGamesChanged() noexcept
 {
 	if (m_bRegenerateGamesListInProgress) {
 		return;
@@ -526,7 +560,7 @@ void GameDialog::onShowAllGamesChanged() noexcept
 	m_bShowAllGames = bValue;
 	regenerateGamesList();
 }
-void GameDialog::onShowPlayedHistoryChanged() noexcept
+void GameScreen::onShowPlayedHistoryChanged() noexcept
 {
 	if (m_bRegenerateGamesListInProgress) {
 		return;
@@ -535,7 +569,7 @@ void GameDialog::onShowPlayedHistoryChanged() noexcept
 	m_bShowPlayedHistory = bValue;
 	regenerateGamesList();
 }
-void GameDialog::onNotebookSwitchPage(Gtk::Widget*, guint /*nPageNum*/) noexcept
+void GameScreen::onNotebookSwitchPage(Gtk::Widget*, guint /*nPageNum*/) noexcept
 {
 	if (! m_refPrefs) {
 		return;
@@ -545,18 +579,16 @@ void GameDialog::onNotebookSwitchPage(Gtk::Widget*, guint /*nPageNum*/) noexcept
 		if (m_sSelectedGameName.empty()) {
 			m_p0NotebookGames->set_current_page(s_nTabGames);
 			changeScreen(s_nScreenGameInfo, "Select a game first");
-			//msgWarningBox("Select a game first");
 			return; //----------------------------------------------------------
 		}
 		if (nCurPage == m_aPageIndex[s_nTabLoading]) {
 			const auto& oGameInfo = m_oGameLoader.getGameInfo(m_sSelectedGameName);
-//std::cout << "GameDialog::onNotebookSwitchPage   1   err='" << oGameInfo.m_sGameErrorString << "'" << '\n';
+//std::cout << "GameScreen::onNotebookSwitchPage   1   err='" << oGameInfo.m_sGameErrorString << "'" << '\n';
 			if (!oGameInfo.m_bLoaded) {
 				// load the game
 				auto oPairGame = m_oGameLoader.getNewGame(m_sSelectedGameName, m_oGameOwner, m_refPrefs, m_refTheme->getNamed(), shared_ptr<Highscore>{});
 				if (! oPairGame.first) {
 					if (oGameInfo.m_sGameErrorString.empty()) {
-						//msgWarningBox("This game is not compatible with the current preferences");
 						changeScreen(s_nScreenGameInfo, "This game is not compatible with the current preferences");
 					}
 				}
@@ -569,26 +601,6 @@ void GameDialog::onNotebookSwitchPage(Gtk::Widget*, guint /*nPageNum*/) noexcept
 	} else {
 		//
 	}
-}
-void GameDialog::onButtonOk() noexcept
-{
-//std::cout << "GameDialog::onButtonOk()" << '\n';
-	if (! m_refPrefs) {
-		m_bReRun = false;
-		return; //--------------------------------------------------------------
-	}
-	m_bReRun = true;
-	if (m_sSelectedGameName.empty()) {
-		//msgWarningBox("No game selected");
-		changeScreen(s_nScreenGameInfo, "No game selected");
-		return; //--------------------------------------------------------------
-	}
-	m_refPrefs->setGameName(m_sSelectedGameName);
-	m_bReRun = false;
-}
-void GameDialog::onButtonCancel() noexcept
-{
-	m_bReRun = false;
 }
 
 } // namespace stmg
