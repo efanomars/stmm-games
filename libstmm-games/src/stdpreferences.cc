@@ -46,6 +46,9 @@ namespace stmi { class Event; }
 namespace stmg
 {
 
+static constexpr int32_t s_nMaxTeamNameLength = 12;
+static constexpr int32_t s_nMaxPlayerNameLength = 12;
+
 Variant StdPreferences::Player::getOptionValue(const std::string& sName) const noexcept
 {
 	assert(m_p0Team != nullptr);
@@ -433,14 +436,11 @@ std::vector< shared_ptr<stmi::Capability> > StdPreferences::Player::getCapabilit
 	auto p0Prefs = m_p0Team->m_p0Prefs;
 	assert(p0Prefs != nullptr);
 	std::vector< shared_ptr<stmi::Capability> > aCapabilities;
-//std::cout << "  Player::getCapabilities() player=" << get() << "  -> ";
 	for (auto& oPair : m_aCapabilities) {
 		const int32_t& nClassIdx = oPair.first;
 		const int32_t& nCapaIdx = oPair.second;
 		aCapabilities.push_back(p0Prefs->m_aCapabilityClassData[nClassIdx].m_aCapabilityData[nCapaIdx].m_refCapability);
-//std::cout << (int64_t)(aCapabilities.back().get()) << "  ";
 	}
-//std::cout << '\n';
 	return aCapabilities;
 }
 shared_ptr<stmi::Capability> StdPreferences::Player::getCapability(const stmi::Capability::Class& oClass) const noexcept
@@ -568,7 +568,6 @@ StdPreferences::StdPreferences(const shared_ptr<StdConfig>& refStdConfig) noexce
 		const shared_ptr<Option>& refOption = oOptions.getObj(nIdx);
 		m_aOption.push_back(refOption->getDefaultValue());
 	}
-//std::cout << "StdPreferences::StdPreferences 0" << '\n';
 	initCreatePlayers();
 	initCreateCapabilities();
 	initListenToDeviceMgmt();
@@ -749,7 +748,6 @@ void StdPreferences::deviceAdded(const shared_ptr<stmi::Device>& refDevice) noex
 			assert(oCapabilityData.m_bRuntimeRemoved);
 			oCapabilityData.m_bRuntimeRemoved = false;
 			oCapabilityData.m_refCapability = refCapa;
-//std::cout << "deviceAdded   &m_refCapability=" << reinterpret_cast<int64_t>(refCapa.get()) << '\n';
 			// Note: m_oHKPlayerKeyAction and m_refPlayer are kept as they are!
 		} else {
 			// add the new one marking it as runtime added if in runtime mode
@@ -1171,10 +1169,8 @@ bool StdPreferences::populatePlayerKeyAction(const shared_ptr<Player>& refPlayer
 	int32_t nRandomClassIdx = -1;
 	int32_t nRandomCapaIdx = -1;
 	for (int32_t nMode = 0; nMode < 5; ++nMode) {
-//std::cout << " --- mode=" << nMode << '\n';
 		if ((nMode == 0) || (nMode == 1)) {
 			if (nPriorityCapaIdx >= 0) {
-//std::cout << " --- nPriorityCapaIdx=" << nPriorityCapaIdx << '\n';
 				assert(nPriorityClassIdx >= 0);
 				if (nRandomCapaIdx < 0) {
 					nRandomClassIdx = nPriorityClassIdx;
@@ -1182,19 +1178,15 @@ bool StdPreferences::populatePlayerKeyAction(const shared_ptr<Player>& refPlayer
 				}
 				auto& aDefaultKeys = oKeyAction.getClassDefaultKeys(m_aCapabilityClass[nPriorityClassIdx]);
 				const int32_t nTotDefaults = static_cast<int32_t>(aDefaultKeys.size());
-//std::cout << " --- nTotDefaults=" << nTotDefaults << '\n';
 				for (int32_t nDefKeyIdx = 0; nDefKeyIdx < nTotDefaults; ++nDefKeyIdx) {
-//std::cout << " --- nDefKeyIdx=" << nDefKeyIdx << "   nPriorityDefaultIdx=" << nPriorityDefaultIdx << '\n';
 					if (((nMode == 0) && (nDefKeyIdx == nPriorityDefaultIdx)) || (nMode == 1)) {
 						stmi::HARDWARE_KEY eDefKey = aDefaultKeys[nDefKeyIdx];
-//std::cout << " --- eDefKey=" << static_cast<int32_t>(eDefKey) << '\n';
 						if ((eDefKey != stmi::HK_NULL) && !capabilityKeyInUse(nPriorityClassIdx, nPriorityCapaIdx, eDefKey)) {
 							//
 							nClassIdx = nPriorityClassIdx;
 							nCapaIdx = nPriorityCapaIdx;
 							eKey = eDefKey;
 							nPriorityDefaultIdx = nDefKeyIdx;
-//std::cout << " --- ASSIGN A" << '\n';
 							return true; //-------------------------------------
 						}
 					}
@@ -1205,18 +1197,14 @@ bool StdPreferences::populatePlayerKeyAction(const shared_ptr<Player>& refPlayer
 			for (int32_t nCurClassIdx = 0; nCurClassIdx < nTotClasses; ++nCurClassIdx) {
 				const CapabilityClassData& oClassData = m_aCapabilityClassData[nCurClassIdx];
 				const int32_t nTotCapas = static_cast<int32_t>(oClassData.m_aCapability.size());
-//std::cout << " --- nCurClassIdx=" << nCurClassIdx << "  nTotCapas=" << nTotCapas << " of class: " << m_aCapabilityClass[nCurClassIdx].getId() << '\n';
 				auto& aDefaultKeys = oKeyAction.getClassDefaultKeys(m_aCapabilityClass[nCurClassIdx]);
 				const int32_t nTotDefaults = static_cast<int32_t>(aDefaultKeys.size());
-//std::cout << " --- nTotDefaults=" << nTotDefaults << '\n';
 				for (int32_t nDefKeyIdx = 0; nDefKeyIdx < nTotDefaults; ++nDefKeyIdx) {
 					stmi::HARDWARE_KEY eDefKey = aDefaultKeys[nDefKeyIdx];
-//std::cout << " --- eDefKey=" << static_cast<int32_t>(eDefKey) << '\n';
 					for (int32_t nCurCapaIdx = 0; nCurCapaIdx < nTotCapas; ++nCurCapaIdx) {
 						if (nRandomCapaIdx < 0) {
 							nRandomClassIdx = nCurClassIdx;
 							nRandomCapaIdx = nCurCapaIdx;
-//std::cout << " --- nRandomClassIdx=" << nRandomClassIdx << "  nRandomCapaIdx=" << nRandomCapaIdx << '\n';
 						}
 						const CapabilityData& oCapaData = oClassData.m_aCapabilityData[nCurCapaIdx];
 						if (((nMode == 2) && (oCapaData.m_refPlayer == refPlayer)) 
@@ -1230,7 +1218,6 @@ bool StdPreferences::populatePlayerKeyAction(const shared_ptr<Player>& refPlayer
 								nPriorityClassIdx = nCurClassIdx;
 								nPriorityCapaIdx = nCurCapaIdx;
 								nPriorityDefaultIdx = nDefKeyIdx;
-//std::cout << " --- ASSIGN B" << '\n';
 								return true; //---------------------------------
 							}
 						}
@@ -1322,7 +1309,6 @@ shared_ptr<StdPreferences::Player> StdPreferences::playerAlloc() noexcept
 			if (! oDefault.getBool()) {
 				// human player: the key actions have to be populated
 				m_bUndefinedKeyActions = true;
-//std::cout << "StdPreferences::playerAlloc()  m_bUndefinedKeyActions SET" << '\n';
 			}
 		}
 	}
@@ -1371,7 +1357,7 @@ void StdPreferences::playerAddToTeam(const shared_ptr<Player>& refPlayer, const 
 	assert(refPlayer->m_p0Team == nullptr);
 	const int32_t nTotTeammates = static_cast<int32_t>(refTeam->m_aTeammate.size());
 	refTeam->m_aTeammate.push_back(refPlayer);
-//std::cout << "playerAddToTeam  nTotTeammates=" << refTeam->m_aTeammate.size() << '\n';
+
 	refPlayer->m_nMate = nTotTeammates;
 	refPlayer->m_nPlayer = -77; // set by recalcStuff())
 	refPlayer->m_p0Team = refTeam.get();
@@ -1447,13 +1433,11 @@ void StdPreferences::recalcStuff() noexcept
 
 int32_t StdPreferences::getMaxTeamNameLength() const noexcept
 {
-	//TODO Put this in a constant
-	return 12;
+	return s_nMaxTeamNameLength;
 }
 int32_t StdPreferences::getMaxPlayerNameLength() const noexcept
 {
-	//TODO Put this in a constant
-	return 12;
+	return s_nMaxPlayerNameLength;
 }
 int32_t StdPreferences::getTotTeams() const noexcept
 {
