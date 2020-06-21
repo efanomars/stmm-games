@@ -214,7 +214,7 @@ std::pair<bool, IntSet> XmlCommonParser::parseIntSetAttrs(ParserCtx& oCtx, const
 		nToInt = XmlUtil::strToNumber<int32_t>(oCtx, p0Element, sToAttr, oToValue.second, false
 														, bMin, nMin, bMax, nMax);
 		if (!bFromDefined) {
-			nFromInt = (bMin ? nMin : std::numeric_limits<int32_t>::min());
+			nFromInt = (bMin ? nMin : std::numeric_limits<int32_t>::lowest());
 		}
 		nDefinedAttr = 1;
 	} else {
@@ -232,7 +232,7 @@ std::pair<bool, IntSet> XmlCommonParser::parseIntSetAttrs(ParserCtx& oCtx, const
 			}
 			if (nDefinedAttr != 1) {
 				assert(nDefinedAttr == -1);
-				nFromInt = (bMin ? nMin : std::numeric_limits<int32_t>::min());
+				nFromInt = (bMin ? nMin : std::numeric_limits<int32_t>::lowest());
 				nToInt = (bMax ? nMax : std::numeric_limits<int32_t>::max());
 			}
 			nStepInt = XmlUtil::strToNumber<int32_t>(oCtx, p0Element, sStepAttr, oStepValue.second, false

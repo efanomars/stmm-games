@@ -61,7 +61,7 @@ public:
 	static constexpr int32_t s_nPermutationMaxValue = +32000; /**< The maximum for the Init::m_nTo value if Init::m_bPermutations is true. */
 	struct LocalInit
 	{
-		int32_t m_nFrom = std::numeric_limits<int32_t>::min(); /**< The random number lowest value. Default is std::numeric_limits<int32_t>::min(). */
+		int32_t m_nFrom = std::numeric_limits<int32_t>::lowest(); /**< The random number lowest value. Default is std::numeric_limits<int32_t>::lowest(). */
 		int32_t m_nTo = std::numeric_limits<int32_t>::max(); /**< The random number highest value. Default is std::numeric_limits<int32_t>::max(). */
 		std::string m_sSharedName; /**< The shared name. For two RandomEvent instances to share the same sequence they also
 									 * must have same (m_nFrom, m_nTo) range. If empty random sequence not shared. */

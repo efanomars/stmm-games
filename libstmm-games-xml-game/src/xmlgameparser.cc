@@ -595,7 +595,7 @@ void XmlGameParser::parseFilterInput(GameCtx& oCtx, Event* p0Event, const xmlpp:
 																	, s_sEventFilterInputMsgFromAttr, s_sEventFilterInputMsgToAttr);
 		}
 	}
-	int32_t nInFromValue = std::numeric_limits<int32_t>::min();
+	int32_t nInFromValue = std::numeric_limits<int32_t>::lowest();
 	int32_t nInToValue = std::numeric_limits<int32_t>::max();
 	m_oXmlConditionalParser.parseAttributeFromTo<int32_t>(oCtx, p0Element
 														, s_sEventFilterInputValueAttr, s_sEventFilterInputValueFromAttr, s_sEventFilterInputValueToAttr

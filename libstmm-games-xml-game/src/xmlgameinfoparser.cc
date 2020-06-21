@@ -437,12 +437,12 @@ void XmlGameInfoParser::parseGameConstraints(GameInfoCtx& oCtx, const xmlpp::Ele
 {
 	// Note: Only the AppConstraints members are used to limit the values
 	oCtx.addChecker(p0Element);
-	XmlCommonParser::parseAttrFromTo<int32_t>(oCtx, p0Element
+	XmlCommonParser::parseAttrFromToClamp<int32_t>(oCtx, p0Element
 									, s_sGameConstraintsTeamsAttr, s_sGameConstraintsTeamsMinAttr, s_sGameConstraintsTeamsMaxAttr
 									, false
 									, true, oGameConstraints.m_nTeamsMin, true, oGameConstraints.m_nTeamsMax
 									, oGameConstraints.m_nTeamsMin, oGameConstraints.m_nTeamsMax);
-	const bool bTeamsPerLevelDefined = XmlCommonParser::parseAttrFromTo<int32_t>(oCtx, p0Element
+	const bool bTeamsPerLevelDefined = XmlCommonParser::parseAttrFromToClamp<int32_t>(oCtx, p0Element
 									, s_sGameConstraintsTeamsPerLevelAttr, s_sGameConstraintsTeamsPerLevelMinAttr, s_sGameConstraintsTeamsPerLevelMaxAttr
 									, false
 									, true, 1, true, oGameConstraints.m_nTeamsMax
@@ -453,7 +453,7 @@ void XmlGameInfoParser::parseGameConstraints(GameInfoCtx& oCtx, const xmlpp::Ele
 		bATIOLDefined = (oGameConstraints.m_nTeamsPerLevelMax > 1);
 		bATIOL = bATIOLDefined;
 	}
-	const bool bLevelsDefined = XmlCommonParser::parseAttrFromTo<int32_t>(oCtx, p0Element
+	const bool bLevelsDefined = XmlCommonParser::parseAttrFromToClamp<int32_t>(oCtx, p0Element
 									, s_sGameConstraintsLevelsAttr, s_sGameConstraintsLevelsMinAttr, s_sGameConstraintsLevelsMaxAttr
 									, false
 									, true, (bATIOLDefined ? 1 : oGameConstraints.m_nTeamsMin), true, (bATIOLDefined ? 1 : oGameConstraints.m_nTeamsMax)
@@ -500,12 +500,12 @@ void XmlGameInfoParser::parseGameConstraints(GameInfoCtx& oCtx, const xmlpp::Ele
 			oGameConstraints.m_nTeamsPerLevelMax = 1;
 		}
 	}
-	XmlCommonParser::parseAttrFromTo<int32_t>(oCtx, p0Element
+	XmlCommonParser::parseAttrFromToClamp<int32_t>(oCtx, p0Element
 											, s_sGameConstraintsMatesPerTeamAttr, s_sGameConstraintsMatesPerTeamMinAttr, s_sGameConstraintsMatesPerTeamMaxAttr
 											, false
 											, true, 1, true, oGameConstraints.m_nMatesPerTeamMax
 											, oGameConstraints.m_nMatesPerTeamMin, oGameConstraints.m_nMatesPerTeamMax);
-	XmlCommonParser::parseAttrFromTo<int32_t>(oCtx, p0Element
+	XmlCommonParser::parseAttrFromToClamp<int32_t>(oCtx, p0Element
 											, s_sGameConstraintsPlayersAttr, s_sGameConstraintsPlayersMinAttr, s_sGameConstraintsPlayersMaxAttr
 											, false
 											, true, (bATIOL ? 1 : oGameConstraints.m_nTeamsMin), true, oGameConstraints.getMaxPlayers()
@@ -516,7 +516,7 @@ void XmlGameInfoParser::parseGameConstraints(GameInfoCtx& oCtx, const xmlpp::Ele
 												, true, 0, true, std::min(oGameConstraints.m_nAIMatesPerTeamMax, oGameConstraints.m_nMatesPerTeamMax));
 	}
 	const bool bAllowAI = (oGameConstraints.m_nAIMatesPerTeamMax > 0);
-	XmlCommonParser::parseAttrFromTo<int32_t>(oCtx, p0Element
+	XmlCommonParser::parseAttrFromToClamp<int32_t>(oCtx, p0Element
 											, s_sGameConstraintsAITeamsAttr, s_sGameConstraintsAITeamsMinAttr, s_sGameConstraintsAITeamsMaxAttr
 											, false
 											, true, 0, true, (bAllowAI ? std::max(oGameConstraints.m_nTeamsMax, oGameConstraints.m_nLevelsMax) : 0)
@@ -527,7 +527,7 @@ void XmlGameInfoParser::parseGameConstraints(GameInfoCtx& oCtx, const xmlpp::Ele
 		oGameConstraints.m_bAllowMixedAIHumanTeam = XmlUtil::strToBool(oCtx, p0Element, s_sGameConstraintsAllowAIHumanTeamAttr, oPairAllowAIHumanTeam.second);
 	}
 	if (oGameConstraints.m_bAllowMixedAIHumanTeam && !bAllowAI) {
-		throw XmlCommonErrors::error(oCtx, p0Element, s_sGameConstraintsAllowAIHumanTeamAttr, Util::stringCompose("attribute %1 conflicts with attribute %2"
+		throw XmlCommonErrors::error(oCtx, p0Element, s_sGameConstraintsAllowAIHumanTeamAttr, Util::stringCompose("Attribute %1 conflicts with attribute %2"
 																			, s_sGameConstraintsAllowAIHumanTeamAttr, s_sGameConstraintsAIMatesPerTeamMaxAttr));
 	}
 	//
@@ -538,7 +538,7 @@ void XmlGameInfoParser::parseGameConstraints(GameInfoCtx& oCtx, const xmlpp::Ele
 	} else {
 		const bool bCond = oPairConstraints.second;
 		if (! bCond) {
-			throw XmlCommonErrors::error(oCtx, p0Element, Util::s_sEmptyString, "constraints condition is always false");
+			throw XmlCommonErrors::error(oCtx, p0Element, Util::s_sEmptyString, "Constraints condition is always false");
 		}
 	}
 	//

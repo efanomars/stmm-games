@@ -94,7 +94,6 @@ void ActionsBoxThWidget::calcGrid() noexcept
 
 bool ActionsBoxThWidget::handleXYInput(const shared_ptr<stmi::Event>& refXYEvent, int32_t nTeam, int32_t nMate) noexcept
 {
-
 	const auto p0XYEvent = static_cast<stmi::XYEvent*>(refXYEvent.get());
 	if (p0XYEvent->getXYGrabType() == stmi::XYEvent::XY_HOVER) {
 		return false; //--------------------------------------------------------

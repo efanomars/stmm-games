@@ -420,8 +420,8 @@ void LevelBlock::resetPrivate(int32_t nTileAnis) noexcept
 	m_nTeammate = -1;
 	m_nPlayer = -1;
 
-	m_nLastTimerCall = std::numeric_limits<int32_t>::min();
-	m_nLastFallCall = std::numeric_limits<int32_t>::min();
+	m_nLastTimerCall = std::numeric_limits<int32_t>::lowest();
+	m_nLastFallCall = std::numeric_limits<int32_t>::lowest();
 	resetPrivateJustTileAnis(nTileAnis);
 }
 const std::vector<int32_t>& LevelBlock::blockVTBrickIds(int32_t /*nViewTick*/, int32_t /*nTotViewTicks*/) const noexcept

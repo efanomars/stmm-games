@@ -354,21 +354,21 @@ public:
 	 */
 	NPoint shapeMinPos(int32_t nShapeId) const noexcept;
 	/** The maximum x position of the visible bricks in a shape.
-	 * If the shape has no visible bricks the return value is std::numeric_limits<int32_t>::min().
+	 * If the shape has no visible bricks the return value is std::numeric_limits<int32_t>::lowest().
 	 * The value is cached (not calculated for each call).
 	 * @param nShapeId The shape id.
 	 * @return The maximum x position (relative to block's origin).
 	 */
 	int32_t shapeMaxX(int32_t nShapeId) const noexcept;
 	/** The maximum y position of the visible bricks in a shape.
-	 * If the shape has no visible bricks the return value is std::numeric_limits<int32_t>::min().
+	 * If the shape has no visible bricks the return value is std::numeric_limits<int32_t>::lowest().
 	 * The value is cached (not calculated for each call).
 	 * @param nShapeId The shape id.
 	 * @return The maximum y position (relative to block's origin).
 	 */
 	int32_t shapeMaxY(int32_t nShapeId) const noexcept;
 	/** The maximum position of the visible bricks in a shape.
-	 * If the shape has no visible bricks the return value is {std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::min()}.
+	 * If the shape has no visible bricks the return value is {std::numeric_limits<int32_t>::lowest(), std::numeric_limits<int32_t>::lowest()}.
 	 * The value is cached (not calculated for each call).
 	 * @param nShapeId The shape id.
 	 * @return The maximum position (relative to block's origin).

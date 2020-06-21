@@ -98,7 +98,7 @@ std::pair<Variant, std::string> EnumOption::getValueFromCode(const std::string& 
 		return std::make_pair(Variant{}, "Code cannot contain empty spaces or be empty!");
 	}
 	const int32_t nEnum = getEnum(sCode);
-	if (nEnum == std::numeric_limits<int32_t>::min()) {
+	if (nEnum == std::numeric_limits<int32_t>::lowest()) {
 		return std::make_pair(Variant{}, "Invalid enum code!");
 	}
 	return std::make_pair(Variant{nEnum}, "");
@@ -152,7 +152,7 @@ const std::string& EnumOption::getEnumDesc(int32_t nIdx) const noexcept
 }
 int32_t EnumOption::getIdx(int32_t nEnum) const noexcept
 {
-	assert(std::numeric_limits<int32_t>::min() != nEnum);
+	assert(std::numeric_limits<int32_t>::lowest() != nEnum);
 	std::unordered_map<int32_t, int32_t>::const_iterator it = m_oEnumIdx.find(nEnum);
 	if (it == m_oEnumIdx.end()) {
 		return -1;
@@ -173,7 +173,7 @@ int32_t EnumOption::getEnum(const std::string& sEnumName) const noexcept
 {
 	int32_t nNameIdx = m_oNamedEnum.getIndex(sEnumName);
 	if (nNameIdx < 0) {
-		return std::numeric_limits<int32_t>::min();
+		return std::numeric_limits<int32_t>::lowest();
 	}
 	return m_oNamedEnum.getObj(nNameIdx).first;
 }

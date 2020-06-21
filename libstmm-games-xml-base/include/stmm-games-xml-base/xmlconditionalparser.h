@@ -54,6 +54,7 @@ class XmlConditionalParser
 {
 public:
 	static const std::string s_sConditionalExistIfNode;
+	static const std::string s_sConditionalPassthroughIfNode;
 	static const std::string s_sConditionalAttrIfNode;
 
 	static const std::string s_sConditionalAttrIfUndefAttr;
@@ -90,7 +91,7 @@ public:
 			}
 			if (bAllChildren) {
 				const auto sName = p0ChildElement->get_name();
-				if ((sName == s_sConditionalExistIfNode) || (sName == s_sConditionalAttrIfNode)) {
+				if ((sName == s_sConditionalExistIfNode) || (sName == s_sConditionalPassthroughIfNode) || (sName == s_sConditionalAttrIfNode)) {
 					continue; // for (it -----
 				}
 				if (sName.substr(0, XmlCommonParser::s_sElementNameIgnorePrefix.size()) == XmlCommonParser::s_sElementNameIgnorePrefix) {
@@ -99,25 +100,38 @@ public:
 			}
 			auto oTuple = parseOwnerExists(oCtx, p0ChildElement);
 			const bool bOwnerExists = std::get<0>(oTuple);
-			if (!bOwnerExists) {
+			if (! bOwnerExists) {
 				continue; // for (it -----
 			}
-			// ExistIf logical OR of all children
 			const xmlpp::Element* p0ExistIf = XmlCommonParser::parseUniqueElement(oCtx, p0ChildElement, s_sConditionalExistIfNode, false);
-			bool bExists = false;
-			bool bHasExistIf = false;
 			if (p0ExistIf != nullptr) {
-				bExists = evalCondition(oCtx, p0ExistIf);
-				bHasExistIf = true;
+				// ExistIf logical OR of all children
+				const bool bExists = evalCondition(oCtx, p0ExistIf);
 				// ExistIf is not supposed to have attributes
 				XmlCommonParser::checkAllAttributesNames(oCtx, p0ExistIf, [&](const std::string& /*sAttrName*/)
 				{
-					//TODO allow not="true" attribute to negate the whole existif condition
+					//TODO allow not="true" attribute to negate the whole ExistIf condition
+					return false;
+				});
+				if (! bExists) {
+					continue; // for (it -----
+				}
+			}
+			bool bPassthrough = false;
+			const xmlpp::Element* p0PassthroughIf = XmlCommonParser::parseUniqueElement(oCtx, p0ChildElement, s_sConditionalPassthroughIfNode, false);
+			if (p0PassthroughIf != nullptr) {
+				bPassthrough = evalCondition(oCtx, p0PassthroughIf);
+				// PassthroughIf is not supposed to have attributes
+				XmlCommonParser::checkAllAttributesNames(oCtx, p0PassthroughIf, [&](const std::string& /*sAttrName*/)
+				{
+					//TODO allow not="true" attribute to negate the whole PassthroughIf condition
 					return false;
 				});
 			}
-			if ((!bHasExistIf) || bExists) {
+			if (! bPassthrough) {
 				oChildVisitor(p0ChildElement);
+			} else {
+				visitNamedElementChildren(oCtx, p0ChildElement, sName, oChildVisitor);
 			}
 		}
 		oCtx.removeChecker(p0Element, false, false);
@@ -162,7 +176,7 @@ public:
 				continue; // for (it -----
 			}
 			const std::string sName = p0ChildElement->get_name();
-			if ((sName == s_sConditionalExistIfNode) || (sName == s_sConditionalAttrIfNode)) {
+			if ((sName == s_sConditionalExistIfNode) || (sName == s_sConditionalPassthroughIfNode)  || (sName == s_sConditionalAttrIfNode)) {
 				continue; // for (it -----
 			}
 			if (sName.substr(0, XmlCommonParser::s_sElementNameIgnorePrefix.size()) == XmlCommonParser::s_sElementNameIgnorePrefix) {
@@ -329,10 +343,13 @@ public:
 												, const std::string& sMultiAttr, const std::string& sSeparatorAttr
 												, bool bMin, int32_t nMin, bool bMax, int32_t nMax) const;
 	/** Parse single or from-to pair attribute.
-	 * The default value for oFrom is std::numeric_limits<T>::lowest() or oMin if provided.
-	 * The default value for oTo is std::numeric_limits<T>::max() or oMax if provided.
-	 * The output values oFrom and oTo are untouched if no attribute is defined and
-	 * their current value satisfies the optional min and max conditions.
+	 * If bMin is false oMin is overridden to std::numeric_limits<T>::lowest().
+	 * If bMax is false oMax is overridden to std::numeric_limits<T>::max().
+	 * If both true, oMin must not be smaller than oMin.
+	 *
+	 * If no attribute is defined, the values oFrom and oTo are untouched if
+	 * their current value satisfies the optional min and max conditions. Otherwise
+	 * they are clamped.
 	 * @param oCtx The context.
 	 * @param p0Element The element. Cannot be null.
 	 * @param sSingleAttr The single value attribute. Cannot be empty.
@@ -352,6 +369,9 @@ public:
 							, const std::string& sSingleAttr, const std::string& sFromAttr, const std::string& sToAttr
 							, bool bMandatory, bool bMin, T oMin, bool bMax, T oMax, T& oFrom, T& oTo) const
 	{
+		if (bMin && bMax) {
+			assertTrue(oMin <= oMax);
+		}
 		auto oTempFrom = (bMin ? oMin : std::numeric_limits<T>::lowest());
 		auto oTempTo = (bMax ? oMax : std::numeric_limits<T>::max());
 		const auto oPairsSingle = getAttributeValue(oCtx, p0Element, sSingleAttr);
@@ -379,8 +399,9 @@ public:
 			const std::string& sTo = oPairTo.second;
 			oTempTo = XmlUtil::strToNumber<T>(oCtx, p0Element, sToAttr, sTo, false, bMin, oMin, bMax, oMax);
 		}
-		if (oTempTo < oTempFrom) {
-			std::swap(oTempFrom, oTempTo);
+		if (oTempFrom > oTempTo) {
+			throw XmlCommonErrors::error(oCtx, p0Element, Util::s_sEmptyString, Util::stringCompose(
+					"Attribute '%1' cannot be bigger than '%2'", sFromAttr, sToAttr));
 		}
 		const bool bDefined = (bSingleDefined || bFromDefined || bToDefined);
 		if (bMandatory && !bDefined) {

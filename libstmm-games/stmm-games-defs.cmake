@@ -20,7 +20,7 @@
 #   MINOR is REVISION (implementation of interface)
 #   AGE is always 0
 set(STMM_GAMES_MAJOR_VERSION 0)
-set(STMM_GAMES_MINOR_VERSION 24) # !-U-!
+set(STMM_GAMES_MINOR_VERSION 25) # !-U-!
 set(STMM_GAMES_VERSION "${STMM_GAMES_MAJOR_VERSION}.${STMM_GAMES_MINOR_VERSION}.0")
 
 # required stmm-input-ev version
@@ -80,14 +80,3 @@ list(APPEND STMMGAMES_LIBRARIES "${STMMGAMES_EXTRA_LIBRARIES}")
 if ("${CMAKE_SCRIPT_MODE_FILE}" STREQUAL "")
     DefineAsSecondaryTarget(stmm-games  ${STMMI_LIB_FILE}  "${STMMGAMES_INCLUDE_DIRS}"  "" "${STMMI_TEMP_EXTERNAL_LIBRARIES}")
 endif()
-
-#if (("${CMAKE_SCRIPT_MODE_FILE}" STREQUAL "") AND NOT TARGET stmm-games)
-#    if (BUILD_SHARED_LIBS)
-#        add_library(stmm-games SHARED IMPORTED)
-#    else()
-#        add_library(stmm-games STATIC IMPORTED)
-#    endif()
-#    set_target_properties(stmm-games PROPERTIES IMPORTED_LOCATION             "${STMMI_LIB_FILE}")
-#    set_target_properties(stmm-games PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${STMMGAMES_INCLUDE_DIRS}")
-#    set_target_properties(stmm-games PROPERTIES INTERFACE_LINK_LIBRARIES      "${STMMGAMES_EXTRA_LIBRARIES}")
-#endif()

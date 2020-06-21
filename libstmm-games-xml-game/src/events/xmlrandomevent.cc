@@ -67,7 +67,7 @@ unique_ptr<Event> XmlRandomEventParser::parseEventRandom(GameCtx& oCtx, const xm
 		oRInit.m_bPermutations = XmlUtil::strToBool(oCtx, p0Element, s_sEventRandomPermutationsAttr, oPairPermutations.second);
 	}
 
-	int32_t nMinValue = std::numeric_limits<int32_t>::min();
+	int32_t nMinValue = std::numeric_limits<int32_t>::lowest();
 	int32_t nMaxValue = std::numeric_limits<int32_t>::max();
 	if (oRInit.m_bPermutations) {
 		nMinValue = RandomEvent::s_nPermutationMinValue;

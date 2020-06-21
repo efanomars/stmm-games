@@ -203,16 +203,16 @@ Gtk::Widget* PlayersScreen::init() noexcept
 
 	m_p0PlayersScreenBoxMain = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
 
-	Gtk::Label* m_p0LabelTitle = Gtk::manage(new Gtk::Label(m_bAlwaysOnePlayer ?  "---- Player ----" : "---- Choose players ----"));
-	m_p0PlayersScreenBoxMain->pack_start(*m_p0LabelTitle, false, false);
-		m_p0LabelTitle->set_margin_top(3);
-		m_p0LabelTitle->set_margin_bottom(3);
-		{
-		Pango::AttrList oAttrList;
-		Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
-		oAttrList.insert(oAttrWeight);
-		m_p0LabelTitle->set_attributes(oAttrList);
-		}
+	//Gtk::Label* m_p0LabelTitle = Gtk::manage(new Gtk::Label(m_bAlwaysOnePlayer ?  "---- Player ----" : "---- Choose players ----"));
+	//m_p0PlayersScreenBoxMain->pack_start(*m_p0LabelTitle, false, false);
+	//	m_p0LabelTitle->set_margin_top(3);
+	//	m_p0LabelTitle->set_margin_bottom(3);
+	//	{
+	//	Pango::AttrList oAttrList;
+	//	Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
+	//	oAttrList.insert(oAttrWeight);
+	//	m_p0LabelTitle->set_attributes(oAttrList);
+	//	}
 
 	m_p0NotebookPlayers = Gtk::manage(new KeysNotebook(this));
 	m_p0PlayersScreenBoxMain->pack_start(*m_p0NotebookPlayers, true, true, 2);
@@ -284,11 +284,11 @@ Gtk::Widget* PlayersScreen::init() noexcept
 									sigc::mem_fun(*this, &PlayersScreen::onButtonRename) );
 				m_p0VBoxMovePlayers = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
 				m_p0VBoxRenameMovePlayers->pack_start(*m_p0VBoxMovePlayers, true, true);
-					m_p0ButtonMoveUp = Gtk::manage(new Gtk::Button(Gtk::Stock::GO_UP));
+					m_p0ButtonMoveUp = Gtk::manage(new Gtk::Button("Move Up"));
 					m_p0VBoxMovePlayers->pack_start(*m_p0ButtonMoveUp, true, true);
 						m_p0ButtonMoveUp->signal_clicked().connect(
 										sigc::mem_fun(*this, &PlayersScreen::onButtonMoveUp) );
-					m_p0ButtonMoveDown = Gtk::manage(new Gtk::Button(Gtk::Stock::GO_DOWN));
+					m_p0ButtonMoveDown = Gtk::manage(new Gtk::Button("Move Down"));
 					m_p0VBoxMovePlayers->pack_start(*m_p0ButtonMoveDown, true, true);
 						m_p0ButtonMoveDown->signal_clicked().connect(
 										sigc::mem_fun(*this, &PlayersScreen::onButtonMoveDown) );

@@ -117,8 +117,8 @@ static int32_t clampToInt(double fCheck)
 {
 	if (fCheck > std::numeric_limits<int32_t>::max()) {
 		return std::numeric_limits<int32_t>::max();
-	} else if (fCheck < std::numeric_limits<int32_t>::min()) {
-		return std::numeric_limits<int32_t>::min();
+	} else if (fCheck < std::numeric_limits<int32_t>::lowest()) {
+		return std::numeric_limits<int32_t>::lowest();
 	} else {
 		return fCheck;
 	}

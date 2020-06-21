@@ -1,7 +1,7 @@
 /*
  * File:   event.h
  *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,12 +41,14 @@ public:
 	};
 	/** Constructor.
 	 * The event can only be added to the level passed as parameter to this function.
+	 * The level passed as oInit.m_p0Level must also be valid (already be constructed or reinitialized).
 	 * @param oInit The initialization data.
 	 */
 	explicit Event(Init&& oInit) noexcept;
 protected:
 	/** Reinitialization.
 	 * The event can only be added to the level passed as parameter to this function.
+	 * The level passed as oInit.m_p0Level must also be valid (already be constructed or reinitialized).
 	 * @param oInit The initialization data.
 	 */
 	void reInit(Init&& oInit) noexcept;

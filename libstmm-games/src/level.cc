@@ -178,7 +178,7 @@ void Level::reInit(Game* p0Game, int32_t nLevel, const shared_ptr<AppPreferences
 			MateData& oMateData = oTeamData.m_aTeammate[nCurMate];
 			oMateData.m_refPrefPlayer = oTeamData.m_refPrefTeam->getMate(nCurMate);
 			oMateData.m_p0Controlled = nullptr;
-			oMateData.m_nLastTimeInControl = std::numeric_limits<int32_t>::min() + nCurMate;
+			oMateData.m_nLastTimeInControl = std::numeric_limits<int32_t>::lowest() + nCurMate;
 			oMateData.m_nLevelPlayer = nLevelPlayer;
 			m_aLevelPlayer[nLevelPlayer] = &oMateData;
 			++nLevelPlayer;

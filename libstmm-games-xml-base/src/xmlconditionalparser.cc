@@ -1,7 +1,7 @@
 /*
  * File:   xmlconditionalparser.cc
  *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,6 +43,7 @@ namespace stmg
 {
 
 const std::string XmlConditionalParser::s_sConditionalExistIfNode = "ExistIf";
+const std::string XmlConditionalParser::s_sConditionalPassthroughIfNode = "PassthroughIf";
 const std::string XmlConditionalParser::s_sConditionalAttrIfNode = "AttrIf";
 
 const std::string XmlConditionalParser::s_sConditionalAttrIfUndefAttr = "_undef_";
@@ -164,7 +165,7 @@ std::pair<bool, IntSet> XmlConditionalParser::parseIntSetAttributes(ConditionalC
 		nToInt = XmlUtil::strToNumber<int32_t>(oCtx, p0Element, sToAttr, oToValue.second, false
 														, bMin, nMin, bMax, nMax);
 		if (!bFromDefined) {
-			nFromInt = (bMin ? nMin : std::numeric_limits<int32_t>::min());
+			nFromInt = (bMin ? nMin : std::numeric_limits<int32_t>::lowest());
 		}
 		nDefinedAttr = 1;
 	} else {

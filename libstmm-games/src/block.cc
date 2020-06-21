@@ -1119,8 +1119,8 @@ void Block::calcMinMaxVisible(int32_t nShapeId) noexcept
 
 	nMinPosX = std::numeric_limits<int32_t>::max();
 	nMinPosY = std::numeric_limits<int32_t>::max();
-	nMaxPosX = std::numeric_limits<int32_t>::min();
-	nMaxPosY = std::numeric_limits<int32_t>::min();
+	nMaxPosX = std::numeric_limits<int32_t>::lowest();
+	nMaxPosY = std::numeric_limits<int32_t>::lowest();
 
 	const std::unordered_map<int64_t, int32_t>& oBricks = oShape.m_oPosOfVisibleBrick;
 

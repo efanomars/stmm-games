@@ -20,12 +20,12 @@
 #   MINOR is REVISION (implementation of interface)
 #   AGE is always 0
 set(STMM_GAMES_XML_BASE_MAJOR_VERSION 0)
-set(STMM_GAMES_XML_BASE_MINOR_VERSION 24) # !-U-!
+set(STMM_GAMES_XML_BASE_MINOR_VERSION 25) # !-U-!
 set(STMM_GAMES_XML_BASE_VERSION "${STMM_GAMES_XML_BASE_MAJOR_VERSION}.${STMM_GAMES_XML_BASE_MINOR_VERSION}.0")
 
 # required stmm-games version
 set(STMM_GAMES_XML_BASE_REQ_STMM_GAMES_MAJOR_VERSION 0)
-set(STMM_GAMES_XML_BASE_REQ_STMM_GAMES_MINOR_VERSION 24) # !-U-!
+set(STMM_GAMES_XML_BASE_REQ_STMM_GAMES_MINOR_VERSION 25) # !-U-!
 set(STMM_GAMES_XML_BASE_REQ_STMM_GAMES_VERSION "${STMM_GAMES_XML_BASE_REQ_STMM_GAMES_MAJOR_VERSION}.${STMM_GAMES_XML_BASE_REQ_STMM_GAMES_MINOR_VERSION}")
 
 # required libxml++-2.6 version
@@ -80,19 +80,3 @@ list(APPEND STMMGAMESXMLBASE_LIBRARIES "${STMMGAMESXMLBASE_EXTRA_LIBRARIES}")
 if ("${CMAKE_SCRIPT_MODE_FILE}" STREQUAL "")
     DefineAsSecondaryTarget(stmm-games-xml-base  ${STMMI_LIB_FILE}  "${STMMGAMESXMLBASE_INCLUDE_DIRS}"  "stmm-games" "${STMMI_TEMP_EXTERNAL_LIBRARIES}")
 endif()
-
-#if (("${CMAKE_SCRIPT_MODE_FILE}" STREQUAL "") AND NOT TARGET stmm-games-xml-base)
-#    if (BUILD_SHARED_LIBS)
-#        add_library(stmm-games-xml-base SHARED IMPORTED)
-#    else()
-#        add_library(stmm-games-xml-base STATIC IMPORTED)
-#    endif()
-#    set_target_properties(stmm-games-xml-base PROPERTIES IMPORTED_LOCATION             "${STMMI_LIB_FILE}")
-#    set_target_properties(stmm-games-xml-base PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${STMMGAMESXMLBASE_INCLUDE_DIRS}")
-#    set(STMMI_TEMP_PROPS "")
-#    get_target_property(STMMI_TEMP_GAMES_PROP stmm-games INTERFACE_LINK_LIBRARIES)
-#    list(APPEND STMMI_TEMP_PROPS "${STMMI_TEMP_GAMES_PROP}")
-#    list(APPEND STMMI_TEMP_PROPS "stmm-games")
-#    list(APPEND STMMI_TEMP_PROPS "${LIBXMLPP_LIBRARIES}")
-#    set_target_properties(stmm-games-xml-base PROPERTIES INTERFACE_LINK_LIBRARIES      "${STMMI_TEMP_PROPS}")
-#endif()

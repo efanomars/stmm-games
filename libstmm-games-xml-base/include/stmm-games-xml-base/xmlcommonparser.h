@@ -93,7 +93,13 @@ public:
 									, bool bMin, int32_t nMin, bool bMax, int32_t nMax);
 
 	/** Parse from to attributes.
-	 * If from is bigger than to the values are swapped.
+	 * If bMin is false oMin is overridden to std::numeric_limits<T>::lowest().
+	 * If bMax is false oMax is overridden to std::numeric_limits<T>::max().
+	 * If both true, oMin must not be smaller than oMin.
+	 *
+	 * If no attribute is defined, the values oFrom and oTo are untouched if
+	 * their current value satisfies the optional min and max conditions. Otherwise
+	 * they are clamped to (oMin, oMax).
 	 * @param oCtx The context.
 	 * @param p0Element The element. Cannot be null.
 	 * @param sSingleAttr The single attribute name.
@@ -113,14 +119,17 @@ public:
 							, const std::string& sSingleAttr, const std::string& sFromAttr, const std::string& sToAttr
 							, bool bMandatory, bool bMin, T oMin, bool bMax, T oMax, T& oFrom, T& oTo)
 	{
-		oFrom = (bMin ? oMin : std::numeric_limits<T>::lowest());
-		oTo = (bMax ? oMax : std::numeric_limits<T>::max());
+		if (bMin && bMax) {
+			assertTrue(oMin <= oMax);
+		}
+		auto oTempFrom = (bMin ? oMin : std::numeric_limits<T>::lowest());
+		auto oTempTo = (bMax ? oMax : std::numeric_limits<T>::max());
 		const auto oPairsSingle = getAttributeValue(oCtx, p0Element, sSingleAttr);
 		const bool bSingleDefined = oPairsSingle.first;
 		if (bSingleDefined) {
 			const std::string& sSingle = oPairsSingle.second;
-			oFrom = XmlUtil::strToNumber<T>(oCtx, p0Element, sSingleAttr, sSingle, false, bMin, oMin, bMax, oMax);
-			oTo = oFrom;
+			oTempFrom = XmlUtil::strToNumber<T>(oCtx, p0Element, sSingleAttr, sSingle, false, bMin, oMin, bMax, oMax);
+			oTempTo = oTempFrom;
 		}
 		const auto oPairFrom = getAttributeValue(oCtx, p0Element, sFromAttr);
 		const bool bFromDefined = oPairFrom.first;
@@ -129,7 +138,7 @@ public:
 				throw XmlCommonErrors::errorAttrAlreadyDefinedByAnother(oCtx, p0Element, sFromAttr, sSingleAttr);
 			}
 			const std::string& sFrom = oPairFrom.second;
-			oFrom = XmlUtil::strToNumber<T>(oCtx, p0Element, sFromAttr, sFrom, false, bMin, oMin, bMax, oMax);
+			oTempFrom = XmlUtil::strToNumber<T>(oCtx, p0Element, sFromAttr, sFrom, false, bMin, oMin, bMax, oMax);
 		}
 		const auto oPairTo = getAttributeValue(oCtx, p0Element, sToAttr);
 		const bool bToDefined = oPairTo.first;
@@ -138,16 +147,58 @@ public:
 				throw XmlCommonErrors::errorAttrAlreadyDefinedByAnother(oCtx, p0Element, sToAttr, sSingleAttr);
 			}
 			const std::string& sTo = oPairTo.second;
-			oTo = XmlUtil::strToNumber<T>(oCtx, p0Element, sToAttr, sTo, false, bMin, oMin, bMax, oMax);
+			oTempTo = XmlUtil::strToNumber<T>(oCtx, p0Element, sToAttr, sTo, false, bMin, oMin, bMax, oMax);
+		}
+		if (oTempFrom > oTempTo) {
+			throw XmlCommonErrors::error(oCtx, p0Element, Util::s_sEmptyString, Util::stringCompose(
+					"Attribute '%1' cannot be bigger than '%2'", sFromAttr, sToAttr));
 		}
 		const bool bDefined = (bSingleDefined || bFromDefined || bToDefined);
 		if (bMandatory && !bDefined) {
 			throw XmlCommonErrors::error(oCtx, p0Element, Util::s_sEmptyString, Util::stringCompose(
 					"Either attribute '%1', '%2' or '%3' have to be defined", sSingleAttr, sFromAttr, sToAttr));
 		}
-		if (bDefined && (oTo < oFrom)) {
-			std::swap(oFrom, oTo);
+		if (bDefined) {
+			oFrom = std::move(oTempFrom);
+			oTo = std::move(oTempTo);
+		} else {
+			if (bMin && (oFrom < oMin)) {
+				oFrom = oMin;
+				if (oTo < oFrom) {
+					oTo = oFrom;
+				}
+			}
+			if (bMax && (oTo > oMax)) {
+				oTo = oMax;
+				if (oFrom > oTo) {
+					oFrom = oTo;
+				}
+			}
 		}
+		return bDefined;
+	}
+	template<typename T>
+	static bool parseAttrFromToClamp(ParserCtx& oCtx, const xmlpp::Element* p0Element
+							, const std::string& sSingleAttr, const std::string& sFromAttr, const std::string& sToAttr
+							, bool bMandatory, bool bMin, T oMin, bool bMax, T oMax, T& oFrom, T& oTo)
+	{
+		auto oTempFrom = oFrom;
+		auto oTempTo = oTo;
+		const bool bDefined = parseAttrFromTo<T>(oCtx, p0Element, sSingleAttr, sFromAttr, sToAttr
+												, bMandatory, false, oMin, false, oMax, oTempFrom, oTempTo);
+		if (bMin && (oTempFrom < oMin)) {
+			oTempFrom = oMin;
+		}
+		if (bMax && (oTempTo > oMax)) {
+			oTempTo = oMax;
+		}
+		if (oTempTo < oTempFrom) {
+			throw XmlCommonErrors::error(oCtx, p0Element, Util::s_sEmptyString, Util::stringCompose(
+					"Attributes '%1', '%2' or '%3' incompatible with (%4,%5) constraint", sSingleAttr, sFromAttr, sToAttr
+												, std::to_string(oFrom), std::to_string(oTo)));
+		}
+		oFrom = std::move(oTempFrom);
+		oTo = std::move(oTempTo);
 		return bDefined;
 	}
 	/** Visits all child elements of a node that have a certain name.

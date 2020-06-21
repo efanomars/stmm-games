@@ -1,7 +1,7 @@
 /*
  * File:   conditionalctx.cc
  *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -54,7 +54,10 @@ ConditionalCtx::ConditionalCtx(const shared_ptr<AppConfig>& refAppConfig, Named&
 void ConditionalCtx::addChecker(const xmlpp::Element* p0Element)
 {
 	ParserCtx::addChecker(p0Element);
-	ParserCtx::addValidChildElementNames(p0Element, XmlConditionalParser::s_sConditionalExistIfNode, XmlConditionalParser::s_sConditionalAttrIfNode);
+	ParserCtx::addValidChildElementNames(p0Element
+										, XmlConditionalParser::s_sConditionalExistIfNode
+										, XmlConditionalParser::s_sConditionalPassthroughIfNode
+										, XmlConditionalParser::s_sConditionalAttrIfNode);
 }
 void ConditionalCtx::removeChecker(const xmlpp::Element* p0Element, bool bCheckChildElements, bool bCheckAttrs)
 {

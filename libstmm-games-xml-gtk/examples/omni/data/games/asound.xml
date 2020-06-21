@@ -86,7 +86,7 @@
 		</ShowTextEvent>
 
 		<AlarmsEvent evId="EVID-ALARM" publish="true" start="0">
-			<SetMillisec value="100" repeat="100000"/>
+			<SetMillisec value="100" repeat="100000000"/>
 			<Listener groupName="TIMEOUT"    event="EVID-VAR-DIR" msgName="VAR_GET_VALUE"/>
 			<Listener groupName="TIMEOUT"    event="EVID-ALARM" msgName="ALARMS_NEXT"/>
 		</AlarmsEvent>

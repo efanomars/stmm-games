@@ -81,16 +81,16 @@ Gtk::Widget* ThemeScreen::init() noexcept
 
 	m_p0ThemeScreenBoxMain = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
 
-	Gtk::Label* m_p0LabelTitle = Gtk::manage(new Gtk::Label("---- Choose theme ----"));
-	m_p0ThemeScreenBoxMain->pack_start(*m_p0LabelTitle, false, false);
-		m_p0LabelTitle->set_margin_top(3);
-		m_p0LabelTitle->set_margin_bottom(3);
-		{
-		Pango::AttrList oAttrList;
-		Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
-		oAttrList.insert(oAttrWeight);
-		m_p0LabelTitle->set_attributes(oAttrList);
-		}
+	//Gtk::Label* m_p0LabelTitle = Gtk::manage(new Gtk::Label("---- Choose theme ----"));
+	//m_p0ThemeScreenBoxMain->pack_start(*m_p0LabelTitle, false, false);
+	//	m_p0LabelTitle->set_margin_top(3);
+	//	m_p0LabelTitle->set_margin_bottom(3);
+	//	{
+	//	Pango::AttrList oAttrList;
+	//	Pango::AttrInt oAttrWeight = Pango::Attribute::create_attr_weight(Pango::WEIGHT_HEAVY);
+	//	oAttrList.insert(oAttrWeight);
+	//	m_p0LabelTitle->set_attributes(oAttrList);
+	//	}
 
 	m_p0StackThemeScreens = Gtk::manage(new Gtk::Stack());
 	m_p0ThemeScreenBoxMain->pack_start(*m_p0StackThemeScreens, true, true);

@@ -92,10 +92,12 @@ public:
 	/** The contact bricks in the current shape in a given direction.
 	 * The position of the contacts is relative to the block's origin.
 	 *
-	 * Example: O is a brick, x is a contact.
+	 * Example: O is a brick, x is a contact
+	 *
 	 *      xx
 	 *     xOO
 	 *     OO
+	 *
 	 * There are only three contacts in the UP direction for the four bricks block shape.
 	 * @param eDir The direction.
 	 * @return The contacts.

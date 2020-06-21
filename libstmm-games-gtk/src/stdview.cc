@@ -578,7 +578,7 @@ void StdView::handleXYEvent(const shared_ptr<stmi::Event>& refXYEvent) noexcept
 	} else if (eType == stmi::XYEvent::XY_HOVER) {
 		int32_t nResTeam = -1;
 		int32_t nResMate = -1;
-		int32_t nResTWIdx = std::numeric_limits<int32_t>::min();
+		int32_t nResTWIdx = std::numeric_limits<int32_t>::lowest();
 		handleXYEvent(refXYEvent, p0XYEvent, nCapabilityId
 					, aInteractiveTWs
 					, nResTeam, nResMate, nResTWIdx);

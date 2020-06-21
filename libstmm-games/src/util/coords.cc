@@ -242,9 +242,9 @@ NRect Coords::getMinMax() const noexcept
 	}
 	assert(! m_oXY.empty());
 	m_oBoundingRect.m_nX = std::numeric_limits<int32_t>::max();
-	int32_t nMaxX = std::numeric_limits<int32_t>::min();
+	int32_t nMaxX = std::numeric_limits<int32_t>::lowest();
 	m_oBoundingRect.m_nY = std::numeric_limits<int32_t>::max();
-	int32_t nMaxY = std::numeric_limits<int32_t>::min();
+	int32_t nMaxY = std::numeric_limits<int32_t>::lowest();
 	for (const auto& oPair : m_oXY) {
 		const int64_t nXY = oPair.first;
 		const NPoint oXY = Util::unpackPointFromInt64(nXY);
