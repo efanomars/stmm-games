@@ -237,6 +237,12 @@ void StdLevelView::recreateSurfs() noexcept
 			m_refBoard2Surf = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, nSurfPixW, nSurfPixH);
 			m_refBoard2Cc = Cairo::Context::create(m_refBoard2Surf);
 		}
+		m_refBoard2Cc->save();
+		m_refBoard2Cc->set_source_rgba(0, 0, 0, 0); // transparency
+		m_refBoard2Cc->set_operator(Cairo::OPERATOR_SOURCE);
+		m_refBoard2Cc->rectangle(0, 0, nSurfPixW, nSurfPixH);
+		m_refBoard2Cc->fill();
+		m_refBoard2Cc->restore();
 	}
 	if ((m_nShowSurfPixW != nShowPixW) || (m_nShowSurfPixH != nShowPixH)) {
 		m_nShowSurfPixW = nShowPixW;
@@ -263,6 +269,12 @@ void StdLevelView::recreateSurfs() noexcept
 			m_refShowSurf = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, nSurfPixW, nSurfPixH);
 			m_refShowCc = Cairo::Context::create(m_refShowSurf);
 		}
+		m_refShowCc->save();
+		m_refShowCc->set_source_rgba(0, 0, 0, 0); // transparency
+		m_refShowCc->set_operator(Cairo::OPERATOR_SOURCE);
+		m_refShowCc->rectangle(0, 0, nSurfPixW, nSurfPixH);
+		m_refShowCc->fill();
+		m_refShowCc->restore();
 	}
 //std::cout << "StdLevelView::recreateSurfs  nSubshowPixW=" << nSubshowPixW << "  nSubshowPixH=" << nSubshowPixH << '\n';
 //std::cout << "                             m_nSubshowSurfPixW=" << m_nSubshowSurfPixW << "  m_nSubshowSurfPixH=" << m_nSubshowSurfPixH << '\n';
@@ -293,14 +305,22 @@ void StdLevelView::recreateSurfs() noexcept
 				refSubshow->m_refSubshowSurf = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, nSurfPixW, nSurfPixH);
 				refSubshow->m_refSubshowCc = Cairo::Context::create(refSubshow->m_refSubshowSurf);
 			}
+			refSubshow->m_refSubshowCc->save();
+			refSubshow->m_refSubshowCc->set_source_rgba(0, 0, 0, 0); // transparency
+			refSubshow->m_refSubshowCc->set_operator(Cairo::OPERATOR_SOURCE);
+			refSubshow->m_refSubshowCc->rectangle(0, 0, nSurfPixW, nSurfPixH);
+			refSubshow->m_refSubshowCc->fill();
+			refSubshow->m_refSubshowCc->restore();
 		}
 	}
 
+	//
 	m_refBoardCc->save();
 	m_refBoardCc->set_source_rgba(0, 0, 0, 0); // transparency
 	m_refBoardCc->set_operator(Cairo::OPERATOR_SOURCE);
 	m_refBoardCc->rectangle(0, 0, nBoardPixW, nBoardPixH);
 	m_refBoardCc->fill();
+	m_refBoardCc->set_operator(Cairo::OPERATOR_OVER);
 	drawBoard(m_refBoardCc);
 	m_refBoardCc->restore();
 

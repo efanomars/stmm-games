@@ -263,6 +263,7 @@ target_include_directories(stmm-games-xml-gtk BEFORE PUBLIC
   $<BUILD_INTERFACE:${STMMI_HEADERS_DIR}>
   $<INSTALL_INTERFACE:include/stmm-games-xml-gtk>  # <prefix>/include/stmm-games-xml-gtk
 )
+target_include_directories(stmm-games-xml-gtk       PRIVATE "${PROJECT_SOURCE_DIR}/src")
 
 target_link_libraries(stmm-games-xml-gtk ${STMMGAMESXMLGTK_EXTRA_LIBRARIES})
 
@@ -283,17 +284,28 @@ include(GNUInstallDirs)
 #   CMAKE_INSTALL_FULL_DATADIR=/usr/share
 set(STMMI_HOME_REL_DATA_DIR ".local/${CMAKE_INSTALL_DATADIR}/stmm-games")
 if (NOT ("$ENV{STMM_SNAP_PACKAGING}" STREQUAL "ON"))
+    # the following will be prefixed with $HOME at runtime (ex. "/home/myuser" + "/" + "share/stmm-games")
+    # it is where prefs and highscores are stored
     set(STMMI_PKG_USER_DATA_DIR "${STMMI_HOME_REL_DATA_DIR}")
+    # the installation path (ex. "/usr/local/share/stmm-games")
+    # the result is the installation path
     set(STMMI_PKG_DATA_DIR      "${CMAKE_INSTALL_FULL_DATADIR}/stmm-games")
+    # the system paths from which games and themes are loaded
     set(STMMI_RO_DATA_DIR_1     "/usr/local/${CMAKE_INSTALL_DATADIR}/stmm-games")
     set(STMMI_RO_DATA_DIR_2     "/usr/${CMAKE_INSTALL_DATADIR}/stmm-games")
     set(STMMI_RO_DATA_DIR_3     "${STMMI_PKG_DATA_DIR}")
 else()
-    # the following will be prefixed with $SNAP_USER_DATA at runtime (ex. /home/myuser/snap/stmg/x4 + share/stmm-games)
+    # the following will be prefixed with $SNAP_USER_DATA at runtime (ex. "/home/myuser/snap/stmg/x4" + "/" + "share/stmm-games")
+    # it is where prefs and highscores are stored
     set(STMMI_PKG_USER_DATA_DIR "${CMAKE_INSTALL_DATADIR}/stmm-games")
-    # the following will be prefixed with $SNAP at runtime (ex. /home/myuser/snap/stmg/x4)
+    # the following will be prefixed with $SNAP at runtime (ex. "/snap/stmg/x4" + "/" + "/usr/share/stmm-games")
+    # the result is the installation path
     set(STMMI_PKG_DATA_DIR      "${CMAKE_INSTALL_FULL_DATADIR}/stmm-games")
+    # the following will be prefixed with $SNAP at runtime (ex. "/snap/stmg/x4" + "/" + "/usr/share/stmm-games")
+    # the path from which games and themes can be loaded
     set(STMMI_RO_DATA_DIR_1     "${STMMI_PKG_DATA_DIR}")
+    # "/homw/myuser" + "/" + ${STMMI_HOME_REL_DATA_DIR} is also used as an additional path
+    # from which games and themes are loaded
 endif()
 
 # Create config file for library

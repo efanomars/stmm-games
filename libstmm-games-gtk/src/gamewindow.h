@@ -116,6 +116,9 @@ private:
 	void onButtonInfoOk() noexcept;
 
 	void onActiveChanged() noexcept;
+	bool onConfigureEvent(GdkEventConfigure* p0ConfigureEvent) noexcept;
+	bool onWindowStateEvent(GdkEventWindowState* p0WindowStateEvent) noexcept;
+	void onResizedOut() noexcept;
 
 	bool onResizeTimeout() noexcept;
 
@@ -125,7 +128,7 @@ private:
 	bool on_button_release_event(GdkEventButton* p0GdkEvent) override;
 	bool on_motion_notify_event(GdkEventMotion* p0GdkEvent) override;
 
-	bool on_sig_touch_event(GdkEventTouch* p0TouchEvent);
+	bool onTouchEvent(GdkEventTouch* p0TouchEvent) noexcept;
 
 	void callbackNextViewTick() noexcept;
 
@@ -280,8 +283,6 @@ private:
 
 	sigc::connection m_oResizeConn;
 	double m_fLastDelayedAllocation;
-	static constexpr int32_t s_nResizeConnMillisec = 1000; // each second the layout is recalculated
-	static constexpr int32_t s_nResumeResizeMillisec = 0; // Time after resume the layout is recalculated once
 	bool m_bWaitingForDrawingAreaSizeAllocate;
 
 	Gtk::Stack* m_p0StackScreens = nullptr;

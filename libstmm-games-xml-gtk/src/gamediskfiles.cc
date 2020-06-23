@@ -20,6 +20,8 @@
 #include "gamediskfiles.h"
 #include "stmm-games-xml-gtk-config.h"
 
+#include "xmlutilfile.h"
+
 #include <stmm-games-file/file.h>
 
 #include <glibmm.h>
@@ -32,11 +34,6 @@
 #include <memory>
 #include <iostream>
 
-#ifdef STMM_SNAP_PACKAGING
-#include <array>
-#include <errno.h>
-#include <string.h>
-#endif //STMM_SNAP_PACKAGING
 #include <stdint.h>
 
 namespace stmg
@@ -72,34 +69,6 @@ const std::string::value_type* GameDiskFiles::s_aSoundFileExt[] = {
 
 const File GameDiskFiles::s_oEmptyFile{};
 
-#ifdef STMM_SNAP_PACKAGING
-static std::string getEnvString(const char* p0Name) noexcept
-{
-	const char* p0Value = ::secure_getenv(p0Name);
-	std::string sValue{(p0Value == nullptr) ? "" : p0Value};
-	return sValue;
-}
-static bool execCmd(const char* sCmd, std::string& sResult, std::string& sError) noexcept
-{
-	::fflush(nullptr);
-	sError.clear();
-	sResult.clear();
-	std::array<char, 128> aBuffer;
-	FILE* pFile = ::popen(sCmd, "r");
-	if (pFile == nullptr) {
-		sError = std::string("Error: popen() failed: ") + ::strerror(errno) + "(" + std::to_string(errno) + ")";
-		return false; //--------------------------------------------------------
-	}
-	while (!::feof(pFile)) {
-		if (::fgets(aBuffer.data(), sizeof(aBuffer), pFile) != nullptr) {
-			sResult += aBuffer.data();
-		}
-	}
-	const auto nRet = ::pclose(pFile);
-	return (nRet == 0);
-}
-#endif //STMM_SNAP_PACKAGING
-
 static bool checkCanHomeLocal(bool bIncludeHomeLocal)
 {
 	#ifdef STMM_SNAP_PACKAGING
@@ -107,13 +76,13 @@ static bool checkCanHomeLocal(bool bIncludeHomeLocal)
 		return false; //--------------------------------------------------------
 	}
 	const std::string sHomeRelDir = libconfig::xmlgtk::getUserDataHomeRelDirPath();
-	const std::string sSnapName = getEnvString("SNAP_NAME");
+	const std::string sSnapName = XmlUtil::getEnvString("SNAP_NAME");
 	if (sSnapName.empty() || sHomeRelDir.empty()) {
 		return false; //--------------------------------------------------------
 	}
 	std::string sResult;
 	std::string sError;
-	if (! execCmd("snapctl is-connected dot-local-share-stmm-games", sResult, sError)) {
+	if (! XmlUtil::execCmd("snapctl is-connected dot-local-share-stmm-games", sResult, sError)) {
 		sError = "Not allowed to load custom games and themes from '~/" + sHomeRelDir + "'."
 				"\nGrant permission with 'sudo snap connect " + sSnapName + ":dot-local-share-stmm-games'";
 		std::cout << sError << '\n';

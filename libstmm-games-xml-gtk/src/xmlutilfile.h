@@ -40,6 +40,12 @@ void makePath(const std::string& sPath);
  */
 void makePath(const File& oFile);
 
+std::string getEnvString(const char* p0Name) noexcept;
+
+#ifdef STMM_SNAP_PACKAGING
+bool execCmd(const char* sCmd, std::string& sResult, std::string& sError) noexcept;
+#endif //STMM_SNAP_PACKAGING
+
 } // namespace XmlUtil
 
 } // namespace stmg

@@ -4,9 +4,12 @@ stmm-games (0.25) unstable; urgency=low
   * Improve constraints parsing
   * Rename numeric limits of int32_t from min() to lowest()
   * Remove title from dialogs
+  * Snap can now load games from ${HOME}/stmm-games
+  * Fix window state change not recalculating layout bug
+  * Fix StaticGrid theme animation bug
   * Increase minor version
 
- -- Stefano Marsili <efanomars@gmx.ch>  Mon, 22 Jun 2020 19:29:39 +0100
+ -- Stefano Marsili <efanomars@gmx.ch>  Tue, 23 Jun 2020 19:29:39 +0100
 
 stmm-games (0.24) unstable; urgency=low
 

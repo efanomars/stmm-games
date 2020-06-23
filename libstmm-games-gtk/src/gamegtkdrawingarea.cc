@@ -170,7 +170,7 @@ bool GameGtkDrawingArea::delayedAllocation() noexcept
 {
 //std::cout << "GameGtkDrawingArea::delayedAllocation: " << m_oTimer.elapsed() << '\n';
 	const Gtk::Allocation oAllocation = get_allocation();
-//std::cout << "GameGtkDrawingArea::delayedAllocation: " << m_oTimer.elapsed()
+//std::cout << "GameGtkDrawingArea::delayedAllocation: "
 //<< "  x=" << oAllocation.get_x()
 //<< "  y=" << oAllocation.get_y()
 //<< "  w=" << oAllocation.get_width()

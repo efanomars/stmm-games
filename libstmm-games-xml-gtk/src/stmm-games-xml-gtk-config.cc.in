@@ -20,9 +20,12 @@
 
 #include "stmm-games-xml-gtk-config.h"
 
-#include <cassert>
+#include "xmlutilfile.h"
 
-#include <stdlib.h>
+#include <cassert>
+#ifdef STMM_SNAP_PACKAGING
+#include <iostream>
+#endif //STMM_SNAP_PACKAGING
 
 namespace stmg
 {
@@ -43,13 +46,6 @@ const std::string& getVersion()
 	return s_sLibVersion;
 }
 
-static std::string getEnvString(const char* p0Name) noexcept
-{
-	const char* p0Value = ::secure_getenv(p0Name);
-	std::string sValue{(p0Value == nullptr) ? "" : p0Value};
-	return sValue;
-}
-
 std::string getUserDataHomeRelDirPath()
 {
 	static const std::string s_sHomeRelDir{"@STMMI_HOME_REL_DATA_DIR@"};
@@ -64,10 +60,10 @@ std::string getUserDataDirPath()
 	}
 	#ifdef STMM_SNAP_PACKAGING
 	// ex. /home/myusername/snap/mysnapname/x1
-	const std::string sHome = getEnvString("SNAP_USER_DATA");
+	const std::string sHome = XmlUtil::getEnvString("SNAP_USER_DATA");
 	#else
 	// ex. /home/myusername
-	const std::string sHome = getEnvString("HOME");
+	const std::string sHome = XmlUtil::getEnvString("HOME");
 	#endif //STMM_SNAP_PACKAGING
 	if (sHome.empty()) {
 		return sHome; //--------------------------------------------------------
@@ -80,13 +76,39 @@ const std::string getPackageDataDirPath()
 	static const std::string s_sDataDir = "@STMMI_PKG_DATA_DIR@";
 
 	#ifdef STMM_SNAP_PACKAGING
-	const std::string sPrefix = getEnvString("SNAP");
+	const std::string sPrefix = XmlUtil::getEnvString("SNAP");
 	#else
 	const std::string sPrefix;
 	#endif //STMM_SNAP_PACKAGING
 
 	return sPrefix + s_sDataDir;
 }
+
+#ifdef STMM_SNAP_PACKAGING
+static const std::string getRealHomeDir()
+{
+	std::string sHome = XmlUtil::getEnvString("HOME");
+	if (sHome.substr(0, 6) == "/home/") {
+		// expected values:
+		//   /home/myuser
+		//   /home/myuser/snap/x8
+		// extract /home/myuser
+		const auto nThirdSlashPos = sHome.find('/', 6);
+		if (nThirdSlashPos != std::string::npos) {
+			if (sHome.substr(nThirdSlashPos + 1, 4) != "snap") {
+				sHome.clear();
+			} else {
+				sHome = sHome.substr(0, nThirdSlashPos);
+			}
+		} else if (sHome.size() == 6) {
+			sHome.clear();
+		}
+	} else {
+		sHome.clear();
+	}
+	return sHome;
+}
+#endif //STMM_SNAP_PACKAGING
 
 std::vector<std::string> getDataDirPaths(bool bIncludeHomeLocal, bool bIncludeAdditionalEnvPath)
 {
@@ -96,10 +118,26 @@ std::vector<std::string> getDataDirPaths(bool bIncludeHomeLocal, bool bIncludeAd
 
 	std::vector<std::string> aDataDirs;
 
-	std::string sHome = getEnvString("HOME");
-
 	if (bIncludeAdditionalEnvPath) {
-		std::string sAddiPath = getEnvString(s_p0EnvVarAdditionalPath);
+		#ifdef STMM_SNAP_PACKAGING
+		const std::string sRealHomePath = getRealHomeDir();
+		if (! sRealHomePath.empty()) {
+			const std::string sAddiPath = sRealHomePath + "/stmm-games";
+			const std::string sSnapName = XmlUtil::getEnvString("SNAP_NAME");
+			if (! sSnapName.empty()) {
+				std::string sResult;
+				std::string sError;
+				if (! XmlUtil::execCmd("snapctl is-connected home", sResult, sError)) {
+					sError = "Not allowed to load custom games and themes from '" + sAddiPath + "'."
+							"\nGrant permission with 'sudo snap connect " + sSnapName + ":home :home'";
+					std::cout << sError << '\n';
+				} else {
+					aDataDirs.push_back(sAddiPath);
+				}
+			}
+		}
+		#else
+		std::string sAddiPath = XmlUtil::getEnvString(s_p0EnvVarAdditionalPath);
 		if ((! sAddiPath.empty()) && (sAddiPath[0] == '/')) {
 			auto nAddiLen = sAddiPath.size();
 			// eliminate trailing slash
@@ -110,17 +148,15 @@ std::vector<std::string> getDataDirPaths(bool bIncludeHomeLocal, bool bIncludeAd
 			// can't be root directory
 			if (nAddiLen > 1) {
 				if (sAddiPath.find_first_not_of('/') != std::string::npos) {
-					#ifdef STMM_SNAP_PACKAGING
-					// perform additional checks (in user's home)
-					#endif //STMM_SNAP_PACKAGING
 					aDataDirs.push_back(sAddiPath);
 				}
 			}
 		}
+		#endif //STMM_SNAP_PACKAGING
 	}
 
 	#ifdef STMM_SNAP_PACKAGING
-	const std::string sPrefix = getEnvString("SNAP");
+	const std::string sPrefix = XmlUtil::getEnvString("SNAP");
 	#else
 	const std::string sPrefix;
 	#endif //STMM_SNAP_PACKAGING
@@ -141,30 +177,15 @@ std::vector<std::string> getDataDirPaths(bool bIncludeHomeLocal, bool bIncludeAd
 
 	#ifdef STMM_SNAP_PACKAGING
 	const std::string sHomeRelDir = getUserDataHomeRelDirPath();
-	if ((! bIncludeHomeLocal) && (! sHomeRelDir.empty())) {
+	if ((! bIncludeHomeLocal) || sHomeRelDir.empty()) {
 		return aDataDirs; //----------------------------------------------------
 	}
 	// ex. sHomeRelDir = .local/share/stmm-games
-	if (sHome.substr(0, 6) == "/home/") {
-		// expected values:
-		//   /home/myuser
-		//   /home/myuser/snap/x8
-		// extract /home/myuser
-		const auto nThirdSlashPos = sHome.find('/', 6);
-		if (nThirdSlashPos != std::string::npos) {
-			if (sHome.substr(nThirdSlashPos + 1, 4) != "snap") {
-				sHome.clear();
-			} else {
-				sHome = sHome.substr(0, nThirdSlashPos);
-			}
-		} else if (sHome.size() == 6) {
-			sHome.clear();
-		}
-		if (! sHome.empty()) {
-			const std::string sRealUserDataDir = sHome + "/" + sHomeRelDir;
-			if (sUserDataDir != sRealUserDataDir) {
-				aDataDirs.push_back(sRealUserDataDir);
-			}
+	const std::string sRealHomePath = getRealHomeDir();
+	if (! sRealHomePath.empty()) {
+		const std::string sRealUserDataPath = sRealHomePath + "/" + sHomeRelDir;
+		if (sUserDataDir != sRealUserDataPath) {
+			aDataDirs.push_back(sRealUserDataPath);
 		}
 	}
 	#endif //STMM_SNAP_PACKAGING

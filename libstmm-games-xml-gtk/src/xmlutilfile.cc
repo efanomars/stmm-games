@@ -26,6 +26,11 @@
 #include <cassert>
 #include <stdexcept>
 
+#ifdef STMM_SNAP_PACKAGING
+#include <array>
+#include <string.h>
+#include <stdlib.h>
+#endif //STMM_SNAP_PACKAGING
 #include <errno.h>
 #include <sys/stat.h>
 
@@ -87,6 +92,34 @@ void makePath(const File& oFile)
 	}
 	makePath(sFile.substr(0, nPos));
 }
+
+std::string getEnvString(const char* p0Name) noexcept
+{
+	const char* p0Value = ::secure_getenv(p0Name);
+	std::string sValue{(p0Value == nullptr) ? "" : p0Value};
+	return sValue;
+}
+#ifdef STMM_SNAP_PACKAGING
+bool execCmd(const char* sCmd, std::string& sResult, std::string& sError) noexcept
+{
+	::fflush(nullptr);
+	sError.clear();
+	sResult.clear();
+	std::array<char, 128> aBuffer;
+	FILE* pFile = ::popen(sCmd, "r");
+	if (pFile == nullptr) {
+		sError = std::string("Error: popen() failed: ") + ::strerror(errno) + "(" + std::to_string(errno) + ")";
+		return false; //--------------------------------------------------------
+	}
+	while (!::feof(pFile)) {
+		if (::fgets(aBuffer.data(), sizeof(aBuffer), pFile) != nullptr) {
+			sResult += aBuffer.data();
+		}
+	}
+	const auto nRet = ::pclose(pFile);
+	return (nRet == 0);
+}
+#endif //STMM_SNAP_PACKAGING
 
 } // namespace XmlUtil
 

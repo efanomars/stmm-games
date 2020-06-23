@@ -78,12 +78,16 @@ static const Glib::ustring s_sScreenNameChooseGame = "ChooseGame";
 static const Glib::ustring s_sScreenNameChooseTheme = "ChooseTheme";
 static const Glib::ustring s_sScreenNameChoosePlayers = "ChoosePlayers";
 
-static constexpr int32_t s_nMinDefaultPixW = 100;
-static constexpr int32_t s_nMinDefaultPixH = 150;
+static constexpr const int32_t s_nMinDefaultPixW = 100;
+static constexpr const int32_t s_nMinDefaultPixH = 150;
 
-static constexpr int32_t s_nNewGameTransitionMillisec = 100;
+static constexpr const int32_t s_nNewGameTransitionMillisec = 100;
 
 static constexpr const int32_t s_nButtonLeftRightMargin = 20;
+
+static constexpr const int32_t s_nResizeConnMillisec = 1000; // each second the layout is recalculated
+static constexpr const int32_t s_nResumeResizeMillisec = 0; // Time after resume the layout is recalculated once
+static constexpr const int32_t s_nWindowStateChangeResizeMillisec = 50; // Time after a state change the layout is recalculated once
 
 std::pair<Glib::RefPtr<GameWindow>, std::string> GameWindow::create(MainWindowData&& oMainWindowData) noexcept
 {
@@ -126,6 +130,14 @@ GameWindow::GameWindow(MainWindowData&& oMainWindowData) noexcept
 	if (m_oD.m_bPauseIfWindowDeactivated) {
 		property_is_active().signal_changed().connect(sigc::mem_fun(this, &GameWindow::onActiveChanged));
 	}
+	const Gdk::EventMask oCurMask = get_events();
+	const Gdk::EventMask oNewMask = oCurMask | Gdk::STRUCTURE_MASK;
+	if (oNewMask != oCurMask) {
+		set_events(oNewMask);
+	}
+	signal_configure_event().connect(sigc::mem_fun(*this, &GameWindow::onConfigureEvent));
+	signal_window_state_event().connect(sigc::mem_fun(*this, &GameWindow::onWindowStateEvent));
+
 	const std::string sGameName = m_refPrefs->getGameName();
 	if (!sGameName.empty()) {
 		assert(m_oD.m_refGameLoader);
@@ -353,7 +365,7 @@ std::string GameWindow::init() noexcept
 
 	show_all_children();
 
-	signal_touch_event().connect(sigc::mem_fun(*this, &GameWindow::on_sig_touch_event));
+	signal_touch_event().connect(sigc::mem_fun(*this, &GameWindow::onTouchEvent));
 	signal_realize().connect(sigc::mem_fun(*this, &GameWindow::onWindowRealize));
 	return "";
 }
@@ -819,12 +831,7 @@ bool GameWindow::onResizeTimeout() noexcept
 	const double fCurrentTime = m_oClock.elapsed();
 //std::cout << "GameWindow::onResizeTimeout() m_fLastDelayedAllocation=" << m_fLastDelayedAllocation << " fCurrentTime=" << fCurrentTime << '\n';
 	if (m_fLastDelayedAllocation + 1.0 * s_nResizeConnMillisec / 1000 < fCurrentTime) {
-		const bool bDirty = m_p0GameGtkDrawingArea->delayedAllocation();
-		if (bDirty) {
-			//TODO to be changed as soon Gdk::Window is fixed
-			gdk_window_invalidate_rect(get_window()->gobj(), nullptr, true);
-			//Gdk::Window::invalidate_rect(nullptr, true);
-		}
+		onResizedOut();
 		m_fLastDelayedAllocation = m_oClock.elapsed();
 	}
 	return true;
@@ -1076,12 +1083,7 @@ void GameWindow::onDrawingAreaSizeAllocate(Gtk::Allocation& /*oAllocation*/) noe
 }
 void GameWindow::onButtonResumeOut() noexcept
 {
-	const bool bDirty = m_p0GameGtkDrawingArea->delayedAllocation();
-	if (bDirty) {
-		//TODO to be changed as soon Gdk::Window is fixed
-		gdk_window_invalidate_rect(get_window()->gobj(), nullptr, true);
-		//Gdk::Window::invalidate_rect(nullptr, true);
-	}
+	onResizedOut();
 }
 void GameWindow::onButtonAbort() noexcept
 {
@@ -1181,7 +1183,7 @@ bool GameWindow::on_motion_notify_event(GdkEventMotion* p0GdkEvent)
 	}
 	return Gtk::Window::on_motion_notify_event(p0GdkEvent);
 }
-bool GameWindow::on_sig_touch_event(GdkEventTouch* p0TouchEvent)
+bool GameWindow::onTouchEvent(GdkEventTouch* p0TouchEvent) noexcept
 {
 	if (m_eStatus == STATUS_PLAY) {
 		// propagate to device manager
@@ -1194,6 +1196,26 @@ bool GameWindow::on_sig_touch_event(GdkEventTouch* p0TouchEvent)
 		return true; //---------------------------------------------------------
 	}
 	return false;
+}
+bool GameWindow::onConfigureEvent(GdkEventConfigure* /*p0ConfigureEvent*/) noexcept
+{
+	return onWindowStateEvent(nullptr);
+}
+bool GameWindow::onWindowStateEvent(GdkEventWindowState* /*p0WindowStateEvent*/) noexcept
+{
+	if (m_bGameIsTicking && m_refGame->isRunning()) {
+		gameInterrupt(GameProxy::INTERRUPT_PAUSE);
+		Glib::signal_timeout().connect_once(
+			sigc::mem_fun(*this, &GameWindow::onResizedOut), s_nWindowStateChangeResizeMillisec);
+	}
+	return false;
+}
+void GameWindow::onResizedOut() noexcept
+{
+	const bool bDirty = m_p0GameGtkDrawingArea->delayedAllocation();
+	if (bDirty) {
+		::gdk_window_invalidate_rect(get_window()->gobj(), nullptr, true);
+	}
 }
 
 } // namespace stmg

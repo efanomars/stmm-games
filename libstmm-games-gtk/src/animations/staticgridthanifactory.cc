@@ -53,6 +53,7 @@ void StaticGridThAniFactory::StaticGridThAni::draw(int32_t /*nViewTick*/, int32_
 	const bool bNewSize = getRectInternal();
 	if (bNewSize) {
 //std::cout << "StaticGridThAniFactory::StaticGridThAni::draw new size  m_oPixRect.m_nW=" << m_oPixRect.m_nW << "  m_oPixRect.m_nH=" << m_oPixRect.m_nH << '\n';
+//std::cout << "                                              new pos   m_oPixRect.m_nX=" << m_oPixRect.m_nX << "  m_oPixRect.m_nY=" << m_oPixRect.m_nY << '\n';
 		int32_t nSurfPixW = m_oPixRect.m_nW;
 		int32_t nSurfPixH = m_oPixRect.m_nH;
 		bool bEnlarged = false;
@@ -81,7 +82,7 @@ void StaticGridThAniFactory::StaticGridThAni::draw(int32_t /*nViewTick*/, int32_
 		m_refCc->save();
 		m_refCc->set_source_rgba(0, 0, 0, 0); // transparency
 		m_refCc->set_operator(Cairo::OPERATOR_SOURCE);
-		m_refCc->rectangle(0, 0, m_oPixRect.m_nW, m_oPixRect.m_nH);
+		m_refCc->rectangle(0, 0, nSurfPixW, nSurfPixH);
 		m_refCc->fill();
 
 		m_refCc->set_operator(Cairo::OPERATOR_OVER);
