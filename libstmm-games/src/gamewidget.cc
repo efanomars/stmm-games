@@ -1,6 +1,4 @@
 /*
- * File:   gamewidget.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   gamewidget.cc
  */
 
 #include "gamewidget.h"
@@ -140,7 +141,7 @@ void GameWidget::setTeam(int32_t nTeam) noexcept
 	}
 }
 
-void GameWidget::dump(int32_t 
+void GameWidget::dump(int32_t
 #ifndef NDEBUG
 nIndentSpaces
 #endif //NDEBUG
@@ -148,7 +149,7 @@ nIndentSpaces
 {
 	#ifndef NDEBUG
 	auto sIndent = std::string(nIndentSpaces, ' ');
-	
+
 	for (int32_t nIdx = 0; nIdx < g_nTotLayoutConfigs; ++nIdx) {
 		std::cout << sIndent << "m_aHorizAxisFit[" << nIdx << "]: "; m_oData.m_aHorizAxisFit[nIdx].dump();
 		std::cout << sIndent << "m_aVertAxisFit[" << nIdx << "]:  "; m_oData.m_aVertAxisFit[nIdx].dump();

@@ -1,7 +1,5 @@
 /*
- * File:   themewidgetinteractive.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   themewidgetinteractive.h
  */
 
 #ifndef STMG_THEME_WIDGET_INTERACTIVE_H
@@ -67,7 +68,7 @@ public:
 	 */
 	inline bool isInteractive() const noexcept
 	{
-		return m_bInteractive; // || m_p0TW->getModel()->isAssignedToHuman() 
+		return m_bInteractive; // || m_p0TW->getModel()->isAssignedToHuman()
 	}
 	/** The pointer to the interface's theme widget.
 	 * @return The widget implementing this interface. Can't be null.

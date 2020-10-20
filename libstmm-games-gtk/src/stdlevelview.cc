@@ -1,6 +1,4 @@
 /*
- * File:   stdlevelview.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stdlevelview.cc
  */
 
 #include "stdlevelview.h"
@@ -434,8 +435,8 @@ void StdLevelView::drawStepToBuffers(int32_t nViewTick, int32_t nTotViewTicks, b
 //std::cout << "StdLevelView::drawStep    m_oTickTileAnis                    nX=" << nX << " nY=" << nY << '\n';
 			m_refBoardCc->save();
 			m_refBoardCc->set_operator(Cairo::OPERATOR_SOURCE);
-			m_refBoardCc->rectangle(nX * m_nTileW, nY * m_nTileH, m_nTileW, m_nTileH);
 			m_refBoardCc->set_source_rgba(0, 0, 0, 0);
+			m_refBoardCc->rectangle(nX * m_nTileW, nY * m_nTileH, m_nTileW, m_nTileH);
 			m_refBoardCc->fill();
 			drawBoard(m_refBoardCc, nX, nY, 1, 1, nViewTick, nTotViewTicks);
 			m_refBoardCc->restore();
@@ -666,7 +667,7 @@ bool StdLevelView::drawAniData(AniData& oAniData, const Cairo::RefPtr<Cairo::Con
 std::unique_ptr<StdLevelView::AniData> StdLevelView::anidataRecycle() noexcept
 {
 	const bool bRecycleEmpty = m_aAniDataRecycle.empty();
-	std::unique_ptr<AniData> refAniData = (bRecycleEmpty 
+	std::unique_ptr<AniData> refAniData = (bRecycleEmpty
 			? std::make_unique<AniData>()
 			: std::unique_ptr<AniData>(m_aAniDataRecycle.back().release()));
 	if (bRecycleEmpty) {
@@ -678,7 +679,7 @@ std::unique_ptr<StdLevelView::AniData> StdLevelView::anidataRecycle() noexcept
 	assert(refAniData);
 	return refAniData;
 }
-std::vector< std::unique_ptr<StdLevelView::AniData> >::iterator 
+std::vector< std::unique_ptr<StdLevelView::AniData> >::iterator
 		StdLevelView::anidataRecycleKeepOrder(std::vector< std::unique_ptr<AniData> >& aAniData
 											, const std::vector< std::unique_ptr<AniData> >::iterator& itAniData) noexcept
 {
@@ -832,7 +833,7 @@ void StdLevelView::blockPostAdd(LevelBlock& oBlock) noexcept
 //std::cout << "StdLevelView::blockPostAdd" << '\n';
 	auto refAniData = anidataRecycle();
 	//const bool bRecycleEmpty = m_aAniDataRecycle.empty();
-	//std::unique_ptr<AniData> refAniData = (bRecycleEmpty 
+	//std::unique_ptr<AniData> refAniData = (bRecycleEmpty
 	//		? std::make_unique<AniData>()
 	//		: std::make_unique<AniData>(m_aAniDataRecycle.back().release()));
 	//if (!bRecycleEmpty) {

@@ -1,7 +1,5 @@
 /*
- * File:   scrollerevent.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   scrollerevent.cc
  */
 
 #include "events/scrollerevent.h"
@@ -116,7 +117,7 @@ void ScrollerEvent::trigger(int32_t nMsg, int32_t nValue, Event* p0TriggeringEve
 	// ACTIVATE activate event
 	// INIT init
 	// RUN  scroll up if possible
-	// last RUN disactivate, state to INIT
+	// last RUN deactivate, state to INIT
 	//          send messages to finished-group listeners
 	Level& oLevel = level();
 	const int32_t nTimer = oLevel.game().gameElapsed();
@@ -391,7 +392,7 @@ const TileAnimator* ScrollerEvent::boardGetTileAnimator(int32_t nX, int32_t nY, 
 		return nullptr;
 	}
 	return level().boardGetTileAnimator(nX, nY, nIdxTileAni);
-	
+
 }
 
 } // namespace stmg

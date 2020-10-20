@@ -1,7 +1,5 @@
 /*
- * File:   themewidget.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   themewidget.h
  */
 
 #ifndef STMG_THEME_WIDGET_H
@@ -61,7 +62,7 @@ public:
 	/** Whether the widget's appearance (or one of its parents) can change.
 	 * This is a static property of the widget calculated when it is already
 	 * inserted in its final layout and shouldn't change during its lifetime.
-	 * If a call to drawIfChanged() might return `true` this function returns 
+	 * If a call to drawIfChanged() might return `true` this function returns
 	 * `true`, `false` otherwise.
 	 * @return Whether the widget can change.
 	 */
@@ -183,7 +184,7 @@ protected:
 	/** Sets the tile size of the widget and its configuration.
 	 * The widget should evaluate and set the actual size of the widget through
 	 * its size functions.
-	 * 
+	 *
 	 * This function is called when the layout has determined the best tile size
 	 * and layout config in order to maximize the tile size itself.
 	 * @param nTileW The tile width. Must be &gt;0.

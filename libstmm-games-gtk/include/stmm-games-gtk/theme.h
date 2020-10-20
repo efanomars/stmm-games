@@ -1,6 +1,4 @@
 /*
- * File:   theme.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   theme.h
+ */
 
 #ifndef STMG_THEME_H
 #define STMG_THEME_H
@@ -23,6 +24,8 @@
 #include <stmm-games/util/basictypes.h>
 
 #include <memory>
+#include <utility>
+#include <string>
 
 #include <stdint.h>
 
@@ -70,6 +73,21 @@ public:
 	virtual shared_ptr<ThemeWidget> createWidget(const shared_ptr<GameWidget>& refGameWidget, double fTileWHRatio
 												, const Glib::RefPtr<Pango::Context>& refFontContext) noexcept = 0;
 
+	class RuntimeVariablesEnv
+	{
+	public:
+		virtual ~RuntimeVariablesEnv() noexcept = default;
+		/** Get variable id from name callback.
+		 * @param sVarName The variable name. Cannot be empty.
+		 * @return The variable id or -1 if not defined.
+		 */
+		virtual int32_t getVariableIdFromName(const std::string& sVarName) noexcept = 0;
+		/** Get variable value callback.
+		 * @param nVarId The variable id as returned from getVariableIdFromName().
+		 * @return The current value.
+		 */
+		virtual int32_t getVariableValue(int32_t nVarId) noexcept = 0;
+	};
 	/** Create a theme context.
 	 * The bRegister value tells to the theme whether the tile size of the context
 	 * is stable and will be used often. If true images and possibly other data structures
@@ -80,10 +98,12 @@ public:
 	 * @param fSoundScaleY The tile to sound reference system scale for the y axis.
 	 * @param fSoundScaleZ The tile to sound reference system scale for the z axis.
 	 * @param refFontContext The font context. Cannot be null.
+	 * @param p0RuntimeVariablesEnv Cannot be null.
 	 * @return The theme context.
 	 */
 	virtual shared_ptr<ThemeContext> createContext(NSize oTileWH, bool bRegister, double fSoundScaleX, double fSoundScaleY, double fSoundScaleZ
-													, const Glib::RefPtr<Pango::Context>& refFontContext) noexcept = 0;
+													, const Glib::RefPtr<Pango::Context>& refFontContext
+													, RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept = 0;
 };
 
 } // namespace stmg

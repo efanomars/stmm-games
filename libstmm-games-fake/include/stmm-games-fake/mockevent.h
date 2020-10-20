@@ -1,7 +1,5 @@
 /*
- * File:   mockevent.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,40 +14,54 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   mockevent.h
+ */
 /*   @DO_NOT_REMOVE_THIS_LINE_IT_IS_USED_BY_COMMONTESTING_CMAKE@   */
 
 #ifndef STMG_MOCK_EVENT_H
 #define STMG_MOCK_EVENT_H
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "event.h"
-#else
 #include <stmm-games/event.h>
-#endif
 
 #include <vector>
+#include <functional>
 
 #include <stdint.h>
 
 namespace stmg
 {
 
+class Level;
+
 class MockEvent : public Event
 {
 public:
 	struct Init : public Event::Init
 	{
+		std::function<void(Level& oLevel)> m_oTriggerFunction; /**< The function called */
 	};
 	/** Constructor.
 	 * @param oInit The initialization data.
 	 */
-	MockEvent(Init&& oInit) noexcept;
+	explicit MockEvent(Init&& oInit) noexcept;
+	/** Constructor with custom function.
+	 * The function is called when the event is triggered. See Level::activateEvent().
+	 * @param oInit The initialization data.
+	 * @param oTriggerFunction The trigger function.
+	 */
+	MockEvent(Init&& oInit, std::function<void(Level& oLevel)>&& oTriggerFunction) noexcept;
 
 protected:
 	/** Reinitialization.
 	 * @param oInit The initialization data.
 	 */
 	void reInit(Init&& oInit) noexcept;
+	/** Reinitialization with custom function.
+	 * @param oInit The initialization data.
+	 * @param oTriggerFunction The trigger function.
+	 */
+	void reInit(Init&& oInit, std::function<void(Level& oLevel)>&& oTriggerFunction) noexcept;
 public:
 	/** Sets a variable when triggered (before inform listeners is called).
 	 * This is useful because variables can only be set within a game tick.
@@ -62,7 +74,7 @@ public:
 	 */
 	void setVariable(int32_t nVarId, int32_t nTeam, int32_t nMate, int32_t nValue) noexcept;
 	/** Set the value the trigger function should send.
-	 * @param nGroup The group that should be triggered. 
+	 * @param nGroup The group that should be triggered.
 	 * @param nValue The value passed.
 	 * @param nSkipTicks How many ticks to the triggering.
 	 */
@@ -86,6 +98,8 @@ private:
 		int32_t m_nValue = -1;
 	};
 	std::vector<VarData> m_aVarDatas;
+
+	std::function<void(Level& oLevel)> m_oTriggerFunction;
 private:
 	MockEvent() = delete;
 	MockEvent(const MockEvent& oSource) = delete;

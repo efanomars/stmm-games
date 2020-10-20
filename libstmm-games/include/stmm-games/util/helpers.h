@@ -1,7 +1,5 @@
 /*
- * File:   helpers.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,12 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   helpers.h
+ */
 
 #ifndef STMG_HELPERS_H
 #define STMG_HELPERS_H
 
-#include "basictypes.h"
-#include "direction.h"
+#include "util/basictypes.h"
+#include "util/direction.h"
 
 namespace stmg
 {
@@ -53,6 +54,36 @@ NRect boardInsertMovingPost(const NRect& oRect, Direction::VALUE eDir) noexcept;
  * @return The rectangle.
  */
 NRect boardInsertAdd(const NRect& oRect, Direction::VALUE eDir) noexcept;
+
+/** The remove rectangle of a Level::boardInsert() within a delimiting area.
+ * @param oRect The insert rectangle.
+ * @param eDir The direction.
+ * @param oArea The delimiting area.
+ * @return The rectangle.
+ */
+NRect boardInsertInAreaRemove(const NRect& oRect, Direction::VALUE eDir, const NRect& oArea) noexcept;
+/** The moved rectangle of a Level::boardInsert() before the move within a delimiting area.
+ * @param oRect The insert rectangle.
+ * @param eDir The The direction.
+ * @param oArea The delimiting area.
+ * @return The rectangle.
+ */
+NRect boardInsertInAreaMovingPre(const NRect& oRect, Direction::VALUE eDir, const NRect& oArea) noexcept;
+/** The moved rectangle of a Level::boardInsert() after the move within a delimiting area.
+ * @param oRect The insert rectangle.
+ * @param eDir The direction.
+ * @param oArea The delimiting area.
+ * @return The rectangle.
+ */
+NRect boardInsertInAreaMovingPost(const NRect& oRect, Direction::VALUE eDir, const NRect& oArea) noexcept;
+/** The add rectangle of a Level::boardInsert() within a delimiting area.
+ * @param oRect The insert rectangle.
+ * @param eDir The direction.
+ * @param oArea The delimiting area.
+ * @return The rectangle.
+ */
+NRect boardInsertInAreaAdd(const NRect& oRect, Direction::VALUE eDir, const NRect& oArea) noexcept;
+
 /** The remove rectangle of a Level::boardScroll().
  * @param oBoardSize The board size
  * @param eDir The direction.

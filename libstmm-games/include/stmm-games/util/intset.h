@@ -1,7 +1,5 @@
 /*
- * File:   intset.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   intset.h
  */
 
 #ifndef STMG_INT_SET_H
@@ -60,7 +61,7 @@ public:
 	/** Constructs integer set with ordered stepped value range.
 	 * Value at index 0 is `nFromValue`, value at index 1 is `nFromValue + nStep`
 	 * provided it isn't past nToValue, etc.
-	 * 
+	 *
 	 * Parameter `nStep` can only be 0 if `nFromValue == nToValue`.
 	 * @param nFromValue The start value.
 	 * @param nToValue The end value.

@@ -1,7 +1,5 @@
 /*
- * File:   xmlhighscoresloader.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmlhighscoresloader.cc
  */
 
 #include "xmlhighscoresloader.h"
@@ -106,7 +107,7 @@ shared_ptr<Highscore> XmlHighscoresLoader::getHighscore(const std::string& sGame
 	if (!oPairTitle.first) {
 		return shared_ptr<Highscore>{}; //--------------------------------------
 	}
-		
+
 	auto aHSs = parseGameHighscores(refHighscoresDefinition, oHSFile, sGameName
 									, false, oPairCode.second, oPairTitle.second);
 	assert(aHSs.size() == 1);
@@ -334,7 +335,7 @@ bool XmlHighscoresLoader::updateHighscore(const std::string& sGameName, const Ap
 
 //std::cout << "XmlHighscoresLoader::updateHighscore File=" << oHSFile.getFullPath() << '\n';
 	try {
-		XmlUtil::makePath(oHSFile);
+		XmlUtilGame::makePath(oHSFile);
 		p0Document->write_to_file_formatted(oHSFile.getFullPath());
 	} catch (const xmlpp::exception& ) {
 		return false; //--------------------------------------------------------
@@ -357,7 +358,7 @@ void XmlHighscoresLoader::writeHighscores(xmlpp::Element* p0RootElement, const H
 			xmlpp::Element* p0ValueElement = p0ScoreElement->add_child(s_sHighscoresScoreValueNodeName);
 			p0ValueElement->set_attribute(s_sHighscoresScoreValueValueAttr, std::to_string(oValue.get()));
 			p0ValueElement->set_attribute(s_sHighscoresScoreValueFormatAttr, std::to_string(static_cast<int32_t>(oValue.getFormat())));
-		}	
+		}
 	}
 }
 

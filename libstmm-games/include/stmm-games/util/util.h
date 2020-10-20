@@ -1,6 +1,4 @@
 /*
- * File:   util.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,11 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   util.h
+ */
 
 #ifndef STMG_UTIL_H
 #define STMG_UTIL_H
 
-#include "basictypes.h"
+#include "util/basictypes.h"
 
 #include <list>
 #include <vector>
@@ -293,7 +294,8 @@ static std::pair<T, std::string> strToRangeNumber(const std::string& sNr, T oMin
 template<class LT>
 bool listContains(std::list<LT>& oList, const LT& oValue, typename std::list<LT>::iterator& it) noexcept
 {
-	for (; it != oList.end(); ++it) {
+	const auto itEnd = oList.end();
+	for (; it != itEnd; ++it) {
 		if (*it == oValue) {
 			return true;
 		}
@@ -303,8 +305,9 @@ bool listContains(std::list<LT>& oList, const LT& oValue, typename std::list<LT>
 template<class LT>
 bool listContains(const std::list<LT>& oList, const LT& oValue) noexcept
 {
+	const auto itEnd = oList.end();
 	for (typename std::list<LT>::const_iterator it = oList.begin()
-				; it != oList.end(); ++it) {
+				; it != itEnd; ++it) {
 		if (*it == oValue) {
 			return true;
 		}
@@ -318,6 +321,20 @@ bool listExtract(std::list<LT>& oList, const LT& oValue) noexcept
 	if (listContains<LT>(oList, oValue, it)) {
 		oList.erase(it);
 		return true;
+	}
+	return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template<class ValueType>
+bool vectorContains(const std::vector<ValueType>& oVector, const ValueType& oValue) noexcept
+{
+	const auto itEnd = oVector.end();
+	for (typename std::vector<ValueType>::const_iterator it = oVector.begin()
+				; it != itEnd; ++it) {
+		if (*it == oValue) {
+			return true;
+		}
 	}
 	return false;
 }

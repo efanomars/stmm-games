@@ -1,6 +1,4 @@
 /*
- * File:   dumbblockevent.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,26 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   dumbblockevent.h
+ */
 /*   @DO_NOT_REMOVE_THIS_LINE_IT_IS_USED_BY_COMMONTESTING_CMAKE@   */
 
 #ifndef _ZIMTRIS_DUMB_BLOCK_EVENT_H_
 #define _ZIMTRIS_DUMB_BLOCK_EVENT_H_
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "levelblock.h"
-#include "event.h"
-#include "block.h"
-#include "levellisteners.h"
-#include "util/basictypes.h"
-#include "util/direction.h"
-#else
 #include <stmm-games/levelblock.h>
 #include <stmm-games/event.h>
 #include <stmm-games/block.h>
 #include <stmm-games/levellisteners.h>
 #include <stmm-games/util/basictypes.h>
 #include <stmm-games/util/direction.h>
-#endif
 
 #include <memory>
 
@@ -113,7 +105,7 @@ public:
 	void boardPreModify(const TileCoords& oTileCoords) noexcept override;
 	void boardPostModify(const Coords& oCoords) noexcept override;
 
-	enum { 
+	enum {
 		LISTENER_GROUP_CANNOT_PLACE = 10
 		, LISTENER_GROUP_COULD_PLACE = 11
 		//, LISTENER_GROUP_FUSED_WITH = 20

@@ -1,6 +1,4 @@
 /*
- * File:   gamegtkdrawingarea.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   gamegtkdrawingarea.cc
  */
 
 #include "gamegtkdrawingarea.h"
@@ -157,9 +158,6 @@ bool GameGtkDrawingArea::onCustomDraw(const Cairo::RefPtr<Cairo::Context>& refCc
 	}
 
 	refCc->save();
-	//	refCc->set_source_rgb(255,255,255);
-	//	refCc->rectangle(0.0, 0.0, nWidth, nHeight);
-	//	refCc->fill();
 	m_refGameView->redraw(refCc);
 	refCc->restore();
 

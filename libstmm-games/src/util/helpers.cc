@@ -1,7 +1,5 @@
 /*
- * File:   helpers.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   helpers.cc
  */
 
 #include "util/helpers.h"
@@ -113,6 +114,39 @@ NRect boardInsertAdd(const NRect& oRect, Direction::VALUE eDir) noexcept
 		return NRect{};
 	}
 	}
+}
+
+NRect boardInsertInAreaRemove(const NRect& oRect, Direction::VALUE eDir, const NRect& oArea) noexcept
+{
+	NRect oIntersect = NRect::intersectionRect(oRect, oArea);
+	if (oIntersect.m_nW == 0) {
+		return oIntersect;
+	}
+	return boardInsertRemove(oIntersect, eDir);
+}
+NRect boardInsertInAreaMovingPre(const NRect& oRect, Direction::VALUE eDir, const NRect& oArea) noexcept
+{
+	NRect oIntersect = NRect::intersectionRect(oRect, oArea);
+	if (oIntersect.m_nW == 0) {
+		return oIntersect;
+	}
+	return boardInsertMovingPre(oIntersect, eDir);
+}
+NRect boardInsertInAreaMovingPost(const NRect& oRect, Direction::VALUE eDir, const NRect& oArea) noexcept
+{
+	NRect oIntersect = NRect::intersectionRect(oRect, oArea);
+	if (oIntersect.m_nW == 0) {
+		return oIntersect;
+	}
+	return boardInsertMovingPost(oIntersect, eDir);
+}
+NRect boardInsertInAreaAdd(const NRect& oRect, Direction::VALUE eDir, const NRect& oArea) noexcept
+{
+	NRect oIntersect = NRect::intersectionRect(oRect, oArea);
+	if (oIntersect.m_nW == 0) {
+		return oIntersect;
+	}
+	return boardInsertAdd(oIntersect, eDir);
 }
 
 } // namespace Helpers

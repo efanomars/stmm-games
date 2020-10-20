@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
 #include "catch2/catch.hpp"
 
 #include "events/logevent.h"
-#include "mockevent.h"
 
-#include "fixtureGame.h"
+#include "stmm-games-fake/mockevent.h"
+#include "stmm-games-fake/fixtureGame.h"
 
 #include <iostream>
 

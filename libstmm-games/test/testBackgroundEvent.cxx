@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@
 #include "catch2/catch.hpp"
 
 #include "events/backgroundevent.h"
-#include "mockevent.h"
 #include "events/logevent.h"
 
-#include "fixtureGame.h"
+#include "stmm-games-fake/mockevent.h"
+#include "stmm-games-fake/fixtureGame.h"
 
 #include <iostream>
 
@@ -72,68 +72,7 @@ protected:
 
 TEST_CASE_METHOD(STFX<BackgroundGameFixture>, "ConstructorTicks")
 {
-//	LogEvent::msgLog().reset();
-//
-//	Level* p0Level = m_refGame->level(0).get();
-//	BackgroundEvent::Init oBInit;
-//	oBInit.m_p0Level = p0Level;
-//	BackgroundEvent::AlarmTimeout oAlarmTimeout;
-//	oAlarmTimeout.m_nRepeat = 1;
-//	oAlarmTimeout.m_eAlarmTimeoutType = BackgroundEvent::ALARMS_EVENT_SET_TICKS;
-//	oAlarmTimeout.m_nChange = 1;
-//	oBInit.m_aAlarmTimeouts.push_back(oAlarmTimeout);
-//	oBInit.m_aAlarmTimeouts.push_back(std::move(oAlarmTimeout));
-//	auto refBackgroundEvent = make_unique<BackgroundEvent>(std::move(oBInit));
-//	BackgroundEvent* p0BackgroundEvent = refBackgroundEvent.get();
-//	p0Level->addEvent(std::move(refBackgroundEvent));
-//	p0Level->activateEvent(p0BackgroundEvent, 1);
-//
-//	LogEvent::Init oLInit;
-//	oLInit.m_p0Level = p0Level;
-//	oLInit.m_eKind = LogEvent::LOG_EVENT_KIND_MSG_LOG_SILENT;
-//	oLInit.m_nTag = 82234;
-//	auto refLogEvent = make_unique<LogEvent>(std::move(oLInit));
-//	LogEvent* p0LogEvent = refLogEvent.get();
-//	p0Level->addEvent(std::move(refLogEvent));
-//
-//	p0BackgroundEvent->addListener(BackgroundEvent::LISTENER_GROUP_TIMEOUT, p0LogEvent, 1001);
-//	p0BackgroundEvent->addListener(BackgroundEvent::LISTENER_GROUP_TIMEOUT, p0BackgroundEvent, BackgroundEvent::MESSAGE_ALARMS_NEXT);
-//
-//	m_refGame->start();
-//	REQUIRE( m_refGame->gameElapsed() == 0 );
-//	m_refGame->handleTimer();
-//	REQUIRE( m_refGame->gameElapsed() == 1 );
-//	m_refGame->handleTimer();
-//	REQUIRE( m_refGame->gameElapsed() == 2 );
-//	m_refGame->handleTimer();
-//
-//	// Make sure BackgroundEvent::MESSAGE_ALARMS_NEXT is ignored when finished
-//	REQUIRE( m_refGame->gameElapsed() == 3 );
-//	m_refGame->handleTimer();
-//	REQUIRE( m_refGame->gameElapsed() == 4 );
-//	m_refGame->handleTimer();
-//
-//	REQUIRE( LogEvent::msgLog().totEntries() == 2);
-//	{
-//	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last(1);
-//	REQUIRE_FALSE( oEntry.isEmpty() );
-//	REQUIRE( oEntry.tag() == 82234 );
-//	REQUIRE( oEntry.gameTick() == 2 );
-//	REQUIRE( oEntry.level() == 0 );
-//	REQUIRE( oEntry.msg() == 1001 );
-//	REQUIRE( oEntry.value() == 0 );
-//	REQUIRE( oEntry.triggeringEventAdr() == reinterpret_cast<int64_t>(p0BackgroundEvent) );
-//	}
-//	{
-//	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last();
-//	REQUIRE_FALSE( oEntry.isEmpty() );
-//	REQUIRE( oEntry.tag() == 82234 );
-//	REQUIRE( oEntry.gameTick() == 3 );
-//	REQUIRE( oEntry.level() == 0 );
-//	REQUIRE( oEntry.msg() == 1001 );
-//	REQUIRE( oEntry.value() == 1 );
-//	REQUIRE( oEntry.triggeringEventAdr() == reinterpret_cast<int64_t>(p0BackgroundEvent) );
-//	}
+	// TODO
 }
 
 } // namespace testing

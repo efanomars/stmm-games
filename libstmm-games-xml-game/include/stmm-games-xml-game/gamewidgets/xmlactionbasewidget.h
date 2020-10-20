@@ -1,6 +1,4 @@
 /*
- * File:   xmlactionbasewidget.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,13 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlactionbasewidget.h
+ */
 
 #ifndef STMG_XML_ACTION_BASE_WIDGET_H
 #define STMG_XML_ACTION_BASE_WIDGET_H
 
 #include "layoutctx.h"
-#include "xmlcommonerrors.h"
-#include "xmlutil/xmlstrconv.h"
+
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
+#include <stmm-games-xml-base/xmlcommonerrors.h>
 
 #include <stmm-games/appconfig.h>
 #include <stmm-games/gameproxy.h>

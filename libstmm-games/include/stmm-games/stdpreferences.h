@@ -1,6 +1,4 @@
 /*
- * File:  stdpreferences.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stdpreferences.h
  */
 
 #ifndef STMG_STD_PREFERENCES_H
@@ -54,7 +55,7 @@ public:
 	 * The initial number of teams is defined by AppConstraints::m_nTeamsMin
 	 * which is obtained with refStdConfig->getAppConstraints(). Initially each
 	 * team has one human player.
-	 * 
+	 *
 	 * The instance is created in edit mode.
 	 * @param refStdConfig The configuration. Cannot be null.
 	 */
@@ -166,7 +167,7 @@ public:
 	 * If the constraints limited the addition or removal of players
 	 * `false` is returned. The limiting factors might be the minimum number
 	 * of teams, the maximum number of AI mates, etc.
-	 * 
+	 *
 	 * Unless it's full, new players are added to the last team, otherwise
 	 * to the preceding team and so on.
 	 * @param nPlayers The number of players. Must be &gt;= 0.

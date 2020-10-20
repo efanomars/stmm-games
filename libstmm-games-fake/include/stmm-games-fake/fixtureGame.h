@@ -1,7 +1,5 @@
 /*
- * File:   fixtureGame.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   fixtureGame.h
+ */
 /*   @DO_NOT_REMOVE_THIS_LINE_IT_IS_USED_BY_COMMONTESTING_CMAKE@   */
 
 #ifndef STMG_TESTING_FIXTURE_GAME_H
@@ -27,17 +28,10 @@
 #include "fixturevariantLevelInit.h"
 #include "fixturevariantLayout.h"
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "game.h"
-#include "level.h"
-#include "named.h"
-#include "util/namedobjindex.h"
-#else
 #include <stmm-games/game.h>
 #include <stmm-games/level.h>
 #include <stmm-games/named.h>
 #include <stmm-games/util/namedobjindex.h>
-#endif
 
 #include <stmm-input-fake/fakedevicemanager.h>
 #include <stmm-input/devicemanager.h>

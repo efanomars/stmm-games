@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@
 #include "catch2/catch.hpp"
 
 #include "events/alarmsevent.h"
-#include "mockevent.h"
 #include "events/logevent.h"
 
-#include "fixtureGame.h"
+#include "stmm-games-fake/mockevent.h"
+#include "stmm-games-fake/fixtureGame.h"
 
 #include <iostream>
 
@@ -77,12 +77,12 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "ConstructorTicks")
 	Level* p0Level = m_refGame->level(0).get();
 	AlarmsEvent::Init oAInit;
 	oAInit.m_p0Level = p0Level;
-	AlarmsEvent::AlarmTimeout oAlarmTimeout;
-	oAlarmTimeout.m_nRepeat = 1;
-	oAlarmTimeout.m_eAlarmTimeoutType = AlarmsEvent::ALARMS_EVENT_SET_TICKS;
-	oAlarmTimeout.m_nChange = 1;
-	oAInit.m_aAlarmTimeouts.push_back(oAlarmTimeout);
-	oAInit.m_aAlarmTimeouts.push_back(std::move(oAlarmTimeout));
+	AlarmsEvent::AlarmsStage oAlarmsStage;
+	oAlarmsStage.m_nRepeat = 1;
+	oAlarmsStage.m_eAlarmsStageType = AlarmsEvent::ALARMS_STAGE_SET_TICKS;
+	oAlarmsStage.m_nChange = 1;
+	oAInit.m_aAlarmsStages.push_back(oAlarmsStage);
+	oAInit.m_aAlarmsStages.push_back(std::move(oAlarmsStage));
 	auto refAlarmsEvent = make_unique<AlarmsEvent>(std::move(oAInit));
 	AlarmsEvent* p0AlarmsEvent = refAlarmsEvent.get();
 	p0Level->addEvent(std::move(refAlarmsEvent));
@@ -143,13 +143,13 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "RepeatTicks")
 	Level* p0Level = m_refGame->level(0).get();
 	AlarmsEvent::Init oAInit;
 	oAInit.m_p0Level = p0Level;
-	AlarmsEvent::AlarmTimeout oAlarmTimeout;
-	oAlarmTimeout.m_nRepeat = 1;
-	oAlarmTimeout.m_eAlarmTimeoutType = AlarmsEvent::ALARMS_EVENT_SET_TICKS;
-	oAlarmTimeout.m_nChange = 1;
-	oAInit.m_aAlarmTimeouts.push_back(oAlarmTimeout);
-	oAlarmTimeout.m_nRepeat = 2;
-	oAInit.m_aAlarmTimeouts.push_back(std::move(oAlarmTimeout));
+	AlarmsEvent::AlarmsStage oAlarmsStage;
+	oAlarmsStage.m_nRepeat = 1;
+	oAlarmsStage.m_eAlarmsStageType = AlarmsEvent::ALARMS_STAGE_SET_TICKS;
+	oAlarmsStage.m_nChange = 1;
+	oAInit.m_aAlarmsStages.push_back(oAlarmsStage);
+	oAlarmsStage.m_nRepeat = 2;
+	oAInit.m_aAlarmsStages.push_back(std::move(oAlarmsStage));
 	auto refAlarmsEvent = make_unique<AlarmsEvent>(std::move(oAInit));
 	AlarmsEvent* p0AlarmsEvent = refAlarmsEvent.get();
 	p0Level->addEvent(std::move(refAlarmsEvent));
@@ -227,15 +227,15 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "SetMillisec")
 	AlarmsEvent::Init oAInit;
 	oAInit.m_p0Level = p0Level;
 
-	AlarmsEvent::AlarmTimeout oAlarmTimeout;
-	oAlarmTimeout.m_nRepeat = 1;
-	oAlarmTimeout.m_eAlarmTimeoutType = AlarmsEvent::ALARMS_EVENT_SET_MILLISEC;
-	oAlarmTimeout.m_nChange = nInterval;
-	oAInit.m_aAlarmTimeouts.push_back(oAlarmTimeout);
-	oAlarmTimeout.m_nChange = nInterval / 2;
-	oAInit.m_aAlarmTimeouts.push_back(oAlarmTimeout);
-	oAlarmTimeout.m_nChange = nInterval * 2;
-	oAInit.m_aAlarmTimeouts.push_back(std::move(oAlarmTimeout));
+	AlarmsEvent::AlarmsStage oAlarmsStage;
+	oAlarmsStage.m_nRepeat = 1;
+	oAlarmsStage.m_eAlarmsStageType = AlarmsEvent::ALARMS_STAGE_SET_MILLISEC;
+	oAlarmsStage.m_nChange = nInterval;
+	oAInit.m_aAlarmsStages.push_back(oAlarmsStage);
+	oAlarmsStage.m_nChange = nInterval / 2;
+	oAInit.m_aAlarmsStages.push_back(oAlarmsStage);
+	oAlarmsStage.m_nChange = nInterval * 2;
+	oAInit.m_aAlarmsStages.push_back(std::move(oAlarmsStage));
 
 	auto refAlarmsEvent = make_unique<AlarmsEvent>(std::move(oAInit));
 	AlarmsEvent* p0AlarmsEvent = refAlarmsEvent.get();
@@ -307,6 +307,73 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "SetMillisec")
 	REQUIRE( oEntry.m_nValue == 2 );
 	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
+}
+
+TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "JumpStage")
+{
+	LogEvent::msgLog().reset();
+
+	Level* p0Level = m_refGame->level(0).get();
+	AlarmsEvent::Init oAInit;
+	oAInit.m_p0Level = p0Level;
+	AlarmsEvent::AlarmsStage oAlarmsStage;
+	oAlarmsStage.m_eAlarmsStageType = AlarmsEvent::ALARMS_STAGE_SET_TICKS;
+	oAlarmsStage.m_nChange = 1;
+	oAlarmsStage.m_nRepeat = 10;
+	oAInit.m_aAlarmsStages.push_back(oAlarmsStage);
+	oAlarmsStage.m_eAlarmsStageType = AlarmsEvent::ALARMS_STAGE_SET_TICKS;
+	oAlarmsStage.m_nChange = 3;
+	oAlarmsStage.m_nRepeat = 10;
+	oAInit.m_aAlarmsStages.push_back(std::move(oAlarmsStage));
+	auto refAlarmsEvent = make_unique<AlarmsEvent>(std::move(oAInit));
+	AlarmsEvent* p0AlarmsEvent = refAlarmsEvent.get();
+	p0Level->addEvent(std::move(refAlarmsEvent));
+	p0Level->activateEvent(p0AlarmsEvent, 0);
+
+	LogEvent::Init oLInit;
+	oLInit.m_p0Level = p0Level;
+	oLInit.m_bToStdOut = false;
+	oLInit.m_nTag = 82234;
+	auto refLogEvent = make_unique<LogEvent>(std::move(oLInit));
+	LogEvent* p0LogEvent = refLogEvent.get();
+	p0Level->addEvent(std::move(refLogEvent));
+
+	p0AlarmsEvent->addListener(AlarmsEvent::LISTENER_GROUP_TIMEOUT, p0LogEvent, 1001);
+	p0AlarmsEvent->addListener(AlarmsEvent::LISTENER_GROUP_TIMEOUT, p0AlarmsEvent, AlarmsEvent::MESSAGE_ALARMS_NEXT);
+
+	MockEvent::Init oMockInit;
+	oMockInit.m_p0Level = p0Level;
+	auto refMockEvent = make_unique<MockEvent>(std::move(oMockInit));
+	MockEvent* p0MockEvent = refMockEvent.get();
+	p0Level->addEvent(std::move(refMockEvent));
+
+	p0MockEvent->addListener(77, p0AlarmsEvent, AlarmsEvent::MESSAGE_ALARMS_STAGE_NEXT);
+
+	m_refGame->start();
+	REQUIRE( m_refGame->gameElapsed() == 0 );
+	m_refGame->handleTimer();
+	REQUIRE( m_refGame->gameElapsed() == 1 );
+	m_refGame->handleTimer();
+	REQUIRE( LogEvent::msgLog().totEntries() == 1); // first timeout, second alarm started
+	REQUIRE( m_refGame->gameElapsed() == 2 );
+
+	const int32_t nSkipTicks = 0;
+	p0MockEvent->setTriggerValue(77, 0, nSkipTicks);
+
+	m_refGame->handleTimer();
+	REQUIRE( LogEvent::msgLog().totEntries() == 2); // second timeout, third alarm is started from stage 2
+	REQUIRE( m_refGame->gameElapsed() == 3 );
+
+	m_refGame->handleTimer();
+	REQUIRE( LogEvent::msgLog().totEntries() == 2);
+	REQUIRE( m_refGame->gameElapsed() == 4 );
+	m_refGame->handleTimer();
+	REQUIRE( LogEvent::msgLog().totEntries() == 2);
+	REQUIRE( m_refGame->gameElapsed() == 5 );
+	m_refGame->handleTimer();
+	REQUIRE( LogEvent::msgLog().totEntries() == 3); // third timeout, from stage 2
+	REQUIRE( m_refGame->gameElapsed() == 6 );
+
 }
 
 } // namespace testing

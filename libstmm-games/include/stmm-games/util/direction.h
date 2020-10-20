@@ -1,7 +1,5 @@
 /*
- * File:   direction.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   direction.h
  */
 
 #ifndef STMG_DIRECTION_H
@@ -39,14 +40,14 @@ public:
 		RIGHT = 3 /**< Right (dX=+1 dY=0). */
 	};
 	/** The direction from the unary delta of the coords.
-	 * 
+	 *
 	 * @param nDx The x delta. Must be either -1, 0 or +1.
 	 * @param nDy The y delta. Must be either -1, 0 or +1.
 	 * @return The direction or undefined if abs(nDx + nDy) not 1.
 	 */
 	static VALUE fromDelta(int32_t nDx, int32_t nDy) noexcept
 	{
-		assert(((nDx == 0) &&  ((nDy == -1) || (nDy == 1))) 
+		assert(((nDx == 0) &&  ((nDy == -1) || (nDy == 1)))
 				|| ((nDy == 0) &&  ((nDx == -1) || (nDx == 1))));
 		return static_cast<VALUE>((3*nDx+nDy+3)/2);
 	}

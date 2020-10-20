@@ -1,7 +1,5 @@
 /*
- * File:   highscoresdefinition.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   highscoresdefinition.h
  */
 
 #ifndef STMG_HIGHSCORES_DEFINITION_H
@@ -59,7 +60,7 @@ public:
 	 * one team with master or enabled slave option with the given name.
 	 * If the owner type is OwnerType::PLAYER there has to be one and only
 	 * one player in the game with master or enabled slave option with the given name.
-	 * 
+	 *
 	 * Example of discriminator: a game enum option called "Difficulty" which has
 	 * values "Easy", "Medium", "Hard". If it's the only discriminator passed
 	 * to a HighscoresDefinition instance a Highscore will be created for
@@ -70,7 +71,7 @@ public:
 		DISCRIMINATOR_TYPE m_eType = DISCRIMINATOR_TYPE_OPTION; /**< The type of the discriminator. Default: DISCRIMINATOR_TYPE_OPTION */
 		std::string m_sOptionName = ""; /**< Name of option. Default: empty string.
 										* Only set if m_eType is DISCRIMINATOR_TYPE_OPTION. */
-		OwnerType m_eOptionOwnerType = OwnerType::GAME; /**< Whether the option is of game, team or player. Default: OwnerType::GAME. 
+		OwnerType m_eOptionOwnerType = OwnerType::GAME; /**< Whether the option is of game, team or player. Default: OwnerType::GAME.
 														 * Only set if m_eType is DISCRIMINATOR_TYPE_OPTION. */
 		bool operator==(const Discriminator& oHS) const noexcept;
 	};
@@ -118,11 +119,11 @@ public:
 		bool operator==(const ScoreElement& oHS) const noexcept;
 	};
 	/** Constructor.
-	 * 
+	 *
 	 * If more than one ScoreElement is passed the one at index 0 (in the vector)
 	 * is the most significant. Note: the variables are expected to be correct,
 	 * this class doesn't check whether the Game really has them.
-	 * 
+	 *
 	 * Since a highscore (file) might be created for each combination of Discriminators
 	 * the total number should be kept low. So options that can take a huge amount of values
 	 * shouldn't be used as discriminator. Example: an IntOption "Initial lives"
@@ -177,7 +178,7 @@ public:
 	 * This string can be used along with the game name (and the app name) to
 	 * uniquely identify a highscore. It can be used to build the name of a highscore
 	 * file or build the path of a key in a settings hierarchy like gconf.
-	 * 
+	 *
 	 * Example: if HighscoresDefinition was initialized with one discriminator
 	 * of type EnumOption (localized to french) with the name "Difficulty" and values
 	 * (1,"Easy","Facile"), (2,"Medium","Moyen") and (3,"Hard","Difficile")
@@ -188,7 +189,7 @@ public:
 	 *
 	 * If more discriminators are defined the values are separated with an "_"
 	 * (underscore).
-	 * 
+	 *
 	 * If one of the discriminator options is a not enabled slave option
 	 * `{false, ""}` is returned.
 
@@ -205,7 +206,7 @@ public:
 	/** Return a title string that can identify a highscore based on the preferences.
 	 * This string can be used along with the game name (and the app name) as
 	 * title of a highscore.
-	 * 
+	 *
 	 * Example: if HighscoresDefinition was initialized with one discriminator
 	 * of type EnumOption (localized to french) with the name "Difficulty", description "Difficulté"
 	 * and values (1,"Easy","Facile"), (2,"Medium","Moyen") and (3,"Hard","Difficile")
@@ -215,7 +216,7 @@ public:
 	 * example "Jointris scores - Difficulté: Moyen".
 	 *
 	 * If more discriminators are defined the values are separated with an ", ".
-	 * 
+	 *
 	 * If one of the discriminator options is a not enabled slave option
 	 * `{false, ""}` is returned.
 	 *

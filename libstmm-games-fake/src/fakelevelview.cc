@@ -1,7 +1,5 @@
 /*
- * File:   fakelevelview.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,12 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   fakelevelview.cc
+ */
 
-#include "fakelevelview.h"
-
-#include <cassert>
-//#include <iostream>
-#include <utility>
+#include "stmm-games-fake/fakelevelview.h"
 
 #include <stmm-games/game.h>
 #include <stmm-games/level.h>
@@ -29,6 +26,10 @@
 #include <stmm-games/util/coords.h>
 #include <stmm-games/util/direction.h>
 #include <stmm-games/utile/tilecoords.h>
+
+#include <cassert>
+//#include <iostream>
+#include <utility>
 
 namespace stmg { class LevelAnimation; }
 namespace stmg { class LevelBlock; }

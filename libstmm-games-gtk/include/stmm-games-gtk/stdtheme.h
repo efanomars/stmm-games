@@ -1,6 +1,4 @@
 /*
- * File:   stdtheme.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stdtheme.h
  */
 
 #ifndef STMG_STD_THEME_H
@@ -117,7 +118,8 @@ public:
 	double getTileWHRatio() const noexcept override;
 
 	shared_ptr<ThemeContext> createContext(NSize oTileWH, bool bRegister, double fSoundScaleX, double fSoundScaleY, double fSoundScaleZ
-											, const Glib::RefPtr<Pango::Context>& refFontContext) noexcept override;
+											, const Glib::RefPtr<Pango::Context>& refFontContext
+											, RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept override;
 	shared_ptr<ThemeWidget> createWidget(const shared_ptr<GameWidget>& refGameWidget, double fTileWHRatio
 										, const Glib::RefPtr<Pango::Context>& refFontContext) noexcept override;
 	//
@@ -297,7 +299,7 @@ public:
 	/** Add an array of images defined by image files.
 	 * If an array (of any kind) with the given name already exists, this function
 	 * does nothing.
-	 * 
+	 *
 	 * @param sArrayId The string array id. Cannot be empty.
 	 * @param aFileArray The image file names. Must have been added with addKnownImageFile(). Cannot be empty.
 	 */
@@ -437,7 +439,11 @@ public:
 	 */
 	void addBlockModifierNext() noexcept;
 
+	int32_t getVariableIndex(const std::string& sVariableName) noexcept;
 private:
+	friend class StdThemeDrawingContext;
+	int32_t getTotVariableIndexes() const noexcept;
+	const std::string& getVariableNameFromIndex(int32_t nVariableIdx) const noexcept;
 	friend class StdThemeContext;
 	void registerTileSize(int32_t nW, int32_t nH) noexcept;
 	void unregisterTileSize(int32_t nW, int32_t nH) noexcept;
@@ -479,6 +485,7 @@ private:
 	class PrivateStdThemeContext : public StdThemeContext
 	{
 	public:
+		using StdThemeContext::StdThemeContext;
 		using StdThemeContext::reInit;
 	};
 	Recycler<PrivateStdThemeContext> m_oContexts;
@@ -529,7 +536,7 @@ private:
 	std::vector< StdThemeAnimationFactory* > m_aAnonymousModelAnimationFactories;
 	// "Fast" search by typeid of model. Filled lazily as animations are created.
 	// Key: typeid(LavelAnimation).hash_code(), Value: vector of factories supporting that class
-	std::unordered_map< size_t, std::vector< StdThemeAnimationFactory* > > m_oAnimationTypeIdFactories; 
+	std::unordered_map< size_t, std::vector< StdThemeAnimationFactory* > > m_oAnimationTypeIdFactories;
 
 	// All the widget factories.
 	// Size: m_oNamed.widgets().size(), Index: m_oNamed.widgets().getIndex(sName)
@@ -567,7 +574,7 @@ private:
 		// cache
 		std::vector< std::pair<bool, int32_t> > m_aTileTraitsCaches; // Value: <bHasEmptyValue, nTotValues>,  Size: m_aTraitSets.size())
 		int32_t m_nTotValues = 0; // Multiplication of the size of all trait and player sets.
-		std::vector< shared_ptr<Image> > m_aImages; // The images 
+		std::vector< shared_ptr<Image> > m_aImages; // The images
 	};
 	NamedIndex m_oAssignIds;
 	std::vector< AssignData > m_aAssign; // Size: m_oAssignId.size()
@@ -577,6 +584,8 @@ private:
 
 	std::vector< size_t > m_aThemeStartBoardPP; // Size: number of (sub)themes, Value: Paint Pointer into m_aBoardModifiers
 	std::vector< size_t > m_aThemeStartBlockPP; // Size: number of (sub)themes, Value: Paint Pointer into m_aBlockModifiers
+
+	NamedIndex m_oVariableNames;
 
 	static const std::string s_sSansFontDesc;
 

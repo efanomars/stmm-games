@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,16 +27,6 @@
 #include "fixturevariantLayout.h"
 #include "fixturevariantVariables.h"
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "layout.h"
-#include "gamewidget.h"
-#include "stdpreferences.h"
-#include "util/namedobjindex.h"
-#include "variable.h"
-#include "widgets/boxwidget.h"
-#include "widgets/levelshowwidget.h"
-#include "widgets/varwidget.h"
-#else
 #include <stmm-games/layout.h>
 #include <stmm-games/gamewidget.h>
 #include <stmm-games/stdpreferences.h>
@@ -45,7 +35,6 @@
 #include <stmm-games/widgets/boxwidget.h>
 #include <stmm-games/widgets/levelshowwidget.h>
 #include <stmm-games/widgets/varwidget.h>
-#endif
 
 #include <algorithm>
 #include <memory>

@@ -21,11 +21,11 @@
 #define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
 
-#include "fixtureStdPreferences.h"
-
 #include "layout.h"
 #include "gamewidgets.h"
-#include "fixturevariantVariables.h"
+
+#include "stmm-games-fake/fixturevariantVariables.h"
+#include "stmm-games-fake/fixtureStdPreferences.h"
 
 namespace stmg
 {

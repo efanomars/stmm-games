@@ -1,6 +1,4 @@
 /*
- * File:   stdview.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,12 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   stdview.h
+ */
 
 #ifndef STMG_STD_VIEW_H
 #define STMG_STD_VIEW_H
 
 #include "stdviewlayout.h"
 #include "stdlevelview.h"
+#include "theme.h"
 
 #include <stmm-games/gameview.h>
 #include <stmm-games/util/basictypes.h>
@@ -43,7 +45,6 @@ namespace stmg { class StdConfig; }
 namespace stmg { class StdPreferences; }
 namespace stmg { class ThemeContext; }
 namespace stmg { class Game; }
-namespace stmg { class Theme; }
 namespace stmg { class ThemeSound; }
 namespace stmg { class ThemeWidgetInteractive; }
 
@@ -60,7 +61,7 @@ namespace stmg
 
 using std::shared_ptr;
 
-class StdView : public GameView
+class StdView : public GameView, public Theme::RuntimeVariablesEnv
 {
 public:
 	/** Constructor.
@@ -131,6 +132,9 @@ public:
 									, double fVolume01, bool bLooping) noexcept override;
 	void preloadSound(int32_t nSoundIdx) noexcept override;
 	bool removeSound(const shared_ptr<GameSound>& refSound) noexcept override;
+
+	int32_t getVariableIdFromName(const std::string& sVarName) noexcept override;
+	int32_t getVariableValue(int32_t nVarId) noexcept override;
 
 #ifndef NDEBUG
 	void dump(bool bTickTileAnis) const noexcept;

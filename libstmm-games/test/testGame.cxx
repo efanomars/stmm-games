@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
 #include "game.h"
 #include "event.h"
 
-#include "fixtureLayoutAuto.h"
-#include "fixtureGameOwner.h"
+#include "stmm-games-fake/fixtureLayoutAuto.h"
+#include "stmm-games-fake/fixtureGameOwner.h"
 
 namespace stmg
 {

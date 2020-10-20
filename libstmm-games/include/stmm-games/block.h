@@ -1,7 +1,5 @@
 /*
- * File:   block.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   block.h
  */
 
 #ifndef STMG_BLOCK_H
@@ -90,7 +91,7 @@ public:
 	Block(int32_t nTotBricks, const std::vector<Tile>& aBrick
 			, const std::vector< std::tuple<bool, int32_t, int32_t> >& aBrickPos
 			, int32_t nWH) noexcept;
-	// The first shape of this instance becomes the concatenation of the 
+	// The first shape of this instance becomes the concatenation of the
 	// visible bricks of the shape of two blocks.
 	// Three further shapes are created by rotating the first shape counterclockwise
 	// by 90, 180, 270 degrees around a "geometric" center.
@@ -105,7 +106,7 @@ public:
 	 * of the first block to get the position of the result block to make it coincide
 	 * with the fused blocks.
 	 *
-	 * The result Block is generated automatically from the fused shapes, adding 3 
+	 * The result Block is generated automatically from the fused shapes, adding 3
 	 * additional shapes rotated counterclockwise 90, 180 and 270 degrees around
 	 * the "geometric" center.
 	 *
@@ -464,7 +465,7 @@ private:
 	};
 	std::list<int32_t> m_oShapeIds; // Size: m_nTotShapes, Value: ShapeId, Keep order after shape removals
 	std::vector< std::list<int32_t>::iterator > m_aShapeIdIterator; // Size: m_aIsShapeId.size(), Index: ShapeId, Value: iterator of m_oShapeIds
-	std::vector<bool> m_aIsShapeId; // Size: Highest ShapeId + 1, Index: ShapeId, Value: validity of ShapeId 
+	std::vector<bool> m_aIsShapeId; // Size: Highest ShapeId + 1, Index: ShapeId, Value: validity of ShapeId
 	std::vector<int32_t> m_aFreeShapeId; // Size: m_aIsShapeId.size() - m_nTotShapes
 	std::vector<Shape> m_aShape; // Size: m_aIsShapeId.size(), Index: ShapeId
 

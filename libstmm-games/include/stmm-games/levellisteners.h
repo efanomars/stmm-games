@@ -1,7 +1,5 @@
 /*
- * File:   levellisteners.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   levellisteners.h
  */
 
 #ifndef STMG_LEVEL_LISTENERS_H
@@ -191,6 +192,12 @@ class BlocksBricksIdListener : public BlocksListener
 public:
 	/** Pre block modification callback.
 	 * Called by LevelBlock::blockModify().
+	 *
+	 * When the visibility of a brick is changed its id is in aModifyPosBrickId.
+	 *
+	 * Note that the implementation might pass all the bricks of a rotated block to aModifyPosBrickId
+	 * without really checking whether the bricks have really changed position or
+	 * their visibility. So don't rely on it.
 	 * @param oBlock The block that will be modified.
 	 * @param aDeleteBrickId The to be removed bricks.
 	 * @param aModifyPosBrickId The bricks the position of which will be modified.
@@ -204,6 +211,12 @@ public:
 								, bool bAddsBricks) noexcept = 0;
 	/** Post block modification callback.
 	 * Called by LevelBlock::blockModify().
+	 *
+	 * When the visibility of a brick is changed its id is in aModifyPosBrickId.
+	 *
+	 * Note that the implementation might pass all the bricks of a rotated block to aModifyPosBrickId
+	 * without really checking whether the bricks have really changed position or
+	 * their visibility. So don't rely on it.
 	 * @param oBlock The modified block.
 	 * @param aDeletedBrickId The removed bricks.
 	 * @param aModifiedPosBrickId The bricks with modified position.
@@ -240,7 +253,7 @@ public:
 
 //TODO BlocksPosListener X,Y and maybe Z changes, would be subclassed by view
 // This interface is useful to AI Players (Events) that want to know when they get control of a block
-// or for a positioner to know which block it should track on a player's subshow 
+// or for a positioner to know which block it should track on a player's subshow
 
 } // namespace stmg
 

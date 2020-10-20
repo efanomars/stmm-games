@@ -1,7 +1,5 @@
 /*
- * File:   stdthemedrawingcontext.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,13 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   stdthemedrawingcontext.h
+ */
 
 #ifndef STMG_STD_THEME_DRAWING_CONTEXT_H
 #define STMG_STD_THEME_DRAWING_CONTEXT_H
 
+#include "theme.h"
+
 #include <stmm-games/util/basictypes.h>
 
 #include <memory>
+#include <utility>
+#include <vector>
 
 namespace stmg { class Image; }
 namespace stmg { class StdThemeContext; }
@@ -42,7 +47,10 @@ using std::shared_ptr;
 class StdThemeDrawingContext
 {
 public:
-	StdThemeDrawingContext() noexcept;
+	/** Constructor
+	 * @param p0RuntimeVariablesEnv Can be null.
+	 */
+	StdThemeDrawingContext(Theme::RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept;
 	/** The tile size.
 	 * @return The size of the tile.
 	 */
@@ -60,12 +68,19 @@ public:
 	 * @param p0Image The selected image. Can be null.
 	 */
 	void setSelectedImage(Image* p0Image) noexcept;
+	/** Get variable value.
+	 * @param nVarId The variable id as returned from StdTheme::getVariablesIndex().
+	 * @return Whether it is defined and the current value.
+	 */
+	std::pair<bool, int32_t> getVariableValue(int32_t nVarId) noexcept;
 protected:
-	void reInit() noexcept;
+	void reInit(Theme::RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept;
 private:
 	friend class StdThemeContext;
 	friend class StdTheme;
 	StdThemeContext* m_p1Owner;
+	Theme::RuntimeVariablesEnv* m_p0RuntimeVariablesEnv;
+	std::vector<int32_t> m_aStdThemeNameIdxToRuntimeId;
 	Image* m_p0SelectedImage;
 };
 

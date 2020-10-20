@@ -1,7 +1,5 @@
 /*
- * File:   varthwidgetfactory.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   varthwidgetfactory.cc
  */
 
 #include "widgets/varthwidgetfactory.h"
@@ -310,7 +311,7 @@ void VarThWidgetFactory::VarTWidget::placeAndMaybeResizeIn(const NRect& oRect) n
 //std::cout << "VarThWidgetFactory::VarTWidget::placeAndMaybeResizeIn()  nX=" << nX << "  nY=" << nY << "   nW=" << nW << "  nH=" << nH << '\n';
 	m_oMutaTW.placeAndMaybeResizeIn(oRect);
 	calcCanvas();
-//std::cout << "VarThWidgetFactory::VarTWidget::placeAndMaybeResizeIn()  nResX=" << m_oSizedTW.getPixX() << "  nResY=" << m_oSizedTW.getPixY() 
+//std::cout << "VarThWidgetFactory::VarTWidget::placeAndMaybeResizeIn()  nResX=" << m_oSizedTW.getPixX() << "  nResY=" << m_oSizedTW.getPixY()
 //<< "   nResW=" << m_oSizedTW.getPixW() << "  nResH=" << m_oSizedTW.getPixH() << '\n';
 }
 const std::pair<SegmentedFunction, SegmentedFunction>& VarThWidgetFactory::VarTWidget::getSizeFunctions(int32_t nLayoutConfig) const noexcept

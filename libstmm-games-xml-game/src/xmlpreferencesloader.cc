@@ -1,6 +1,4 @@
 /*
- * File:   xmlpreferencesloader.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmlpreferencesloader.cc
  */
 
 #include "xmlpreferencesloader.h"
@@ -471,7 +472,7 @@ void XmlPreferencesLoader::parsePlayedHistoryGames(const shared_ptr<AllPreferenc
 		const std::string sGameName = p0GameElement->get_attribute_value(s_sPreferencesPlayedHistoryGameNameAttr);
 		checkIsValidName(sGameName);
 		refPrefs->addGameToPlayedHistory(sGameName);
-	}	
+	}
 }
 
 shared_ptr<AllPreferences> XmlPreferencesLoader::getPreferencesCopy(const shared_ptr<AllPreferences>& refAllPreferences) const noexcept
@@ -505,7 +506,7 @@ bool XmlPreferencesLoader::updatePreferences(const shared_ptr<AllPreferences>& r
 
 //std::cout << "XmlHighscoresLoader::updateHighscore File=" << oHSFile.getFullPath() << '\n';
 	try {
-		XmlUtil::makePath(oPrefsFile);
+		XmlUtilGame::makePath(oPrefsFile);
 		p0Document->write_to_file_formatted(oPrefsFile.getFullPath());
 	} catch (const xmlpp::exception& ) {
 		return false; //--------------------------------------------------------

@@ -1,6 +1,4 @@
 /*
- * File:   gamegtkdrawingarea.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   gamegtkdrawingarea.h
  */
 
 #ifndef STMG_GAME_GTK_DRAWING_AREA_H
@@ -72,7 +73,9 @@ private:
 
 	Cairo::RefPtr<Cairo::Region> m_refCurrentDrawingRegion;
 
-	//Glib::Timer& m_oTimer;
+private:
+	GameGtkDrawingArea(const GameGtkDrawingArea& oSource) = delete;
+	GameGtkDrawingArea& operator=(const GameGtkDrawingArea& oSource) = delete;
 };
 
 } // namespace stmg

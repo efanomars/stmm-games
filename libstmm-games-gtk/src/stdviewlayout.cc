@@ -1,7 +1,5 @@
 /*
- * File:   stdviewlayout.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,17 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   stdviewlayout.cc
+ */
 
 #include "stdviewlayout.h"
 #include "themecontainerwidget.h"
 
-#include "layout.h"
 #include "levelshowthemewidget.h"
 #include "themewidget.h"
 #include "themewidgetinteractive.h"
 #include "gtkutil/segmentedfunction.h"
-#include "widgets/levelshowwidget.h"
 
+#include <stmm-games/widgets/levelshowwidget.h>
+#include <stmm-games/layout.h>
 #include <stmm-games/apppreferences.h>
 #include <stmm-games/gamewidget.h>
 #include <stmm-games/util/basictypes.h>
@@ -248,7 +249,7 @@ void StdViewLayout::calcLayout(int32_t nDestW, int32_t nDestH, int32_t nTileMinW
 //#ifndef NDEBUG
 //std::cout << "StdViewLayout::calcLayout nLayoutConfig =" << nLayoutConfig << "  oHFun="; oHFun.dump();
 //#endif //NDEBUG
-		
+
 		int32_t nPixW = nDestW;
 		int32_t nPixH = nDestH;
 		{

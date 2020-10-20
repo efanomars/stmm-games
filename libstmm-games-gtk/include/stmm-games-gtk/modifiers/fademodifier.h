@@ -1,7 +1,5 @@
 /*
- * File:   fademodifier.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   fademodifier.h
+ */
 
 #ifndef STMG_FADE_MODIFIER_H
 #define STMG_FADE_MODIFIER_H
@@ -23,6 +24,8 @@
 #include "containermodifier.h"
 
 #include "stdthememodifier.h"
+
+#include "gtkutil/elapsedmapper.h"
 
 #include <vector>
 
@@ -38,8 +41,11 @@ namespace stmg
 
 class StdTheme;
 
-/** Fader.
- * This modifier fades the submodifiers: from [elapsed == 0.0] alpha=255 (opaque),   to [elapsed == 1.0] alpha=0 (invisible)
+/** Fading effect to a sub-modifier.
+ * This modifier fades the sub-modifiers: from [elapsed == 0.0] alpha=255 (opaque),
+ * to [elapsed == 1.0] alpha=0 (invisible).
+ * If elapsed is -1 the sub-modifiers are drawn opaque even if inverted.
+ * The elapsed mapping is applied first.
  */
 class FadeModifier : public ContainerModifier
 {
@@ -48,6 +54,7 @@ public:
 	{
 		int32_t m_nElapsedTileAniIdx = -1; /**< The tileanimation that determines the fade value. Default -1 (undefined).*/
 		double m_fDefaultElapsed = -1.0; /**< The default elapsed value. From 0.0 to 1.0 or -1.0 if not defined. */
+		ElapsedMapper m_oMapper; /**< The elapsed mapper. */
 		bool m_bInvert = false; /**< Whether the fading should be inverted. Default is false.*/
 	};
 	/** Constructor.

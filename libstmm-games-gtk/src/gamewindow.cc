@@ -1,6 +1,4 @@
 /*
- * File:   gamewindow.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,18 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   gamewindow.cc
+ */
 
 #include "gamewindow.h"
 
 #include "mainwindow.h"
 #include "stdview.h"
 
-#include "game.h"
 #include "gamegtkdrawingarea.h"
-#include "gameproxy.h"
-#include "highscore.h"
-#include "level.h"
-#include "stdconfig.h"
 #include "theme.h"
 #include "themeloader.h"
 
@@ -44,6 +40,11 @@
 #include <stmm-games-file/allpreferencesloader.h>
 #include <stmm-games-file/highscoresloader.h>
 
+#include <stmm-games/game.h>
+#include <stmm-games/gameproxy.h>
+#include <stmm-games/highscore.h>
+#include <stmm-games/level.h>
+#include <stmm-games/stdconfig.h>
 #include <stmm-games/util/util.h>
 #include <stmm-games/stdpreferences.h>
 
@@ -324,32 +325,6 @@ std::string GameWindow::init() noexcept
 			addBigSeparator(m_p0BoxInfo);
 	m_aScreens[s_nScreenInfo] = m_p0ScreenBoxInfo;
 
-	m_refAboutScreen = std::make_unique<AboutScreen>(*this, m_oD, m_refLogoPixbuf);
-	m_p0ScreenBoxAbout = m_refAboutScreen->init();
-	m_p0StackScreens->add(*m_p0ScreenBoxAbout, s_sScreenNameAbout);
-	m_aScreens[s_nScreenAbout] = m_p0ScreenBoxAbout;
-
-	m_refHighscoreScreen = std::make_unique<HighscoreScreen>(*this);
-	m_p0ScreenBoxHighscores = m_refHighscoreScreen->init();
-	m_p0StackScreens->add(*m_p0ScreenBoxHighscores, s_sScreenNameHighscore);
-	m_aScreens[s_nScreenHighscore] = m_p0ScreenBoxHighscores;
-
-	m_refChooseGameScreen = std::make_unique<GameScreen>(*this, m_oD.m_refStdConfig
-														, *m_oD.m_refGameLoader);
-	m_p0ScreenBoxChooseGame = m_refChooseGameScreen->init();
-	m_p0StackScreens->add(*m_p0ScreenBoxChooseGame, s_sScreenNameChooseGame);
-	m_aScreens[s_nScreenChooseGame] = m_p0ScreenBoxChooseGame;
-
-	m_refChooseThemeScreen = std::make_unique<ThemeScreen>(*this, m_oD.m_refStdConfig
-														, *m_oD.m_refThemeLoader);
-	m_p0ScreenBoxChooseTheme = m_refChooseThemeScreen->init();
-	m_p0StackScreens->add(*m_p0ScreenBoxChooseTheme, s_sScreenNameChooseTheme);
-	m_aScreens[s_nScreenChooseTheme] = m_p0ScreenBoxChooseTheme;
-
-	m_refChoosePlayersScreen = std::make_unique<PlayersScreen>(*this, m_oD.m_refStdConfig);
-	m_p0ScreenBoxChoosePlayers = m_refChoosePlayersScreen->init();
-	m_p0StackScreens->add(*m_p0ScreenBoxChoosePlayers, s_sScreenNameChoosePlayers);
-	m_aScreens[s_nScreenChoosePlayers] = m_p0ScreenBoxChoosePlayers;
 
 	auto* p0VisibleWidget = m_p0StackScreens->get_visible_child();
 	constexpr int32_t nTotScreens = static_cast<int32_t>(sizeof(m_aScreens) / sizeof(m_aScreens[0]));
@@ -422,6 +397,51 @@ void GameWindow::changeScreen(STATUS eStatus, int32_t nToScreen, const std::stri
 	}
 
 	m_nCurrentScreen = nToScreen;
+
+	if (m_nCurrentScreen == s_nScreenAbout) {
+		if (! m_refAboutScreen) {
+			m_refAboutScreen = std::make_unique<AboutScreen>(*this, m_oD, m_refLogoPixbuf);
+			m_p0ScreenBoxAbout = m_refAboutScreen->init();
+			m_p0StackScreens->add(*m_p0ScreenBoxAbout, s_sScreenNameAbout);
+			m_aScreens[s_nScreenAbout] = m_p0ScreenBoxAbout;
+			show_all_children();
+		}
+	} else if (m_nCurrentScreen == s_nScreenHighscore) {
+		if (! m_refHighscoreScreen) {
+			m_refHighscoreScreen = std::make_unique<HighscoreScreen>(*this);
+			m_p0ScreenBoxHighscores = m_refHighscoreScreen->init();
+			m_p0StackScreens->add(*m_p0ScreenBoxHighscores, s_sScreenNameHighscore);
+			m_aScreens[s_nScreenHighscore] = m_p0ScreenBoxHighscores;
+			show_all_children();
+		}
+	} else if (m_nCurrentScreen == s_nScreenChooseGame) {
+		if (! m_refChooseGameScreen) {
+			m_refChooseGameScreen = std::make_unique<GameScreen>(*this, m_oD.m_refStdConfig
+																, *m_oD.m_refGameLoader);
+			m_p0ScreenBoxChooseGame = m_refChooseGameScreen->init();
+			m_p0StackScreens->add(*m_p0ScreenBoxChooseGame, s_sScreenNameChooseGame);
+			m_aScreens[s_nScreenChooseGame] = m_p0ScreenBoxChooseGame;
+			show_all_children();
+		}
+	} else if (m_nCurrentScreen == s_nScreenChooseTheme) {
+		if (! m_refChooseThemeScreen) {
+			m_refChooseThemeScreen = std::make_unique<ThemeScreen>(*this, m_oD.m_refStdConfig
+																, *m_oD.m_refThemeLoader);
+			m_p0ScreenBoxChooseTheme = m_refChooseThemeScreen->init();
+			m_p0StackScreens->add(*m_p0ScreenBoxChooseTheme, s_sScreenNameChooseTheme);
+			m_aScreens[s_nScreenChooseTheme] = m_p0ScreenBoxChooseTheme;
+			show_all_children();
+		}
+	} else if (m_nCurrentScreen == s_nScreenChoosePlayers) {
+		if (! m_refChoosePlayersScreen) {
+			m_refChoosePlayersScreen = std::make_unique<PlayersScreen>(*this, m_oD.m_refStdConfig);
+			m_p0ScreenBoxChoosePlayers = m_refChoosePlayersScreen->init();
+			m_p0StackScreens->add(*m_p0ScreenBoxChoosePlayers, s_sScreenNameChoosePlayers);
+			m_aScreens[s_nScreenChoosePlayers] = m_p0ScreenBoxChoosePlayers;
+			show_all_children();
+		}
+	}
+
 	m_p0StackScreens->set_visible_child(*m_aScreens[m_nCurrentScreen]);
 	if (m_nCurrentScreen == s_nScreenPlay) {
 		//
@@ -552,7 +572,7 @@ void GameWindow::gameInterrupt(GameProxy::INTERRUPT_TYPE eInterruptType) noexcep
 							sigc::mem_fun(*this, &GameWindow::gamePauseOut), 0);
 		return; //--------------------------------------------------------------
 	}
-	const bool bAsk = (eInterruptType == GameProxy::INTERRUPT_ABORT_ASK) 
+	const bool bAsk = (eInterruptType == GameProxy::INTERRUPT_ABORT_ASK)
 					|| (eInterruptType == GameProxy::INTERRUPT_RESTART_ASK)
 					|| (eInterruptType == GameProxy::INTERRUPT_QUIT_APP_ASK);
 	if (bAsk) {

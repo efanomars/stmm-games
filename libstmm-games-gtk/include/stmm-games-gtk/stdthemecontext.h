@@ -1,6 +1,4 @@
 /*
- * File:   stdthemecontext.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,11 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   stdthemecontext.h
+ */
 
 #ifndef STMG_STD_THEME_CONTEXT_H
 #define STMG_STD_THEME_CONTEXT_H
 
 #include "themecontext.h"
+#include "theme.h"
 #include "stdthemedrawingcontext.h"
 
 #include <stmm-games/util/basictypes.h>
@@ -54,7 +56,7 @@ class StdThemeContext : public ThemeContext, public std::enable_shared_from_this
 public:
 	/** Constructor.
 	 */
-	StdThemeContext() noexcept;
+	StdThemeContext(Theme::RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept;
 	void drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer
 						, const std::vector<double>& aAniElapsed) noexcept override;
 	void drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer) noexcept override;
@@ -76,7 +78,7 @@ public:
 protected:
 	/** Reinitialization.
 	 */
-	void reInit() noexcept;
+	void reInit(Theme::RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept;
 private:
 	friend class StdTheme;
 	friend class StdThemeSound;

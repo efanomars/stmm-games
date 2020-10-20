@@ -1,6 +1,4 @@
 /*
- * File:   stdtheme.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stdtheme.cc
  */
 
 #include "stdtheme.h"
@@ -187,7 +188,7 @@ const shared_ptr<Image>& StdTheme::getImageByFileName(const std::string& sImgFil
 	NamedIndex& oImageFiles = m_oImageFileNames;
 	const int32_t nImgFileIdx = oImageFiles.getIndex(sImgFileName);
 	assert(nImgFileIdx >= 0);
-	shared_ptr<Image>& refImage = m_aImageByFileIdxs[nImgFileIdx]; 
+	shared_ptr<Image>& refImage = m_aImageByFileIdxs[nImgFileIdx];
 	if (refImage) {
 		return refImage; //-----------------------------------------------------
 	}
@@ -223,7 +224,7 @@ shared_ptr<Image> StdTheme::getSubImage(SubArrayData& oSubArrayData, int32_t nAr
 		assert(oSubArrayData.m_nPerRow > 0);
 		const int32_t nImgPosY = (nArrayIdx / oSubArrayData.m_nPerRow) * (oSubArrayData.m_nImgH + oSubArrayData.m_nSpacingY);
 		const int32_t nImgPosX = (nArrayIdx % oSubArrayData.m_nPerRow) * (oSubArrayData.m_nImgW + oSubArrayData.m_nSpacingX);
-		refSubImage = std::make_shared<Image>(oSubArrayData.m_refImage, nImgPosX , nImgPosY 
+		refSubImage = std::make_shared<Image>(oSubArrayData.m_refImage, nImgPosX , nImgPosY
 											, oSubArrayData.m_nImgW, oSubArrayData.m_nImgH);
 	}
 	return refSubImage;
@@ -617,7 +618,7 @@ shared_ptr<ThemeAnimation> StdTheme::createAnimation(const shared_ptr<StdThemeCo
 	assert(refLevelAnimation);
 
 	const int32_t nTotFactoryNames = m_oNamed.animations().size();
-	const int32_t nNameIdx = refLevelAnimation->getViewAnimationNameIdx(); 
+	const int32_t nNameIdx = refLevelAnimation->getViewAnimationNameIdx();
 //std::cout << "StdThemeContext::createAnimation()   nNameIdx=" << nNameIdx << "  nTotFactories=" << nTotFactoryNames << '\n';
 	if ((nNameIdx >= 0) && (nNameIdx < nTotFactoryNames)) {
 //std::cout << "        -> " << m_p1Owner->m_oNamed.animations().getName(nNameIdx) << '\n';
@@ -986,9 +987,20 @@ void StdTheme::addBlockModifierNext() noexcept
 	m_aBlockModifiers.push_back(std::move(refStopModifier));
 	m_aThemeStartBlockPP.push_back(m_aBlockModifiers.size());
 }
-
+int32_t StdTheme::getVariableIndex(const std::string& sVariableName) noexcept
+{
+	return m_oVariableNames.addName(sVariableName);
+}
+int32_t StdTheme::getTotVariableIndexes() const noexcept
+{
+	return m_oVariableNames.size();
+}
+const std::string& StdTheme::getVariableNameFromIndex(int32_t nVariableIdx) const noexcept
+{
+	return m_oVariableNames.getName(nVariableIdx);
+}
 shared_ptr<ThemeContext> StdTheme::createContext(NSize oTileWH, bool bRegister, double fSoundScaleX, double fSoundScaleY, double fSoundScaleZ
-												, const Glib::RefPtr<Pango::Context>& refFontContext) noexcept
+												, const Glib::RefPtr<Pango::Context>& refFontContext, RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept
 {
 //std::cout << "StdTheme::createContext()" << '\n';
 	const int32_t& nTileW = oTileWH.m_nW;
@@ -998,7 +1010,7 @@ shared_ptr<ThemeContext> StdTheme::createContext(NSize oTileWH, bool bRegister, 
 	m_aNoAniElapsed.resize(nTotTileAnis, -1.0);
 
 	shared_ptr<PrivateStdThemeContext> refNew;
-	m_oContexts.create(refNew);
+	m_oContexts.create(refNew, p0RuntimeVariablesEnv);
 	refNew->m_p1Owner = this;
 	refNew->m_nTileW = nTileW;
 	refNew->m_nTileH = nTileH;

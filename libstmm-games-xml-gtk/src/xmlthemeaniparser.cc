@@ -1,6 +1,4 @@
 /*
- * File:   xmlthemeaniparser.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,15 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlthemeaniparser.cc
+ */
 
 #include "xmlthemeaniparser.h"
 
 #include "xmlthanimationfactoryparser.h"
-#include "xmlutil/xmlstrconv.h"
 #include "themectx.h"
-#include "xmlcommonerrors.h"
-#include <stmm-games-xml-base/xmlconditionalparser.h>
 #include "xmlthemeimageparser.h"
+
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
+#include <stmm-games-xml-base/xmlcommonerrors.h>
+#include <stmm-games-xml-base/xmlconditionalparser.h>
 
 #include <stmm-games-gtk/gtkutil/tileani.h>
 #include <stmm-games-gtk/stdtheme.h>

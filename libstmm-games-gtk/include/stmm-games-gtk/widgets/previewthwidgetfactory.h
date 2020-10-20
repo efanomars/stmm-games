@@ -1,7 +1,5 @@
 /*
- * File:   previewthwidgetfactory.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,12 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   previewthwidgetfactory.h
+ */
 
 #ifndef STMG_PREVIEW_TH_WIDGET_FACTORY_H
 #define STMG_PREVIEW_TH_WIDGET_FACTORY_H
 
 #include "stdthemewidgetfactory.h"
 #include "themewidget.h"
+#include "theme.h"
 #include "widgetimpl/mutablethwidgetimpl.h"
 #include "widgetimpl/relsizedthwidgetimpl.h"
 #include "gtkutil/frame.h"
@@ -72,7 +74,7 @@ public:
 	shared_ptr<ThemeWidget> create(const shared_ptr<GameWidget>& refGameWidget
 									, double fTileWHRatio, const Glib::RefPtr<Pango::Context>& refFontContext) noexcept override;
 private:
-	class PreviewTWidget : public ThemeWidget
+	class PreviewTWidget : public ThemeWidget, public Theme::RuntimeVariablesEnv
 	{
 	public:
 		PreviewTWidget(PreviewThWidgetFactory* p1Owner
@@ -92,14 +94,18 @@ private:
 		void placeAndMaybeResizeIn(const NRect& oRect) noexcept override;
 		inline ThemeContainerWidget* getParent() const noexcept { return ThemeWidget::getParent(); }
 		void dump(int32_t nIndentSpaces, bool bHeader) const noexcept override;
-	protected:
+
+		int32_t getVariableIdFromName(const std::string& sVarName) noexcept override;
+		int32_t getVariableValue(int32_t nVarId) noexcept override;
+
+		protected:
 		void onAssignedToLayout() noexcept override { m_oMutaTW.onAssignedToLayout(); }
 		void onRecalcSizeFunctions(ThemeWidget* p0ReferenceThemeWidget) noexcept override { m_oSizedTW.onRecalcSizeFunctions(p0ReferenceThemeWidget); }
 		void sizeAndConfig(int32_t nTileW, int32_t nLayoutConfig) noexcept override;
 	private:
 		void drawBase(const Cairo::RefPtr<Cairo::Context>& refCc) noexcept;
 		void drawVariable(const Cairo::RefPtr<Cairo::Context>& refCc) noexcept;
-		bool isChanged() const noexcept { return m_p0PreviewWidget->isChanged(); } 
+		bool isChanged() const noexcept { return m_p0PreviewWidget->isChanged(); }
 		NSize getMinSize(int32_t nLayoutConfig) const noexcept;
 	private:
 		void reInitCommon(const Glib::RefPtr<Pango::Context>& refFontContext, double fTileWHRatio) noexcept;

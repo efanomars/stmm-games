@@ -1,6 +1,4 @@
 /*
- * File:   volatilethwidgetfactory.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   volatilethwidgetfactory.cc
  */
 
 #include "widgets/volatilethwidgetfactory.h"
@@ -111,7 +112,7 @@ void VolatileThWidgetFactory::VolatileTWidget::reInit(VolatileThWidgetFactory* p
 	m_nPixH = 0;
 	//
 	m_aCachedImgs.clear();
-	
+
 	reInitCommon(refChildTW);
 }
 void VolatileThWidgetFactory::VolatileTWidget::reInitCommon(const shared_ptr<ThemeWidget>& refChildTW) noexcept

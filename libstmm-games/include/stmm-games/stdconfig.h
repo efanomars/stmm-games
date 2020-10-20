@@ -1,6 +1,4 @@
 /*
- * File:   stdconfig.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stdconfig.h
  */
 
 #ifndef STMG_STD_CONFIG_H
@@ -74,7 +75,7 @@ public:
 		 * The default is empty.
 		 */
 		std::vector<stmi::Capability::Class> m_aCapabilityClasses;
-		/** The maximum number of capabilities that can be explicitly assigned 
+		/** The maximum number of capabilities that can be explicitly assigned
 		 * to a player. The default is `0`, which means you cannot explicitly
 		 * assign capabilities to a player, only automatically to a single
 		 * active human player.
@@ -87,7 +88,7 @@ public:
 		int32_t m_nMaxCapabilitiesExplicitlyAssignedToPlayer = 0;
 		/** Whether more than one instance per capability class can be assigned
 		 * to a player. The default is `false`.
-		 * This only makes sense in very unlikely games where for example 
+		 * This only makes sense in very unlikely games where for example
 		 * two keyboards or joysticks per player are needed.
 		 *
 		 * Note: at most one sound playback capability can be assigned to a player
@@ -115,7 +116,7 @@ public:
 		 */
 		bool canBeAssigned(const stmi::Capability::Class& oClass) const noexcept
 		{
-			return m_bAllCapabilityClasses 
+			return m_bAllCapabilityClasses
 				|| (std::find(m_aCapabilityClasses.begin(), m_aCapabilityClasses.end(), oClass) != m_aCapabilityClasses.end());
 		}
 	};
@@ -129,10 +130,10 @@ public:
 		 * Having more than one name for the same action allows to mix different games into one.
 		 *
 		 * Names must start with alphanumeric character.
-		 * 
+		 *
 		 * Ex. The hardware key stmi::HK_UP can be assigned to a tetris block with key action
 		 * name "Rotate" and to a cursor that responds to a key action named "MoveUp".
-		 * 
+		 *
 		 * @param aKeyActionName The non empty names that identify the same key action.
 		 * @param sDescription The description as it should appear in the preferences dialog.
 		 * @param aDefaultClassKeys The capability classes and their default keys.
@@ -202,7 +203,7 @@ public:
 	 * The option created by StdConfig::createSoundEnabledOption() should only be passed
 	 * if `Init::m_bSoundPerPlayerAllowed == true`. The option created by StdConfig::createSoundVolumeOption()
 	 * for players should only be passed if `Init::m_bSoundPerPlayerAllowed == true`.
-	 * 
+	 *
 	 * @param oInit The initialization structure.
 	 */
 	explicit StdConfig(StdConfig::Init&& oInit) noexcept;
@@ -290,12 +291,12 @@ public:
 	 * is created automatically with some default description string. This
 	 * function allows you to create the option and set the description string
 	 * and possibly use it as a master option for another slave option (ex. 'AISmartness').
-	 * 
-	 * If the owner is game, the created option is readonly and invisible and the 
+	 *
+	 * If the owner is game, the created option is readonly and invisible and the
 	 * default value is true iff AI players are allowed.
 	 *
-	 * If the owner is team, the option is readonly. It is visible iff AI players 
-	 * are allowed. The default value should be ignored since a team should be 
+	 * If the owner is team, the option is readonly. It is visible iff AI players
+	 * are allowed. The default value should be ignored since a team should be
 	 * considered AI only if all its players are AI.
 	 *
 	 * If the owner is player, the option is modifiable and visible iff AI players

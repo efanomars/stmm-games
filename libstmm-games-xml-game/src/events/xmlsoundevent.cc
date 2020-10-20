@@ -1,6 +1,4 @@
 /*
- * File:   xmlsoundevent.cc
- *
  * Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,13 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlsoundevent.cc
+ */
 
 #include "events/xmlsoundevent.h"
 
 #include "gamectx.h"
-#include "xmlcommonerrors.h"
+
+#include <stmm-games-xml-base/xmlcommonerrors.h>
 #include <stmm-games-xml-base/xmlconditionalparser.h>
-#include "xmlutil/xmlstrconv.h"
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
 
 #include <stmm-games/events/soundevent.h>
 #include <stmm-games/event.h>

@@ -1,19 +1,19 @@
-# share/cmake/CommonTesting.cmake
+# Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this program; if not, see <http://www.gnu.org/licenses/>
 
-#  Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
-#
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public
-#  License along with this program; if not, see <http://www.gnu.org/licenses/>
+# File:   CommonTesting.cmake
 
 # TestFiles              Create test executables for a target library.
 # 
@@ -56,27 +56,28 @@ function(TestFiles STMMI_TEST_SOURCES  STMMI_WITH_SOURCES  STMMI_LINKED_INCLUDES
             #
             set(STMMI_FAKES_HEADERS_DIR "${PROJECT_SOURCE_DIR}/../libstmm-games-fake/include/stmm-games-fake")
             set(STMMI_FAKES_HEADERS
-                    "${PROJECT_BINARY_DIR}/dumbblockevent.h"
-                    "${PROJECT_BINARY_DIR}/fakelevelview.h"
-                    "${PROJECT_BINARY_DIR}/fixtureDevices.h"
-                    "${PROJECT_BINARY_DIR}/fixtureGame.h"
-                    "${PROJECT_BINARY_DIR}/fixtureGameOwner.h"
-                    "${PROJECT_BINARY_DIR}/fixtureLayoutAuto.h"
-                    "${PROJECT_BINARY_DIR}/fixtureStdConfig.h"
-                    "${PROJECT_BINARY_DIR}/fixtureStdPreferences.h"
-                    "${PROJECT_BINARY_DIR}/fixtureTestBase.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantHighscoresDefinition.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantKeyActions.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantLayout.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantLevelInit.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantOptions.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantPlayers.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantPrefsDevices.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantPrefsPlayers.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantTeams.h"
-                    "${PROJECT_BINARY_DIR}/fixturevariantVariables.h"
-                    "${PROJECT_BINARY_DIR}/mockevent.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/dumbblockevent.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fakelevelview.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixtureDevices.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixtureGame.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixtureGameOwner.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixtureLayoutAuto.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixtureStdConfig.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixtureStdPreferences.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixtureTestBase.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantHighscoresDefinition.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantKeyActions.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantLayout.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantLevelInit.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantOptions.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantPlayers.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantPrefsDevices.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantPrefsPlayers.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantTeams.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/fixturevariantVariables.h"
+                    "${PROJECT_BINARY_DIR}/stmm-games-fake/mockevent.h"
                  )
+            file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/stmm-games-fake")
             foreach (STMMI_TEST_CUR_FAKES_HEADER  ${STMMI_FAKES_HEADERS})
                 get_filename_component(STMMI_TEST_CUR_FAKES_HEADER_NAME "${STMMI_TEST_CUR_FAKES_HEADER}" NAME)
                 configure_file("${STMMI_FAKES_HEADERS_DIR}/${STMMI_TEST_CUR_FAKES_HEADER_NAME}"
@@ -147,9 +148,6 @@ function(TestFiles STMMI_TEST_SOURCES  STMMI_WITH_SOURCES  STMMI_LINKED_INCLUDES
             target_include_directories(${STMMI_TEST_CUR_TGT}        PRIVATE ${PROJECT_SOURCE_DIR}/../share/thirdparty)
 
             DefineTestTargetPublicCompileOptions(${STMMI_TEST_CUR_TGT})
-            if (STMMI_ADD_FAKE_STUFF)
-                target_compile_definitions(${STMMI_TEST_CUR_TGT} PUBLIC STMG_TESTING_COPY_FROM_FAKE)
-            endif (STMMI_ADD_FAKE_STUFF)
 
             target_link_libraries(${STMMI_TEST_CUR_TGT} ${STMMI_LINKED_LIBS})
 

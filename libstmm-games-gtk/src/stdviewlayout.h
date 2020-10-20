@@ -1,7 +1,5 @@
 /*
- * File:   stdviewlayout.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stdviewlayout.h
  */
 
 #ifndef STMG_STD_VIEW_LAYOUT_H
@@ -69,7 +70,7 @@ public:
 	 */
 	int32_t getLevelShowWidgetByPos(int32_t nX, int32_t nY) const noexcept;
 	/** The interactive widget that encloses a position.
-	 * If both a widget and an ancestor (certainly a container) encloses the 
+	 * If both a widget and an ancestor (certainly a container) encloses the
 	 * position, the former is chosen.
 	 * @param nX The x position.
 	 * @param nY The y position.
@@ -77,7 +78,7 @@ public:
 	 */
 	int32_t getInteractiveWidget(int32_t nX, int32_t nY) const noexcept;
 	/** The interactive widget that encloses a position and is compatible with a owner context.
-	 * If both a widget and an ancestor (certainly a container) encloses the 
+	 * If both a widget and an ancestor (certainly a container) encloses the
 	 * position and is owner compatible, the former is chosen.
 	 * @param nX The x position.
 	 * @param nY The y position.
@@ -113,6 +114,9 @@ private:
 
 	bool m_bValid;
 	std::string m_sErrorString;
+private:
+	StdViewLayout(const StdViewLayout& oSource) = delete;
+	StdViewLayout& operator=(const StdViewLayout& oSource) = delete;
 };
 
 } // namespace stmg

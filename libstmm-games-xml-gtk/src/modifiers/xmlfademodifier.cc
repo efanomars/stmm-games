@@ -1,7 +1,5 @@
 /*
- * File:   xmlfademodifier.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,10 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlfademodifier.cc
+ */
 
 #include "modifiers/xmlfademodifier.h"
+#include "xmlgtkutil/xmlelapsedmapperparser.h"
 
 #include "themectx.h"
+
+#include <stmm-games-xml-base/xmlconditionalparser.h>
 
 #include <stmm-games-gtk/stdthememodifier.h>
 #include <stmm-games-gtk/modifiers/fademodifier.h>
@@ -35,6 +39,8 @@ namespace stmg
 {
 
 static const std::string s_sModifierFadeNodeName = "Fade";
+
+static const std::string s_sModifierFadeElapsedMapperNodeName = "ElapsedMapper";
 
 XmlFadeModifierParser::XmlFadeModifierParser()
 : XmlModifierParser(s_sModifierFadeNodeName)
@@ -55,9 +61,15 @@ unique_ptr<StdThemeModifier> XmlFadeModifierParser::parseModifier(ThemeCtx& oCtx
 	oFInit.m_fDefaultElapsed = std::get<1>(oTupleAni);
 	oFInit.m_bInvert = std::get<2>(oTupleAni);
 
+	const xmlpp::Element* p0ElapsedMapperElement = getXmlConditionalParser()->parseUniqueElement(oCtx, p0Element, s_sModifierFadeElapsedMapperNodeName, false);
+	if (p0ElapsedMapperElement != nullptr) {
+		stmg::XmlElapsedMapperParser oXmlElapsedMapperParser(*getXmlConditionalParser());
+		oFInit.m_oMapper = oXmlElapsedMapperParser.parseElapsedMapper(oCtx, p0ElapsedMapperElement);
+	}
+
 	unique_ptr<FadeModifier> refFadeModifier = std::make_unique<FadeModifier>(&oTheme, std::move(oFInit));
 
-	auto aModifiers = parseSubModifiers(oCtx, p0Element);
+	auto aModifiers = parseSubModifiers(oCtx, p0Element, std::vector<std::string const*>{&s_sModifierFadeElapsedMapperNodeName});
 	refFadeModifier->addSubModifiers(std::move(aModifiers));
 
 	oCtx.popCtx();

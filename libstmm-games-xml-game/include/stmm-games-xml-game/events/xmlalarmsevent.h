@@ -1,7 +1,5 @@
 /*
- * File:   xmlalarmsevent.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmlalarmsevent.h
  */
 
 #ifndef STMG_XML_ALARMS_EVENT_H
@@ -52,7 +53,7 @@ public:
 										, const std::string& sListenerGroupName) override;
 private:
 	unique_ptr<Event> parseEventAlarms(GameCtx& oCtx, const xmlpp::Element* p0Element);
-	void parseEventAlarmsChanger(GameCtx& oCtx, const xmlpp::Element* p0Element, bool bPerc, int32_t& nValue, int32_t& nRepeat);
+	void parseEventAlarmsStage(GameCtx& oCtx, const xmlpp::Element* p0Element, bool bPerc, int32_t& nValue, int32_t& nRepeat);
 
 private:
 	XmlAlarmsEventParser(const XmlAlarmsEventParser& oSource) = delete;

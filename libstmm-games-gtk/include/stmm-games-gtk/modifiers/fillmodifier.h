@@ -1,7 +1,5 @@
 /*
- * File:   fillmodifier.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   fillmodifier.h
  */
 
 #ifndef STMG_FILL_MODIFIER_H
@@ -45,7 +46,7 @@ public:
 	struct Init
 	{
 		int32_t m_nAlpha = 255; /**< The transparency. Must be &gt;= 0 and  &lt;= 255, Opaque is 255. Default is 255. */
-		//could let rect size in perc of tile (0..1) and define stroke color and width (of rect border)
+		//TODO could let rect size in perc of tile (0..1) and define stroke color and width (of rect border)
 	};
 	/** Constructor.
 	 * @param p1Owner The owner theme. Cannot be null.

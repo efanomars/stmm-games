@@ -1,6 +1,4 @@
 /*
- * File:   preferences.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stdpreferences.cc
  */
 
 #include "stdpreferences.h"
@@ -126,7 +127,7 @@ bool StdPreferences::Player::setKeyValue(int32_t nKeyActionId, stmi::Capability*
 	int32_t nClassIdx;
 	int32_t nCapaIdx;
 	#ifndef NDEBUG
-	const bool bFound = 
+	const bool bFound =
 	#endif //NDEBUG
 	p0Prefs->getIdxsFromCapability(p0Capability, nClassIdx, nCapaIdx);
 	assert(bFound);
@@ -240,7 +241,7 @@ bool StdPreferences::Player::setAI(bool bIsAI) noexcept
 			#endif //NDEBUG
 			assert(refTempPlayer.get() == this);
 			assert(nTempKeyActionId == nKeyActionId);
-			// 
+			//
 			oHKPlayerKeyAction.erase(itFind);
 			nClassId = -1;
 			nCapaId = -1;
@@ -860,7 +861,7 @@ void StdPreferences::deviceRemoved(const shared_ptr<stmi::Device>& refDevice) no
 			// Don't reset oCapabilityData.m_refPlayer
 			// Don't clear oCapabilityData.m_oHKPlayerKeyAction
 		} else {
-			// Either in edit mode or 
+			// Either in edit mode or
 			// the capability being removed at runtime was also added at runtime
 			// which means it isn't used in key actions or assigned to a player.
 
@@ -872,7 +873,7 @@ void StdPreferences::deviceRemoved(const shared_ptr<stmi::Device>& refDevice) no
 				assert(!oCapabilityData.m_refPlayer);
 				assert(oCapabilityData.m_oHKPlayerKeyAction.empty());
 			}
-			// 
+			//
 			const int32_t nTotCapas = static_cast<int32_t>(aCapability.size());
 			const int32_t nLastCapaIdx = nTotCapas - 1;
 			if (nRemoveCapaIdx < nLastCapaIdx) {
@@ -1144,7 +1145,7 @@ void StdPreferences::populatePlayersKeyActions() noexcept
 					} else {
 						auto& oCapabilityClassData = m_aCapabilityClassData[nClassIdx];
 						auto& oCapabilityData = oCapabilityClassData.m_aCapabilityData[nCapaIdx];
-//std::cout << "populatePlayersKeyActions defined nKeyActionId=" << nKeyActionId << "  nClassIdx=" << nClassIdx << " nCapaIdx=" << nCapaIdx 
+//std::cout << "populatePlayersKeyActions defined nKeyActionId=" << nKeyActionId << "  nClassIdx=" << nClassIdx << " nCapaIdx=" << nCapaIdx
 						oCapabilityData.m_oHKPlayerKeyAction.emplace(eKey, std::make_pair(refPlayer, nKeyActionId));
 						refPlayer->m_aKeyActionCapaHK[nKeyActionId] = std::make_tuple(nClassIdx, nCapaIdx, eKey);
 					}
@@ -1207,7 +1208,7 @@ bool StdPreferences::populatePlayerKeyAction(const shared_ptr<Player>& refPlayer
 							nRandomCapaIdx = nCurCapaIdx;
 						}
 						const CapabilityData& oCapaData = oClassData.m_aCapabilityData[nCurCapaIdx];
-						if (((nMode == 2) && (oCapaData.m_refPlayer == refPlayer)) 
+						if (((nMode == 2) && (oCapaData.m_refPlayer == refPlayer))
 								|| ((nMode == 3) && !oCapaData.m_refPlayer)
 								|| ((nMode == 4) && (oCapaData.m_refPlayer != refPlayer))) {
 							if ((eDefKey != stmi::HK_NULL) && !capabilityKeyInUse(nCurClassIdx, nCurCapaIdx, eDefKey)) {
@@ -1337,7 +1338,7 @@ void StdPreferences::playerFree(const shared_ptr<Player>& refPlayer) noexcept
 			int32_t& nClassIdx = std::get<0>(oTuple);
 			// defined
 			#ifndef NDEBUG
-			auto nTotErased = 
+			auto nTotErased =
 			#endif //NDEBUG
 			m_aCapabilityClassData[nClassIdx].m_aCapabilityData[nCapaIdx].m_oHKPlayerKeyAction.erase(eKey);
 			assert(nTotErased == 1);

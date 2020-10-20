@@ -1,7 +1,5 @@
 /*
- * File:   staticgridthanifactory.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,21 +14,25 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   staticgridthanifactory.h
+ */
 
 #ifndef STMG_STATIC_GRID_TH_ANI_FACTORY_H
 #define STMG_STATIC_GRID_TH_ANI_FACTORY_H
 
 #include "stdthemeanimationfactory.h"
 
+#include "themeanimation.h"
+
+#include <stmm-games/util/basictypes.h>
+#include <stmm-games/util/recycler.h>
+
 #include <cairomm/context.h>
 #include <cairomm/refptr.h>
 #include <cairomm/surface.h>
 
 #include <memory>
-
-#include "themeanimation.h"
-#include <stmm-games/util/basictypes.h>
-#include <stmm-games/util/recycler.h>
 
 #include <stdint.h>
 

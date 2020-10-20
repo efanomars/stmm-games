@@ -1,7 +1,5 @@
 /*
- * File:   tilecoords.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   tilecoords.h
  */
 
 #ifndef STMG_TILE_COORDS_H
@@ -101,7 +102,7 @@ public:
 	 * @param oXY The coord.
 	 * @return Whether the instance contains the tile aand the tile itself.
 	 */
-	std::pair<bool, Tile> getTile(NPoint oXY) const noexcept; 
+	std::pair<bool, Tile> getTile(NPoint oXY) const noexcept;
 //	/** Removes a coord if it exists.
 //	 * @param nX The x.
 //	 * @param nY The y.

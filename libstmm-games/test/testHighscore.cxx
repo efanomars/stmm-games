@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,12 @@
 #include "catch2/catch.hpp"
 
 #include "highscore.h"
-#include "mockevent.h"
+
 #include "events/variableevent.h"
 
-#include "fixtureGame.h"
-#include "fixturevariantHighscoresDefinition.h"
+#include "stmm-games-fake/mockevent.h"
+#include "stmm-games-fake/fixtureGame.h"
+#include "stmm-games-fake/fixturevariantHighscoresDefinition.h"
 
 namespace stmg
 {

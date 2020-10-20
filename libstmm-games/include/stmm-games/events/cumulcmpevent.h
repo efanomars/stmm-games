@@ -1,7 +1,5 @@
 /*
- * File:   cumulcmpevent.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   cumulcmpevent.h
  */
 
 #ifndef STMG_CUMUL_CMP_EVENT_H
@@ -68,7 +69,7 @@ public:
 
 	// input
 	enum {
-		// 
+		//
 		MESSAGE_CUMUL_COMPARE = 100 /**< Compares the "left" and "right" vars. */
 		, MESSAGE_CUMUL_SET = 110 /**< Sets the "left" and "right" vars to input nValue. */
 		, MESSAGE_CUMUL_SET_LEFT = 111 /**< Sets the "left" var to input nValue. */

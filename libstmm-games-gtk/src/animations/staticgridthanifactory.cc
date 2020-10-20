@@ -1,7 +1,5 @@
 /*
- * File:   staticgridthanifactory.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,15 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   staticgridthanifactory.cc
+ */
 
 #include "animations/staticgridthanifactory.h"
 
 #include "stdthemecontext.h"
 #include "stdtheme.h"
 
-#include "animations/staticgridanimation.h"
 #include "gtkutil/image.h"
 
+#include <stmm-games/animations/staticgridanimation.h>
 #include <stmm-games/util/basictypes.h>
 #include <stmm-games/util/recycler.h>
 
@@ -188,7 +189,7 @@ shared_ptr<ThemeAnimation> StaticGridThAniFactory::create(const shared_ptr<StdTh
 	if (!refModel) {
 		return shared_ptr<ThemeAnimation>{};
 	}
-	
+
 	shared_ptr<StaticGridThAniFactory::StaticGridThAni> refNew;
 	m_oStaticGridThAnis.create(refNew);
 	refNew->m_p1Owner = this;

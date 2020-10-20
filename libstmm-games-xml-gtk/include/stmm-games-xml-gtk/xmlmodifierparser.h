@@ -1,7 +1,5 @@
 /*
- * File:   xmlmodifierparser.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmlmodifierparser.h
  */
 
 #ifndef STMG_XML_MODIFIER_PARSER_H
@@ -78,10 +79,21 @@ protected:
 	 * @throws std::runtime_error.
 	 */
 	std::vector< unique_ptr<StdThemeModifier> > parseSubModifiers(ThemeCtx& oCtx, const xmlpp::Element* p0ParentElement);
+	/** Parse all children as modifiers.
+	 * Use this if the child Elements are all Modifiers, if one isn't an error is thrown.
+	 * Alternatively use parseSubModifier(), to parse them one by one.
+	 * @param oCtx The theme context.
+	 * @param p0ParentElement  The parent element. Cannot be null.
+	 * @param aSkipChildNames  The child names that should be ignored.
+	 * @return The created submodifiers. All values are not null.
+	 * @throws std::runtime_error.
+	 */
+	std::vector< unique_ptr<StdThemeModifier> > parseSubModifiers(ThemeCtx& oCtx, const xmlpp::Element* p0ParentElement
+																, const std::vector<std::string const*>& aSkipChildNames);
 	/** Parses a submodifier.
 	 * If the element is not a modifier it throws.
 	 * @param oCtx The theme context.
-	 * @param p0ModifierElement The submodifier element. Cannot be null. 
+	 * @param p0ModifierElement The submodifier element. Cannot be null.
 	 * @return The parsed submodifier. Is not null.
 	 * @throws std::runtime_error.
 	 */

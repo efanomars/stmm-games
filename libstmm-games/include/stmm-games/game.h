@@ -1,6 +1,4 @@
 /*
- * File:   game.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   game.h
  */
 
 #ifndef STMG_GAME_H
@@ -401,7 +402,7 @@ public:
 		level(nLevel)->handleInput(nLevelTeam, nMate, refEvent);
 	}
 	/** Get the unique active human player within a context.
-	 * 
+	 *
 	 * @param nLevel (Input) The level context (if &gt;=0) or -1. (Output) The level of the found player.
 	 * @param nLevelTeam (Input) The level team context (if &gt;=0) or -1. (Output) The level team of the found player.
 	 * @param nMate (Input) The mate number context (if &gt;=0) or -1. (Output) The mate number of the found player.
@@ -409,7 +410,7 @@ public:
 	 */
 	bool getUniqueActiveHumanPlayer(int32_t& nLevel, int32_t& nLevelTeam, int32_t& nMate) noexcept;
 	/** Get the unique active human player within a context.
-	 * 
+	 *
 	 * @param nTeam (Input) The team context (if &gt;=0) or -1. (Output) The team of the found player.
 	 * @param nMate (Input) The mate number context (if &gt;=0) or -1. (Output) The mate number of the found player.
 	 * @return Whether there is an active player and it is only one.

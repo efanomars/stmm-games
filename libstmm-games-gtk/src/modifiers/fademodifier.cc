@@ -1,7 +1,5 @@
 /*
- * File:   fademodifier.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   fademodifier.cc
+ */
 
 #include "modifiers/fademodifier.h"
 
@@ -25,6 +26,7 @@
 #include <cairomm/surface.h>
 
 #include <cassert>
+//#include <iostream>
 #include <utility>
 
 namespace stmg { class StdThemeDrawingContext; }
@@ -54,6 +56,7 @@ StdThemeModifier::FLOW_CONTROL FadeModifier::drawTile(const Cairo::RefPtr<Cairo:
 			fElapsed = m_oData.m_fDefaultElapsed;
 		}
 	}
+	fElapsed = m_oData.m_oMapper.map(fElapsed);
 	if (fElapsed < 0.0) {
 		// draw opaque
 		const FLOW_CONTROL eCtl = ContainerModifier::drawTile(refCc, oDc, oTile, nPlayer, aAniElapsed);
@@ -63,6 +66,10 @@ StdThemeModifier::FLOW_CONTROL FadeModifier::drawTile(const Cairo::RefPtr<Cairo:
 	if (fAlpha1 == 0.0) {
 		// transparent, draw nothing
 		return FLOW_CONTROL_CONTINUE; //----------------------------------------
+	} else if (fAlpha1 == 1.0) {
+		// draw opaque
+		const FLOW_CONTROL eCtl = ContainerModifier::drawTile(refCc, oDc, oTile, nPlayer, aAniElapsed);
+		return eCtl; //---------------------------------------------------------
 	}
 	Cairo::RefPtr<Cairo::Surface> refWork;
 	const FLOW_CONTROL eCtl = drawContainedToWorkSurface(oDc, oTile, nPlayer, aAniElapsed, refWork);

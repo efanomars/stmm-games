@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -13,7 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
- *
  */
 /*
  * File:   fixturevariantOptions.h
@@ -25,19 +24,13 @@
 
 #include "fixturevariantPlayers.h"
 
-#include "options/booloption.h"
-#include "options/enumoption.h"
-#include "options/intoption.h"
+#include <stmm-games/options/booloption.h>
+#include <stmm-games/options/enumoption.h>
+#include <stmm-games/options/intoption.h>
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "stdconfig.h"
-#include "ownertype.h"
-#include "util/variant.h"
-#else
 #include <stmm-games/stdconfig.h>
 #include <stmm-games/ownertype.h>
 #include <stmm-games/util/variant.h>
-#endif
 
 #include <string>
 #include <tuple>
@@ -132,7 +125,7 @@ protected:
 		}
 		if (dynamic_cast<FixtureVariantOptions_Game_Difficulty const*>(this) != nullptr) {
 			aOptions.push_back(std::make_shared<EnumOption>(OwnerType::GAME, "Difficulty", 0, "Difficulty"
-				, std::vector< std::tuple<int32_t, std::string, std::string> >{ 
+				, std::vector< std::tuple<int32_t, std::string, std::string> >{
 					std::tuple<int32_t, std::string, std::string>{0, "Easy", "Hurt me plenty"}
 					, std::tuple<int32_t, std::string, std::string>{1, "Medium", "Manageable"}
 					, std::tuple<int32_t, std::string, std::string>{2, "Hard", "I give up!"}

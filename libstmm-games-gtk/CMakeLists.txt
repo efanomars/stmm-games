@@ -1,19 +1,19 @@
-# File: libstmm-games-gtk/CMakeLists.txt
+# Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this program; if not, see <http://www.gnu.org/licenses/>
 
-#  Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
-#
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public
-#  License along with this program; if not, see <http://www.gnu.org/licenses/>
+# File:   libstmm-games-gtk/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.0)
 
@@ -58,6 +58,7 @@ set(STMMI_HEADERS_MODIFIERS
         "${STMMI_HEADERS_DIR}/modifiers/selectcasemodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/selectedimagemodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/maskmodifier.h"
+        "${STMMI_HEADERS_DIR}/modifiers/selectvarmodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/stopmodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/textmodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/tileanimodifier.h"
@@ -67,6 +68,7 @@ set(STMMI_HEADERS_GTKUTIL
         "${STMMI_HEADERS_DIR}/gtkutil/cachedsurfaces.h"
         "${STMMI_HEADERS_DIR}/gtkutil/ccsave.h"
         "${STMMI_HEADERS_DIR}/gtkutil/dynanimation.h"
+        "${STMMI_HEADERS_DIR}/gtkutil/elapsedmapper.h"
         "${STMMI_HEADERS_DIR}/gtkutil/frame.h"
         "${STMMI_HEADERS_DIR}/gtkutil/image.h"
         "${STMMI_HEADERS_DIR}/gtkutil/segmentedfunction.h"
@@ -138,6 +140,7 @@ set(STMMI_SOURCES
         "${STMMI_SOURCES_DIR}/stdlevelview.h"
         "${STMMI_SOURCES_DIR}/stdlevelview.cc"
         "${STMMI_SOURCES_DIR}/stdtheme.cc"
+        "${STMMI_SOURCES_DIR}/stdthemeanimationfactories.cc"
         "${STMMI_SOURCES_DIR}/stdthemeanimationfactory.cc"
         "${STMMI_SOURCES_DIR}/stdthemecontext.cc"
         "${STMMI_SOURCES_DIR}/stdthemedrawingcontext.cc"
@@ -192,6 +195,7 @@ set(STMMI_SOURCES
         "${STMMI_SOURCES_DIR}/modifiers/selectcasemodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/selectedimagemodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/maskmodifier.cc"
+        "${STMMI_SOURCES_DIR}/modifiers/selectvarmodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/stopmodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/textmodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/tileanimodifier.cc"
@@ -199,6 +203,7 @@ set(STMMI_SOURCES
         "${STMMI_SOURCES_DIR}/gtkutil/ccsave.cc"
         "${STMMI_SOURCES_DIR}/gtkutil/cachedsurfaces.cc"
         "${STMMI_SOURCES_DIR}/gtkutil/dynanimation.cc"
+        "${STMMI_SOURCES_DIR}/gtkutil/elapsedmapper.cc"
         "${STMMI_SOURCES_DIR}/gtkutil/frame.cc"
         "${STMMI_SOURCES_DIR}/gtkutil/gtkutilpriv.h"
         "${STMMI_SOURCES_DIR}/gtkutil/gtkutilpriv.cc"

@@ -1,7 +1,5 @@
 /*
- * File:   xmlrotatemodifier.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,10 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlrotatemodifier.cc
+ */
 
 #include "modifiers/xmlrotatemodifier.h"
+#include "xmlgtkutil/xmlelapsedmapperparser.h"
 
 #include "themectx.h"
+
+#include <stmm-games-xml-base/xmlconditionalparser.h>
 
 #include <stmm-games-gtk/modifiers/rotatemodifier.h>
 #include <stmm-games-gtk/stdthememodifier.h>
@@ -35,6 +39,9 @@ namespace stmg
 {
 
 static const std::string s_sModifierRotateNodeName = "Rotate";
+
+static const std::string s_sModifierRotateElapsedMapperNodeName = "ElapsedMapper";
+
 
 XmlRotateModifierParser::XmlRotateModifierParser()
 : XmlModifierParser(s_sModifierRotateNodeName)
@@ -53,6 +60,12 @@ unique_ptr<StdThemeModifier> XmlRotateModifierParser::parseModifier(ThemeCtx& oC
 	oRInit.m_nElapsedTileAniIdx = std::get<0>(oTupleAni);
 	oRInit.m_fDefaultElapsed = std::get<1>(oTupleAni);
 	oRInit.m_bInvert = std::get<2>(oTupleAni);
+
+	const xmlpp::Element* p0ElapsedMapperElement = getXmlConditionalParser()->parseUniqueElement(oCtx, p0Element, s_sModifierRotateElapsedMapperNodeName, false);
+	if (p0ElapsedMapperElement != nullptr) {
+		stmg::XmlElapsedMapperParser oXmlElapsedMapperParser(*getXmlConditionalParser());
+		oRInit.m_oMapper = oXmlElapsedMapperParser.parseElapsedMapper(oCtx, p0ElapsedMapperElement);
+	}
 
 	unique_ptr<RotateModifier> refRotateModifier = std::make_unique<RotateModifier>(&oTheme, std::move(oRInit));
 

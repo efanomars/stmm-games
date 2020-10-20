@@ -1,7 +1,5 @@
 /*
- * File:   stdthemewidgetfactories.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,19 +14,22 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   stdthemewidgetfactories.h
+ */
 
 #ifndef STMG_STD_THEME_WIDGET_FACTORIES_H
 #define STMG_STD_THEME_WIDGET_FACTORIES_H
 
-#include "backgroundthwidgetfactory.h"
-#include "boxthwidgetfactory.h"
-#include "inputboxthwidgetfactory.h"
-#include "actionsboxthwidgetfactory.h"
-#include "actionthwidgetfactory.h"
-#include "levelshowthwidgetfactory.h"
-#include "previewthwidgetfactory.h"
-#include "varthwidgetfactory.h"
-#include "transparentthwidgetfactory.h"
+#include "widgets/backgroundthwidgetfactory.h"
+#include "widgets/boxthwidgetfactory.h"
+#include "widgets/inputboxthwidgetfactory.h"
+#include "widgets/actionsboxthwidgetfactory.h"
+#include "widgets/actionthwidgetfactory.h"
+#include "widgets/levelshowthwidgetfactory.h"
+#include "widgets/previewthwidgetfactory.h"
+#include "widgets/varthwidgetfactory.h"
+#include "widgets/transparentthwidgetfactory.h"
 
 #endif	/* STMG_STD_THEME_WIDGET_FACTORIES_H */
 

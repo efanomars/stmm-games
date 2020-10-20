@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -13,7 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
- *
  */
 /*
  * File:   fixturevariantPrefsPlayers.h
@@ -23,17 +22,11 @@
 #ifndef STMG_TESTING_FIXTURE_VARIANT_PREFS_PLAYERS_H
 #define STMG_TESTING_FIXTURE_VARIANT_PREFS_PLAYERS_H
 
-#include "stdpreferences.h"
+#include <stmm-games/stdpreferences.h>
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "stdconfig.h"
-#include "appconstraints.h"
-#include "apppreferences.h"
-#else
 #include <stmm-games/stdconfig.h>
 #include <stmm-games/appconstraints.h>
 #include <stmm-games/apppreferences.h>
-#endif
 
 #include <memory>
 #include <cassert>

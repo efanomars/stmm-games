@@ -1,6 +1,4 @@
 /*
- * File:   util.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   util.cc
  */
 
 #include "util/util.h"
@@ -173,7 +174,7 @@ int32_t strUTF8SizeInCodePoints(const std::string& sUtf8) noexcept
 							nOffset = 6;
 						} else {
 							// 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-							nOffset = 5; 
+							nOffset = 5;
 						}
 					} else {
 						// 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx

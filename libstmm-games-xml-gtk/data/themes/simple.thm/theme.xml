@@ -15,6 +15,9 @@
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, see <http://www.gnu.org/licenses/>
 -->
+<!--
+ * File:   libstmm-games-xml-gtk/data/themes/simple.thm/theme.xml
+-->
 <Theme _ign_version="1" internalName="Simple">
 	<Description>This is a test theme</Description>
 	<Colors>

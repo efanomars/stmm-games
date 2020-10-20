@@ -1,7 +1,5 @@
 /*
- * File:   coords.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,12 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   coords.h
+ */
 
 #ifndef STMG_COORDS_H
 #define STMG_COORDS_H
 
-#include "basictypes.h"
-#include "util.h"
+#include "util/basictypes.h"
+#include "util/util.h"
 
 #include <unordered_map>
 #include <utility>
@@ -98,7 +99,7 @@ public:
 	 * @param oXY The coord.
 	 * @return Whether the instance contains a ccord.
 	 */
-	bool contains(NPoint oXY) const noexcept; 
+	bool contains(NPoint oXY) const noexcept;
 	/** Removes a coord if it exists.
 	 * @param nX The x.
 	 * @param nY The y.
@@ -195,7 +196,7 @@ protected:
 	 * @return A valid iterator, Coords::end() if not found.
 	 */
 	const_iterator find(int32_t nX, int32_t nY) const noexcept;
-	
+
 	int32_t& getOrCreate(NPoint oXY) noexcept;
 	/* Reinitialization.
 	 * @param nAtLeastSize

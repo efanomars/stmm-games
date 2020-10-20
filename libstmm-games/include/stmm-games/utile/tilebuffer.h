@@ -1,7 +1,5 @@
 /*
- * File:   tilebuffer.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,14 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   tilebuffer.h
+ */
 
 #ifndef STMG_TILE_BUFFER_H
 #define STMG_TILE_BUFFER_H
 
-#include "tilerect.h"
-#include "util/xybuffer.h"
-
 #include "tile.h"
+
+#include "utile/tilerect.h"
+
+#include "util/xybuffer.h"
 #include "util/basictypes.h"
 
 #include <stdint.h>

@@ -1,6 +1,4 @@
 /*
- * File:   xmlactionwidget.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,14 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlactionwidget.cc
+ */
 
 #include "gamewidgets/xmlactionwidget.h"
 
 #include "gamewidgets/xmlactionbasewidget.h"
 #include "layoutctx.h"
-#include <stmm-games-xml-base/xmlconditionalparser.h>
 #include "xmlgamewidgetparser.h"
-#include "xmlutil/xmlstrconv.h"
+
+#include <stmm-games-xml-base/xmlconditionalparser.h>
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
 
 #include <stmm-games/named.h>
 #include <stmm-games/util/namedindex.h>

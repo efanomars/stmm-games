@@ -1,6 +1,4 @@
 /*
- * File:   xmltraitsparser.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmltraitsparser.cc
  */
 
 #include "xmltraitsparser.h"
@@ -793,8 +794,8 @@ std::unique_ptr<TileSelector::Operator> XmlTraitsParser::parseTileSelectorCond(C
 	{
 		oCtx.addChecker(p0ItemElement);
 		const std::string sItemName = p0ItemElement->get_name();
-		if ((sItemName == s_sTileSelectorOperatorOrNodeName) 
-					|| (sItemName == s_sTileSelectorOperatorAndNodeName) 
+		if ((sItemName == s_sTileSelectorOperatorOrNodeName)
+					|| (sItemName == s_sTileSelectorOperatorAndNodeName)
 					|| (sItemName == s_sTileSelectorOperatorNotNodeName)) {
 			TileSelector::Operator::OP_TYPE eChildOpType;
 			if (sItemName == s_sTileSelectorOperatorOrNodeName) {

@@ -15,7 +15,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
 /*
- * File:   stmm-games-xml-config.h
+ * File:   stmm-games-xml-game-config.h
  */
 
 #ifndef STMG_STMM_GAMES_XML_LIB_CONFIG_H

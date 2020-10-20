@@ -1,6 +1,4 @@
 /*
- * File:   stdview.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,9 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   stdview.cc
+ */
 
 #include "stdview.h"
-#include "game.h"
 #include "stdlevelview.h"
 
 #include "levelshowthemewidget.h"
@@ -28,6 +28,7 @@
 #include "themesound.h"
 #include "themecontext.h"
 
+#include <stmm-games/game.h>
 #include <stmm-games/appconfig.h>
 #include <stmm-games/apppreferences.h>
 #include <stmm-games/gamewidget.h>
@@ -106,7 +107,7 @@ std::pair<bool, NRect> StdView::reInit(const shared_ptr<Game>& refGame, const sh
 	m_refThemeCtx.reset();
 	m_refThemeCtx = m_refTheme->createContext(oPixSize, true
 											, m_refGame->getSoundScaleX(), m_refGame->getSoundScaleY(), m_refGame->getSoundScaleZ()
-											, getFontContext());
+											, getFontContext(), this);
 
 	m_refGame->setGameView(this);
 
@@ -255,6 +256,22 @@ std::pair<bool, NRect> StdView::reInit(const shared_ptr<Game>& refGame, const sh
 //#endif //NDEBUG
 	return std::make_pair(true, oActive);
 }
+int32_t StdView::getVariableIdFromName(const std::string& sVarName) noexcept
+{
+	assert(m_refGame);
+	const auto oPair = m_refGame->variableIdAndOwner(sVarName);
+	const OwnerType eOwnerType = oPair.second;
+	if (eOwnerType != OwnerType::GAME) {
+		return -1; //-----------------------------------------------------------
+	}
+	const int32_t nVarId = oPair.first;
+	return nVarId;
+}
+int32_t StdView::getVariableValue(int32_t nVarId) noexcept
+{
+	return m_refGame->variable(nVarId).get();
+}
+
 void StdView::checkNewPlaybackDevices() noexcept
 {
 	if (m_bPerPlayerSound) {

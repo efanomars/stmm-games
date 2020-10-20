@@ -1,6 +1,4 @@
 /*
- * File:  layout.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   layout.h
  */
 
 #ifndef STMG_LAYOUT_H
@@ -44,10 +45,10 @@ class Layout
 {
 public:
 	/** Layout constructor.
-	 * If parameter `refReferenceLevelShow` is null, the first LevelShowWidget 
+	 * If parameter `refReferenceLevelShow` is null, the first LevelShowWidget
 	 * found in the refRootGW tree is used. If it is not null it must be in the
 	 * refRootGW tree.
-	 * 
+	 *
 	 * If `bSubshows` is `false` then the stage(s) is shown.
 	 * @param refRootGW The root widget. Cannot be null.
 	 * @param refReferenceLevelShow The reference level show. Can be null.
@@ -94,7 +95,7 @@ public:
 	/** The preferences.
 	 * @return The preferences. Cannot be null;
 	 */
-	const shared_ptr<AppPreferences>& getPrefs() noexcept { return m_refPrefs; } 
+	const shared_ptr<AppPreferences>& getPrefs() noexcept { return m_refPrefs; }
 	#ifndef NDEBUG
 	void dump(int32_t nIndentSpaces) const noexcept;
 	void dump() const noexcept

@@ -1,19 +1,19 @@
-# stmm-games: test/CMakeLists.txt
+# Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this program; if not, see <http://www.gnu.org/licenses/>
 
-#  Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
-#
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public
-#  License along with this program; if not, see <http://www.gnu.org/licenses/>
+# File:   libstmm-games/test/CMakeLists.txt
 
 # BEWARE!
 #   The tests depend on the libstmm-games-fake project
@@ -25,6 +25,8 @@ include(CommonTesting)
 option(BUILD_TESTING "Build tests" OFF)
 
 if (BUILD_TESTING)
+    target_include_directories(stmm-games BEFORE PRIVATE ${STMMI_INCLUDE_DIR})
+
     # Test dirs
     set(STMMI_TEST_SOURCES_DIR  "${PROJECT_SOURCE_DIR}/test")
 
@@ -36,6 +38,7 @@ if (BUILD_TESTING)
             "${STMMI_TEST_SOURCES_DIR}/testCoords.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testBasicTypes.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testDirection.cxx"
+            "${STMMI_TEST_SOURCES_DIR}/testHelpers.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testIntSet.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testNamedIndex.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testNamedObjIndex.cxx"

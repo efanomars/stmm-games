@@ -1,6 +1,4 @@
 /*
- * File:   option.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   option.h
  */
 
 #ifndef STMG_OPTION_H
@@ -47,7 +48,7 @@ protected:
 	 */
 	Option(OwnerType eOwnerType, const std::string& sName, const Variant& oDefaultValue, const std::string& sDesc) noexcept;
 	/** One master constructor.
-	 * 
+	 *
 	 * If bReadOnly is `true` the preferences dialog might show it but not allow to set its value.
 	 *
 	 * If bVisible is `false` the preferences dialog doesn't show the option.

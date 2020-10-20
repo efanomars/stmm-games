@@ -1,6 +1,4 @@
 /*
- * File:   xmlthemeimagesparser.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,16 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlthemeimagesparser.cc
+ */
 
 
 #include "xmlthemeimagesparser.h"
 
-#include "xmlutil/xmlstrconv.h"
 #include "xmlthemeimageparser.h"
 #include "themectx.h"
-#include "xmlcommonerrors.h"
+
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
+#include <stmm-games-xml-base/xmlcommonerrors.h>
 #include <stmm-games-xml-base/xmlconditionalparser.h>
-#include "xmlutil/xmlimageparser.h"
+#include <stmm-games-xml-base/xmlutil/xmlimageparser.h>
 
 #include <stmm-games-gtk/stdtheme.h>
 
@@ -221,7 +223,7 @@ void XmlThemeImagesParser::parseImageArraysFileArray(ThemeCtx& oCtx, const xmlpp
 	if (oPairMinLen.first) {
 		if (bCharFromToDefined) {
 			throw XmlCommonErrors::error(oCtx, p0Element, s_sImageArraysFileArrayMinLenAttr, Util::stringCompose("Attribute %1"
-					" is not compatible with attribute %2" 
+					" is not compatible with attribute %2"
 					, s_sImageArraysFileArrayMinLenAttr, s_sImageArraysFileArrayFromCharAttr));
 		}
 		const std::string& sMinLen = oPairMinLen.second;

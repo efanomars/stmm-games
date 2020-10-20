@@ -1,7 +1,5 @@
 /*
- * File:  gamewidget.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   gamewidget.h
  */
 
 #ifndef STMG_GAME_WIDGET_H
@@ -211,7 +212,7 @@ public:
 	 * because it is virtual.
 	 *
 	 * If bHeader is true this function should also output the type of the object and its address.
-	 * 
+	 *
 	 * @param nIndentSpaces Number of spaces put in front of each output line.
 	 * @param bHeader Whether the header of the object should be displayed.
 	 */

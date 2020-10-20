@@ -1,6 +1,4 @@
 /*
- * File:  actionsboxwidget.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,11 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   actionsboxwidget.h
+ */
 
 #ifndef STMG_ACTIONS_BOX_WIDGET_H
 #define STMG_ACTIONS_BOX_WIDGET_H
 
-#include "boxwidget.h"
+#include "widgets/boxwidget.h"
 #include "widgets/actionwidget.h"
 
 #include <string>
@@ -54,7 +55,7 @@ namespace stmg
  * the value divided by the sum of all the values in the vector.
  * If a LocalInit::m_aActionCells value is empty, no key action is triggered.
  *
- * Example: for a Tetris like game the grid has 2 columns and 3 rows, 
+ * Example: for a Tetris like game the grid has 2 columns and 3 rows,
  * LocalInit could be filled with m_aColumns = {7, 7}, m_aRows = {20, 140, 40},
  * m_aActionCells = {interrupt "PAUSE", interrupt "ABORT_ASK", key action "Drop",
  * key action "Rotate", key action "Left", key action "Right"}.

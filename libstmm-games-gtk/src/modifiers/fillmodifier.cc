@@ -1,7 +1,5 @@
 /*
- * File:   fillmodifier.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,19 +14,22 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   fillmodifier.cc
+ */
 
 #include "modifiers/fillmodifier.h"
 #include "stdtheme.h"
 #include "stdthemedrawingcontext.h"
+
+#include <stmm-games/tile.h>
+#include <stmm-games/util/basictypes.h>
 
 #include <cairomm/context.h>
 #include <cairomm/refptr.h>
 
 #include <cassert>
 //#include <iostream>
-
-#include <stmm-games/tile.h>
-#include <stmm-games/util/basictypes.h>
 
 #include <stdint.h>
 

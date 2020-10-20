@@ -1,6 +1,4 @@
 /*
- * File:   tileanimodifier.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   tileanimodifier.cc
+ */
 
 #include "modifiers/tileanimodifier.h"
 #include "stdtheme.h"
@@ -24,12 +25,12 @@
 #include "gtkutil/image.h"
 #include "gtkutil/tileani.h"
 
-#include <cassert>
-#include <utility>
-
 #include <stmm-games/named.h>
 #include <stmm-games/util/basictypes.h>
 #include <stmm-games/util/namedindex.h>
+
+#include <cassert>
+#include <utility>
 
 namespace Cairo { class Context; }
 namespace Cairo { template <typename T_CastFrom> class RefPtr; }

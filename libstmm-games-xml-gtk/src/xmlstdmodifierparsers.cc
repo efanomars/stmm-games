@@ -1,7 +1,5 @@
 /*
- * File:   xmlstdmodifierparsers.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmlstdmodifierparsers.cc
  */
 
 #include "xmlstdmodifierparsers.h"
@@ -34,6 +35,7 @@
 #include "modifiers/xmlselectanimodifier.h"
 #include "modifiers/xmlselectcasemodifier.h"
 #include "modifiers/xmlselectedimagemodifier.h"
+#include "modifiers/xmlselectvarmodifier.h"
 #include "modifiers/xmlstopmodifier.h"
 #include "modifiers/xmltextmodifier.h"
 #include "modifiers/xmltileanimodifier.h"
@@ -58,6 +60,7 @@ std::vector<unique_ptr<XmlModifierParser>> getXmlStdModifierParsers()
 	aXmlModifierParsers.push_back(std::make_unique<XmlSelectAniModifierParser>());
 	aXmlModifierParsers.push_back(std::make_unique<XmlSelectCaseModifierParser>());
 	aXmlModifierParsers.push_back(std::make_unique<XmlSelectedImageModifierParser>());
+	aXmlModifierParsers.push_back(std::make_unique<XmlSelectVarModifierParser>());
 	aXmlModifierParsers.push_back(std::make_unique<XmlStopModifierParser>());
 	aXmlModifierParsers.push_back(std::make_unique<XmlTextModifierParser>());
 	aXmlModifierParsers.push_back(std::make_unique<XmlTileAniModifierParser>());

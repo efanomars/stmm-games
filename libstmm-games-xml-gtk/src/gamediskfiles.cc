@@ -1,6 +1,4 @@
 /*
- * File:   gamediskfiles.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   gamediskfiles.cc
  */
 
 #include "gamediskfiles.h"
@@ -185,7 +186,6 @@ const File& GameDiskFiles::getGameThumbnailFile(const File& oGameFile) noexcept
 			auto nLastDotIdx = sImgName.find_last_of('.');
 			assert(nLastDotIdx != std::string::npos);
 			if (sImgName.substr(0, nLastDotIdx) + s_sGameXmlExt == sGameName) {
-				// ex. 
 				oFileData.m_aResourceFiles.emplace_back("", File{sImgPath});
 				break; // for
 			}

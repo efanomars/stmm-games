@@ -1,6 +1,4 @@
 /*
- * File:   level.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   level.h
  */
 
 #ifndef STMG_LEVEL_H
@@ -637,7 +638,7 @@ public:
 	 * @param p0Event The event. Cannot be null.
 	 * @param nMsg The message. Must be &gt;= -1.
 	 * @param nValue The value.
-	 * @param p0TriggeringEvent The triggering event or null. 
+	 * @param p0TriggeringEvent The triggering event or null.
 	 */
 	void triggerEvent(Event* p0Event, int32_t nMsg, int32_t nValue, Event* p0TriggeringEvent) noexcept;
 

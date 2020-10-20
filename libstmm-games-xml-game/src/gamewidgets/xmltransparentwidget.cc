@@ -1,7 +1,5 @@
 /*
- * File:   xmltransparentwidget.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,14 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmltransparentwidget.cc
+ */
 
 #include "gamewidgets/xmltransparentwidget.h"
+
+#include "layoutctx.h"
 
 #include <stmm-games/widgets/transparentwidget.h>
 
 #include <string>
 #include <utility>
-#include "layoutctx.h"
 
 namespace stmg { class GameWidget; }
 namespace xmlpp { class Element; }

@@ -1,6 +1,4 @@
 /*
- * File:   xmlgameparser.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,16 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlgameparser.cc
+ */
 
 #include "xmlgameparser.h"
 
-#include "xmlutil/xmlstrconv.h"
-#include "conditionalctx.h"
 #include "gamectx.h"
 #include "gameinitctx.h"
-#include "xmlcommonerrors.h"
-#include "xmlcommonparser.h"
 #include "xmleventparser.h"
+
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
+#include <stmm-games-xml-base/conditionalctx.h>
+#include <stmm-games-xml-base/xmlcommonerrors.h>
+#include <stmm-games-xml-base/xmlcommonparser.h>
 
 #include <stmm-games-file/gameloader.h>
 
@@ -322,7 +324,7 @@ std::pair<std::string, int32_t> XmlGameParser::parseEvIdMessage(ConditionalCtx& 
 	const auto oPairEventId = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, sEvIdAttrName);
 	const std::string& sId = oPairEventId.second;
 	const bool bIdDefined = oPairEventId.first;
-		
+
 	const auto oPairMsgName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, sMsgNameAttrName);
 	const std::string& sMsgName = oPairMsgName.second;
 	const bool bMsgNameDefined = oPairMsgName.first;

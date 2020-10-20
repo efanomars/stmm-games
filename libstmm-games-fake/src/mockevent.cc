@@ -1,6 +1,4 @@
 /*
- * File:   mockevent.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,20 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   mockevent.cc
+ */
 
-#include "mockevent.h"
+#include "stmm-games-fake/mockevent.h"
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "level.h"
-#include "event.h"
-#include "gameproxy.h"
-#include "variable.h"
-#else
 #include <stmm-games/level.h>
 #include <stmm-games/event.h>
 #include <stmm-games/gameproxy.h>
 #include <stmm-games/variable.h>
-#endif
 
 #include <utility>
 #include <cassert>
@@ -44,6 +38,15 @@ MockEvent::MockEvent(Init&& oInit) noexcept
 , m_bTriggerValuesSet(false)
 , m_nGroup(-1)
 , m_nValue(-1)
+, m_oTriggerFunction(std::move([](Level& /*oLevel*/){}))
+{
+}
+MockEvent::MockEvent(Init&& oInit, std::function<void(Level& oLevel)>&& oTriggerFunction) noexcept
+: Event(std::move(oInit))
+, m_bTriggerValuesSet(false)
+, m_nGroup(-1)
+, m_nValue(-1)
+, m_oTriggerFunction(std::move(oTriggerFunction))
 {
 }
 
@@ -53,6 +56,15 @@ void MockEvent::reInit(Init&& oInit) noexcept
 	m_bTriggerValuesSet = false;
 	m_nGroup = -1;
 	m_nValue = -1;
+	m_oTriggerFunction = std::move([](Level& /*oLevel*/){});
+}
+void MockEvent::reInit(Init&& oInit, std::function<void(Level& oLevel)>&& oTriggerFunction) noexcept
+{
+	Event::reInit(std::move(oInit));
+	m_bTriggerValuesSet = false;
+	m_nGroup = -1;
+	m_nValue = -1;
+	m_oTriggerFunction = std::move(oTriggerFunction);
 }
 
 void MockEvent::setTriggerValue(int32_t nGroup, int32_t nValue, int32_t nSkipTicks) noexcept
@@ -76,7 +88,8 @@ void MockEvent::setVariable(int32_t nVarId, int32_t nTeam, int32_t nMate, int32_
 
 void MockEvent::trigger(int32_t /*nMsg*/, int32_t /*nValue*/, Event* p0TriggeringEvent) noexcept
 {
-	auto& oGame = level().game();
+	Level& oLevel = level();
+	auto& oGame = oLevel.game();
 	const bool bATIOL = oGame.isAllTeamsInOneLevel();
 	for (const auto& oVarData : m_aVarDatas) {
 		Variable& oVar = oGame.variable(oVarData.m_nVarId, (bATIOL ? 0 : oVarData.m_nTeam), (bATIOL ? oVarData.m_nTeam : 0), oVarData.m_nMate);
@@ -85,7 +98,10 @@ void MockEvent::trigger(int32_t /*nMsg*/, int32_t /*nValue*/, Event* p0Triggerin
 	if (p0TriggeringEvent != nullptr) {
 		return;
 	}
-	informListeners(m_nGroup, m_nValue);
+	m_oTriggerFunction(oLevel);
+	if (m_nGroup >= 0) {
+		informListeners(m_nGroup, m_nValue);
+	}
 }
 
 } // namespace stmg

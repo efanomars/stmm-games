@@ -1,6 +1,4 @@
 /*
- * File:   playersscreen.cc
- *
  * Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   playersscreen.cc
  */
 
 #include "playersscreen.h"
@@ -1486,7 +1487,7 @@ void PlayersScreen::onButtonPlayTestSound(const shared_ptr<stmi::Capability>& re
 	auto refPlayback = std::static_pointer_cast<stmi::PlaybackCapability>(refCapa);
 	refPlayback->setListenerVol(fVolume);
 
-	auto refThemeCtx = m_refTheme->createContext(NSize{10,10}, false, 1.0, 1.0, 1.0, m_oGameWindow.get_pango_context());
+	auto refThemeCtx = m_refTheme->createContext(NSize{10,10}, false, 1.0, 1.0, 1.0, m_oGameWindow.get_pango_context(), nullptr);
 	auto refThemeSound = refThemeCtx->createSound(m_nSoundTestIdx, {refPlayback}, FPoint{}, 0.0, true, 1.0, false);
 	if (! refThemeSound) {
 		std::cout << "Couldn't play test sound '" << s_sTestSoundName << "'" << '\n';

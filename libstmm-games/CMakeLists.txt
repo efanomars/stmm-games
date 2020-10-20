@@ -1,19 +1,19 @@
-# File: libstmm-games/CMakeLists.txt
+# Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this program; if not, see <http://www.gnu.org/licenses/>
 
-#  Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
-#
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public
-#  License along with this program; if not, see <http://www.gnu.org/licenses/>
+# File:   libstmm-games/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.0)
 
@@ -199,6 +199,7 @@ set(STMMI_SOURCES
         "${STMMI_SOURCES_DIR}/traitsets/fonttraitset.cc"
         "${STMMI_SOURCES_DIR}/traitsets/inttraitset.cc"
         "${STMMI_SOURCES_DIR}/traitsets/notemptyinttraitset.cc"
+        "${STMMI_SOURCES_DIR}/traitsets/tiletraitsets.cc"
         #
         "${STMMI_SOURCES_DIR}/util/basictypes.cc"
         "${STMMI_SOURCES_DIR}/util/circularbuffer.cc"
@@ -248,12 +249,14 @@ set(STMMI_SOURCES
         "${STMMI_SOURCES_DIR}/gameview.cc"
         "${STMMI_SOURCES_DIR}/gameowner.cc"
         "${STMMI_SOURCES_DIR}/gamewidget.cc"
+        "${STMMI_SOURCES_DIR}/gamewidgets.cc"
         "${STMMI_SOURCES_DIR}/highscore.cc"
         "${STMMI_SOURCES_DIR}/highscoresdefinition.cc"
         "${STMMI_SOURCES_DIR}/keyactionevent.cc"
         "${STMMI_SOURCES_DIR}/layout.cc"
         "${STMMI_SOURCES_DIR}/level.cc"
         "${STMMI_SOURCES_DIR}/levelanimation.cc"
+        "${STMMI_SOURCES_DIR}/levelanimations.cc"
         "${STMMI_SOURCES_DIR}/levelblock.cc"
         "${STMMI_SOURCES_DIR}/levellisteners.cc"
         "${STMMI_SOURCES_DIR}/levelshow.cc"
@@ -263,6 +266,7 @@ set(STMMI_SOURCES
         "${STMMI_SOURCES_DIR}/ownertype.cc"
         "${STMMI_SOURCES_DIR}/randomsource.cc"
         "${STMMI_SOURCES_DIR}/prefselector.cc"
+        "${STMMI_SOURCES_DIR}/private-listenerstk.cc"
         "${STMMI_SOURCES_DIR}/relsizedgamewidget.cc"
         "${STMMI_SOURCES_DIR}/stdconfig.cc"
         "${STMMI_SOURCES_DIR}/stdpreferences.cc"

@@ -1,6 +1,4 @@
 /*
- * File:   game.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   game.cc
  */
 
 #include "game.h"
@@ -39,10 +40,11 @@
 #include <vector>
 #include <cassert>
 #include <algorithm>
-#include <ctype.h>
 #include <cstdint>
 #include <iterator>
 #include <iostream>
+
+#include <ctype.h>
 
 namespace stmi { class Accessor; }
 
@@ -269,7 +271,7 @@ void Game::start() noexcept
 	for (auto& refLevel : m_aLevel) {
 		refLevel->variablesInit(m_oTeamVariableTypes, m_oPlayerVariableTypes);
 		//
-		refLevel->gameStart(); 
+		refLevel->gameStart();
 	}
 
 	calcGameInterval();

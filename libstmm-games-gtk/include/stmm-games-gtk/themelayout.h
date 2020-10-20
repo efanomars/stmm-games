@@ -1,7 +1,5 @@
 /*
- * File:   themelayout.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   themelayout.h
  */
 
 #ifndef STMG_THEME_LAYOUT_H
@@ -39,7 +40,7 @@ public:
 	/** Get the root theme widget.
 	 * @return The root widget as passed to the constructor.
 	 */
-	inline const shared_ptr<ThemeWidget>& getRoot() const noexcept { return m_refRootTW; }
+	const shared_ptr<ThemeWidget>& getRoot() const noexcept { return m_refRootTW; }
 	virtual void dump(int32_t nIndentSpaces) const noexcept;
 	void dump() const noexcept
 	{

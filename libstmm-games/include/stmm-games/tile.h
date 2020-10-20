@@ -1,7 +1,5 @@
 /*
- * File:   tile.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   tile.h
  */
 
 #ifndef STMG_TILE_H
@@ -41,7 +42,7 @@ public:
 	// bbbbbbbbggggggggrrrrrrrr00000001 r:red g:green b:blue (a:alpha)
 	// iiiiiiiiiiiiiiiiiiiiiiii00000010 i:index
 	// ssssssssssssssssssssssss00000011 s:COLOR_PAL
-	// 
+	//
 	enum COLOR_TYPE {
 		COLOR_TYPE_EMPTY = 0,
 		COLOR_TYPE_INDEX = 1,
@@ -162,7 +163,7 @@ public:
 		const uint32_t nRGB = (nR << 16) | (nG << 8) | nB;
 		return nRGB;
 	}
-	inline static void int32ToRgb(int32_t nRgb, uint8_t& nR, uint8_t& nG, uint8_t& nB) noexcept 
+	inline static void int32ToRgb(int32_t nRgb, uint8_t& nR, uint8_t& nG, uint8_t& nB) noexcept
 	{
 		const uint32_t nRGB = nRgb & ((1 << 24) -1);
 		nR = static_cast<uint8_t>((nRGB >> 16) & 255);
@@ -282,7 +283,7 @@ public:
 	// cccccccccccccccccccccccccccccccC c:char, C:type
 	// uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu0 u:UCS-4 (UTF-32)
 	// iiiiiiiiiiiiiiiiiiiiiiiiiiiiiii1 i:char index
-	// 
+	//
 	TileChar() noexcept : m_nChar(0) {}
 	inline bool isEmpty() const noexcept
 	{

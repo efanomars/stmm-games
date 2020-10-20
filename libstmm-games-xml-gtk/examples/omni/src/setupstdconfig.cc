@@ -62,11 +62,11 @@ std::string omniSetupStdConfig(shared_ptr<StdConfig>& refStdConfig, const json& 
 	const json& oConstr = oConf[jas::s_sConfConstraints];
 	AppConstraints& oAppConstraints = oStdConfigInit.m_oAppConstraints;
 	oAppConstraints.m_nTeamsMin = oConstr[jas::s_sConfConstraintsTeamsMin].get<int32_t>();
-	oAppConstraints.m_nTeamsMax = oConstr[jas::s_sConfConstraintsTeamsMax].get<int32_t>(); 
-	oAppConstraints.m_nMatesPerTeamMax = oConstr[jas::s_sConfConstraintsMatesPerTeamMax].get<int32_t>(); 
-	oAppConstraints.m_nPlayersMax = oConstr[jas::s_sConfConstraintsPlayersMax].get<int32_t>(); 
-	oAppConstraints.m_nAIMatesPerTeamMax = oConstr[jas::s_sConfConstraintsAIMatesPerTeamMax].get<int32_t>(); 
-	oAppConstraints.m_bAllowMixedAIHumanTeam = oConstr[jas::s_sConfConstraintsAllowMixedAIHumanTeam].get<bool>(); 
+	oAppConstraints.m_nTeamsMax = oConstr[jas::s_sConfConstraintsTeamsMax].get<int32_t>();
+	oAppConstraints.m_nMatesPerTeamMax = oConstr[jas::s_sConfConstraintsMatesPerTeamMax].get<int32_t>();
+	oAppConstraints.m_nPlayersMax = oConstr[jas::s_sConfConstraintsPlayersMax].get<int32_t>();
+	oAppConstraints.m_nAIMatesPerTeamMax = oConstr[jas::s_sConfConstraintsAIMatesPerTeamMax].get<int32_t>();
+	oAppConstraints.m_bAllowMixedAIHumanTeam = oConstr[jas::s_sConfConstraintsAllowMixedAIHumanTeam].get<bool>();
 
 	const json& oCapaAss = oConf[jas::s_sConfAssign];
 	StdConfig::CapabilityAssignment& oCapabilityAssignment = oStdConfigInit.m_oCapabilityAssignment;
@@ -130,7 +130,7 @@ std::string omniSetupStdConfig(shared_ptr<StdConfig>& refStdConfig, const json& 
 	for (const json& oJOption : oJOptions) {
 		const std::string sOptionType = oJOption[jas::s_sConfOptionsOptionType];
 		const bool bOptionIsBoolean = (sOptionType == jas::s_sConfOptionsOptionTypeBool);
-		
+
 		const std::string sOwnerType = oJOption[jas::s_sConfOptionsOwnerType];
 		OwnerType eOwnerType = OwnerType::GAME;
 		if (sOwnerType == jas::s_sConfOptionsOwnerTypeGame) {

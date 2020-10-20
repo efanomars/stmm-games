@@ -1,7 +1,5 @@
 /*
- * File:   xmlmaskmodifier.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmlmaskmodifier.cc
  */
 
 #include "modifiers/xmlmaskmodifier.h"
@@ -62,7 +63,7 @@ unique_ptr<StdThemeModifier> XmlMaskModifierParser::parseModifier(ThemeCtx& oCtx
 	oInit.m_bInvert = std::get<2>(oTupleTileAni);
 
 	unique_ptr<MaskModifier> refMaskModifier = std::make_unique<MaskModifier>(&oTheme, std::move(oInit));
-	
+
 	auto aModifiers = parseSubModifiers(oCtx, p0Element);
 	refMaskModifier->addSubModifiers(std::move(aModifiers));
 	oCtx.popCtx();

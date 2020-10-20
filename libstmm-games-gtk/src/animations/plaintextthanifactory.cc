@@ -1,7 +1,5 @@
 /*
- * File:   plaintextthanifactory.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   plaintextthanifactory.cc
  */
 
 #include "animations/plaintextthanifactory.h"
@@ -56,7 +57,7 @@ void PlainTextThAniFactory::PlainTextThAni::reInit() noexcept
 }
 void PlainTextThAniFactory::PlainTextThAni::reInitCommon() noexcept
 {
-	
+
 }
 int32_t PlainTextThAniFactory::PlainTextThAni::getZ(int32_t /*nViewTick*/, int32_t /*nTotViewTicks*/) noexcept
 {
@@ -134,7 +135,7 @@ void PlainTextThAniFactory::PlainTextThAni::draw(int32_t nViewTick, int32_t nTot
 	assert((nViewTick >= 0) && (nViewTick < nTotViewTicks));
 	assert(m_refModel);
 	if ((m_fWidest <= 0.0) || (m_fHighest <= 0.0)) {
-		// nothing to draw 
+		// nothing to draw
 		return; //--------------------------------------------------------------
 	}
 	PlainTextThAniFactory* p0Factory = m_p1Owner;

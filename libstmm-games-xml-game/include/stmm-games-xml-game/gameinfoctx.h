@@ -1,6 +1,4 @@
 /*
- * File:   gameinfoctx.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,11 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   gameinfoctx.h
+ */
 
 #ifndef STMG_GAME_INFO_CTX_H
 #define STMG_GAME_INFO_CTX_H
 
-#include "conditionalctx.h"
+#include <stmm-games-xml-base/conditionalctx.h>
 
 #include <stmm-games-file/gameloader.h>
 

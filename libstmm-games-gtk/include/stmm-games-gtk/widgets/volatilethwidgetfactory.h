@@ -1,7 +1,5 @@
 /*
- * File:   volatilethwidgetfactory.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   volatilethwidgetfactory.h
  */
 
 #ifndef STMG_VOLATILE_TH_WIDGET_FACTORY_H
@@ -86,7 +87,7 @@ private:
 		void setSize(int32_t nPixW, int32_t nPixH) noexcept;
 		void drawBase(const Cairo::RefPtr<Cairo::Context>& refCc) noexcept;
 		void drawVariable(const Cairo::RefPtr<Cairo::Context>& refCc) noexcept;
-		bool isChanged() const noexcept { return m_p0VolatileWidget->isChanged(); } 
+		bool isChanged() const noexcept { return m_p0VolatileWidget->isChanged(); }
 		NSize getMinSize(int32_t nLayoutConfig) const noexcept;
 		void loadAndDrawImg(const Cairo::RefPtr<Cairo::Context>& refCc, int32_t nImgId) noexcept;
 	private:

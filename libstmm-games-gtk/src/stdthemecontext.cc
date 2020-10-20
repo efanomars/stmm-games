@@ -1,6 +1,4 @@
 /*
- * File:   stdthemecontext.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   stdthemecontext.cc
  */
 
 #include "stdthemecontext.h"
@@ -36,15 +37,20 @@ namespace stmg { class Tile; }
 namespace stmg
 {
 
-StdThemeContext::StdThemeContext() noexcept
+StdThemeContext::StdThemeContext(Theme::RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept
 : m_p1Owner(nullptr)
 , m_nTileW(-1)
 , m_nTileH(-1)
 , m_bRegistered(false)
+, m_bDrawingBoardTile(false)
+, m_fSoundScaleX(1.0)
+, m_fSoundScaleY(1.0)
+, m_fSoundScaleZ(1.0)
+, m_oDrawingContext(p0RuntimeVariablesEnv)
 {
 	m_oDrawingContext.m_p1Owner = this;
 }
-void StdThemeContext::reInit() noexcept
+void StdThemeContext::reInit(Theme::RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept
 {
 	if (m_bRegistered) {
 		assert(m_p1Owner != nullptr);
@@ -54,7 +60,7 @@ void StdThemeContext::reInit() noexcept
 	m_nTileW = -1;
 	m_nTileH = -1;
 	m_bRegistered = false;
-	m_oDrawingContext.reInit();
+	m_oDrawingContext.reInit(p0RuntimeVariablesEnv);
 	m_oDrawingContext.m_p1Owner = this;
 }
 

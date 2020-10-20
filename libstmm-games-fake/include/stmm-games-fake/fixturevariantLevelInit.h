@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -13,7 +13,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
- *
  */
 /*
  * File:   fixturevariantLevelInit.h
@@ -23,13 +22,8 @@
 #ifndef STMG_TESTING_FIXTURE_VARIANT_LEVEL_INIT_H
 #define STMG_TESTING_FIXTURE_VARIANT_LEVEL_INIT_H
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "level.h"
-#include "tile.h"
-#else
 #include <stmm-games/level.h>
 #include <stmm-games/tile.h>
-#endif
 
 #include <vector>
 #include <memory>
@@ -107,6 +101,12 @@ protected:
 			return 8;
 		} else if (dynamic_cast<FixtureVariantLevelInitBoardWidth<9>*>(this) != nullptr) {
 			return 9;
+		} else if (dynamic_cast<FixtureVariantLevelInitBoardWidth<10>*>(this) != nullptr) {
+			return 10;
+		} else if (dynamic_cast<FixtureVariantLevelInitBoardWidth<11>*>(this) != nullptr) {
+			return 11;
+		} else if (dynamic_cast<FixtureVariantLevelInitBoardWidth<12>*>(this) != nullptr) {
+			return 12;
 		}
 		return 10;
 	}
@@ -130,6 +130,10 @@ protected:
 			return 9;
 		} else if (dynamic_cast<FixtureVariantLevelInitBoardHeight<10>*>(this) != nullptr) {
 			return 10;
+		} else if (dynamic_cast<FixtureVariantLevelInitBoardHeight<11>*>(this) != nullptr) {
+			return 11;
+		} else if (dynamic_cast<FixtureVariantLevelInitBoardHeight<12>*>(this) != nullptr) {
+			return 12;
 		}
 		return 6;
 	}

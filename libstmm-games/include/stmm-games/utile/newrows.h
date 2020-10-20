@@ -1,7 +1,5 @@
 /*
- * File:   newrows.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,13 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   newrows.h
+ */
 
 #ifndef STMG_NEW_ROWS_H
 #define STMG_NEW_ROWS_H
 
-#include "util/intset.h"
-#include "randomtiles.h"
 #include "tile.h"
+
+#include "utile/randomtiles.h"
+
+#include "util/intset.h"
 
 #include <vector>
 #include <memory>

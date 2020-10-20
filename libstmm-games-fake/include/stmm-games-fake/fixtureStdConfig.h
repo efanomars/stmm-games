@@ -1,6 +1,4 @@
 /*
- * File:   fixtureStdConfig.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   fixtureStdConfig.h
+ */
 /*   @DO_NOT_REMOVE_THIS_LINE_IT_IS_USED_BY_COMMONTESTING_CMAKE@   */
 
 #ifndef STMG_TESTING_FIXTURE_STD_CONFIG_H
@@ -28,13 +29,8 @@
 #include "fixturevariantKeyActions.h"
 #include "fixturevariantOptions.h"
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "stdconfig.h"
-#include "appconstraints.h"
-#else
 #include <stmm-games/stdconfig.h>
 #include <stmm-games/appconstraints.h>
-#endif
 
 #include <stmm-input-fake/fakedevicemanager.h>
 
@@ -85,7 +81,7 @@ protected:
 
 		oStdConfigInit.m_aKeyActions = getKeyActions();
 		oStdConfigInit.m_aOptions = FixtureVariantOptions::getConfigOptions();
-	
+
 		StdConfig::CapabilityAssignment& oCapabilityAssignment = oStdConfigInit.m_oCapabilityAssignment;
 		oCapabilityAssignment.m_nMaxCapabilitiesExplicitlyAssignedToPlayer = 1000;
 		oCapabilityAssignment.m_bCapabilitiesAutoAssignedToActivePlayer = true;

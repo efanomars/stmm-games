@@ -1,7 +1,5 @@
 /*
- * File:   xmlifelsemodifier.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,13 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlifelsemodifier.cc
+ */
 
 #include "modifiers/xmlifelsemodifier.h"
 
+#include "themectx.h"
+
 #include <stmm-games-xml-base/xmltraitsparser.h>
 #include <stmm-games-xml-base/xmlconditionalparser.h>
-#include "themectx.h"
-#include "xmlcommonerrors.h"
+#include <stmm-games-xml-base/xmlcommonerrors.h>
 
 #include <stmm-games-gtk/modifiers/ifelsemodifier.h>
 #include <stmm-games-gtk/stdthememodifier.h>

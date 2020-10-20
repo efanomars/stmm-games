@@ -1,7 +1,5 @@
 /*
- * File:   actionthwidgetfactory.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   actionthwidgetfactory.h
  */
 
 #ifndef STMG_ACTION_TH_WIDGET_FACTORY_H
@@ -113,7 +114,7 @@ private:
 	private:
 		void drawBase(const Cairo::RefPtr<Cairo::Context>& refCc) noexcept;
 		void drawVariable(const Cairo::RefPtr<Cairo::Context>& refCc) noexcept;
-		bool isChanged() const noexcept { return false; } 
+		bool isChanged() const noexcept { return false; }
 		NSize getMinSize(int32_t nLayoutConfig) const noexcept;
 	private:
 		void reInitCommon(const Glib::RefPtr<Pango::Context>& refFontContext, double fTileWHRatio) noexcept;

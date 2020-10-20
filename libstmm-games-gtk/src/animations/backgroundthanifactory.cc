@@ -1,6 +1,4 @@
 /*
- * File:   backgroundthanifactory.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,15 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   backgroundthanifactory.cc
+ */
 
 #include "animations/backgroundthanifactory.h"
 
 #include "stdtheme.h"
 #include "stdthemecontext.h"
 
-#include "animations/backgroundanimation.h"
 #include "gtkutil/image.h"
 
+#include <stmm-games/animations/backgroundanimation.h>
 #include <stmm-games/util/recycler.h>
 
 #include <cairomm/context.h>

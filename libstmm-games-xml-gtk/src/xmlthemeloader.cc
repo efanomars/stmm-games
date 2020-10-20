@@ -1,6 +1,4 @@
 /*
- * File:   xmlthemeloader.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlthemeloader.cc
+ */
 
 #include "xmlthemeloader.h"
 
@@ -24,7 +25,8 @@
 #include "xmlthanimationfactoryparser.h"
 #include "xmlmodifierparser.h"
 #include "themectx.h"
-#include "parserctx.h"
+
+#include <stmm-games-xml-base/parserctx.h>
 
 #include <stmm-games-gtk/stdtheme.h>
 #include <stmm-games-gtk/themeloader.h>
@@ -121,7 +123,7 @@ void XmlThemeLoader::loadThemeInfos()
 				oThemeInfo.m_sThemeErrorString.clear();
 				ParserCtx oCtx(m_refAppConfig, oDummy);
 				const bool bSupportsAppId = m_refXmlThemeParser->parseXmlThemeInfo(oCtx, p0RootElement
-															, sThemeName, oThemeInfo.m_oExtendsThemes, oThemeInfo); 
+															, sThemeName, oThemeInfo.m_oExtendsThemes, oThemeInfo);
 //std::cout << "XmlThemeLoader::loadThemeInfos()    sThemeName='" << sThemeName << "'" << '\n';
 				if (m_oNamedThemeInfos.find(sThemeName) == m_oNamedThemeInfos.end()) {
 					oThemeInfo.m_bSupportsAppId = bSupportsAppId;

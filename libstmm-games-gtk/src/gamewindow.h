@@ -1,6 +1,4 @@
 /*
- * File:   gamewindow.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   gamewindow.h
  */
 
 #ifndef STMG_GAME_WINDOW_H
@@ -232,7 +233,7 @@ private:
 	// 0---------------1---------------2---------------0---------------1---  view ticks
 	// AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA                      game interval
 	// BBBBBBBBBBBBBBBB                                                      view interval
-	// 
+	//
 	// If a char represents a millisecond the game interval is 48 msec,
 	// the view interval 16 msec (=> 62 "frames" per second).
 	// The game logic is calculated at each game tick before view tick 0.
@@ -342,6 +343,9 @@ private:
 	unique_ptr<PlayersScreen> m_refChoosePlayersScreen;
 	friend class AboutScreen;
 	unique_ptr<AboutScreen> m_refAboutScreen;
+private:
+	GameWindow(const GameWindow& oSource) = delete;
+	GameWindow& operator=(const GameWindow& oSource) = delete;
 };
 
 } // namespace stmg

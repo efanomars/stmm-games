@@ -1,6 +1,4 @@
 /*
- * File:   event.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   event.h
  */
 
 #ifndef STMG_EVENT_H
@@ -126,7 +127,7 @@ public:
 	void setDebugTag(int32_t nDebugTag) noexcept;
 	int32_t getDebugTag() const noexcept;
 public:
-	enum { 
+	enum {
 		LISTENER_GROUP_FINISHED = 0 /**< Reserved group that is triggered when an event has "expired". */
 	};
 
@@ -139,10 +140,10 @@ protected:
 	virtual void informListeners(int32_t nGroupId, int32_t nValue) noexcept;
 	/** The trigger function.
 	 * This function provides the functionality of the event and can be called in two ways.
-	 * 
+	 *
 	 * It can be called by an event through informListeners() this event was listening to.
 	 * Note: events can listen to themselves.
-	 * 
+	 *
 	 * It can also be called by the timer if the event was active.
 	 *
 	 * When this function is called the event has already been deactivated by the level

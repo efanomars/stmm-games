@@ -1,7 +1,5 @@
 /*
- * File:   xmlmodifierparser.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmlmodifierparser.cc
  */
 
 #include "xmlmodifierparser.h"
@@ -50,6 +51,16 @@ std::vector< unique_ptr<StdThemeModifier> > XmlModifierParser::parseSubModifiers
 	}
 	#endif //NDEBUG
 	return m_p1Owner->parseModifiers(oCtx, p0ParentElement);
+}
+std::vector< unique_ptr<StdThemeModifier> > XmlModifierParser::parseSubModifiers(ThemeCtx& oCtx, const xmlpp::Element* p0ParentElement
+																				, const std::vector<std::string const*>& aSkipChildNames)
+{
+	#ifndef NDEBUG
+	if (m_p1Owner == nullptr) {
+		return std::vector< unique_ptr<StdThemeModifier> >{};
+	}
+	#endif //NDEBUG
+	return m_p1Owner->parseModifiers(oCtx, p0ParentElement, aSkipChildNames);
 }
 unique_ptr<StdThemeModifier> XmlModifierParser::parseSubModifier(ThemeCtx& oCtx, const xmlpp::Element* p0ModifierElement)
 {

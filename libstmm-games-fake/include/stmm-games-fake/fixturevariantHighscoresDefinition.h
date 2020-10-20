@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,13 +24,8 @@
 
 #include "fixturevariantOptions.h"
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "highscoresdefinition.h"
-#include "ownertype.h"
-#else
 #include <stmm-games/highscoresdefinition.h>
 #include <stmm-games/ownertype.h>
-#endif
 
 #include <limits>
 #include <string>

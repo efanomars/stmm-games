@@ -22,10 +22,10 @@
 #include "catch2/catch.hpp"
 
 #include "events/delayedqueueevent.h"
-#include "mockevent.h"
 #include "events/logevent.h"
 
-#include "fixtureGame.h"
+#include "stmm-games-fake/mockevent.h"
+#include "stmm-games-fake/fixtureGame.h"
 
 #include <iostream>
 

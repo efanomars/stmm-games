@@ -1,6 +1,4 @@
 /*
- * File:   xmlgameinfoparser.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   xmlgameinfoparser.cc
  */
 
 #include "xmlgameinfoparser.h"
@@ -667,7 +668,7 @@ void XmlGameInfoParser::parseVariablesVar(GameInfoCtx& oCtx, const xmlpp::Elemen
 	}
 
 	#ifndef NDEBUG
-	const int32_t nIdx2 = 
+	const int32_t nIdx2 =
 	#endif
 	oVariableTypes.addNamedObj(sName, oVariableType);
 	assert(nIdx2 >= 0);

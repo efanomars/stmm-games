@@ -1,6 +1,4 @@
 /*
- * File:   appconfig.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   appconfig.h
  */
 
 #ifndef STMG_APP_CONFIG_H
@@ -84,17 +85,17 @@ public:
 	 */
 	virtual const shared_ptr<Option>& getOption(OwnerType eOwner, const std::string& sName) const noexcept = 0;
 	/** Tells whether events should be assigned to the active player.
-	 * If this function returns `true`, the game, when it receives an event from a 
+	 * If this function returns `true`, the game, when it receives an event from a
 	 * device's capability that wasn't assigned to a player in the preferences,
 	 * will try to assign it to the unique active human player.
 	 * If more than one human player is active at the moment the event is received,
 	 * it is dropped.
-	 * 
+	 *
 	 * This is useful in turn based games where the two players use the same device
 	 * (ex. the mouse). Be aware that it can cause inconsistencies. Example:
 	 * if between the press and the release of a joystick button the active player
 	 * is changed the release event is sent to a different player.
-	 * 
+	 *
 	 * @return Whether to look for a target human player for an unassigned event.
 	 */
 	virtual bool isEventAssignedToActivePlayer() const noexcept = 0;

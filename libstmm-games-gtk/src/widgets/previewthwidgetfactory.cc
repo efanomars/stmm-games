@@ -1,6 +1,4 @@
 /*
- * File:   previewthwidgetfactory.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   previewthwidgetfactory.cc
+ */
 
 #include "widgets/previewthwidgetfactory.h"
 
@@ -25,6 +26,8 @@
 
 #include <stmm-games/block.h>
 #include <stmm-games/gamewidget.h>
+#include <stmm-games/gameproxy.h>
+#include <stmm-games/variable.h>
 #include <stmm-games/tile.h>
 #include <stmm-games/widgets/previewwidget.h>
 #include <stmm-games/util/basictypes.h>
@@ -134,6 +137,20 @@ void PreviewThWidgetFactory::PreviewTWidget::reInitCommon(const Glib::RefPtr<Pan
 	m_refFontLayout->set_font_description(*(m_p1Owner->m_refFont));
 
 	m_refPreviewTc.reset();
+}
+int32_t PreviewThWidgetFactory::PreviewTWidget::getVariableIdFromName(const std::string& sVarName) noexcept
+{
+	const auto oPair = m_p0PreviewWidget->game().variableIdAndOwner(sVarName);
+	const OwnerType eOwnerType = oPair.second;
+	if (eOwnerType != OwnerType::GAME) {
+		return -1; //-----------------------------------------------------------
+	}
+	const int32_t nVarId = oPair.first;
+	return nVarId;
+}
+int32_t PreviewThWidgetFactory::PreviewTWidget::getVariableValue(int32_t nVarId) noexcept
+{
+	return m_p0PreviewWidget->game().variable(nVarId).get();
 }
 void PreviewThWidgetFactory::PreviewTWidget::dump(int32_t
 #ifndef NDEBUG
@@ -328,7 +345,7 @@ void PreviewThWidgetFactory::PreviewTWidget::drawPreviewBlock(const Cairo::RefPt
 	assert(nShape >= 0);
 
 	if (!m_refPreviewTc) {
-		m_refPreviewTc = p0StdTheme->createContext(NSize{nTileW, nTileH}, false, 1.0, 1.0, 1.0, m_refFontContext);
+		m_refPreviewTc = p0StdTheme->createContext(NSize{nTileW, nTileH}, false, 1.0, 1.0, 1.0, m_refFontContext, this);
 	} else {
 		const NSize oSize = m_refPreviewTc->getTileSize();
 		const int32_t& nOldTileW = oSize.m_nW;

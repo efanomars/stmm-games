@@ -1,7 +1,5 @@
 /*
- * File:   xmlstaticgridevent.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,12 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlstaticgridevent.h
+ */
 
 #ifndef STMG_XML_STATIC_GRID_EVENT_H
 #define STMG_XML_STATIC_GRID_EVENT_H
 
 #include "xmleventparser.h"
-#include "xmlcommonparser.h"
+
+#include <stmm-games-xml-base/xmlcommonparser.h>
 
 #include <stmm-games/animations/staticgridanimation.h>
 

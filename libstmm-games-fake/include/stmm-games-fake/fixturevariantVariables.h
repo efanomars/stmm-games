@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,8 @@
 #ifndef STMG_TESTING_FIXTURE_VARIANT_VARIABLES_H
 #define STMG_TESTING_FIXTURE_VARIANT_VARIABLES_H
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "variable.h"
-#include "util/namedobjindex.h"
-#else
 #include <stmm-games/variable.h>
 #include <stmm-games/util/namedobjindex.h>
-#endif
 
 #include <memory>
 

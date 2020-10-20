@@ -1,19 +1,19 @@
-# File: libstmm-games-xml-gtk/CMakeLists.txt
+# Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this program; if not, see <http://www.gnu.org/licenses/>
 
-#  Copyright © 2020  Stefano Marsili, <stemars@gmx.ch>
-#
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public
-#  License along with this program; if not, see <http://www.gnu.org/licenses/>
+# File:   libstmm-games-xml-gtk/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.0)
 
@@ -49,6 +49,7 @@ set(STMMI_HEADERS_MODIFIERS
         "${STMMI_HEADERS_DIR}/modifiers/xmlselectanimodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/xmlselectcasemodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/xmlselectedimagemodifier.h"
+        "${STMMI_HEADERS_DIR}/modifiers/xmlselectvarmodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/xmlstopmodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/xmltextmodifier.h"
         "${STMMI_HEADERS_DIR}/modifiers/xmltileanimodifier.h"
@@ -74,6 +75,10 @@ set(STMMI_HEADERS_THEME_WIDGETS
         "${STMMI_HEADERS_DIR}/themewidgets/xmltransparentthwidgetfactory.h"
         "${STMMI_HEADERS_DIR}/themewidgets/xmlvarthwidgetfactory.h"
         "${STMMI_HEADERS_DIR}/themewidgets/xmlvolatilethwidgetfactory.h"
+        )
+#
+set(STMMI_HEADERS_XML_GTK_UTIL
+        "${STMMI_HEADERS_DIR}/xmlgtkutil/xmlelapsedmapperparser.h"
         )
 #
 set(STMMI_HEADERS
@@ -109,6 +114,7 @@ set(STMMI_SOURCES
         "${STMMI_SOURCES_DIR}/modifiers/xmlselectanimodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/xmlselectcasemodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/xmlselectedimagemodifier.cc"
+        "${STMMI_SOURCES_DIR}/modifiers/xmlselectvarmodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/xmlstopmodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/xmltextmodifier.cc"
         "${STMMI_SOURCES_DIR}/modifiers/xmltileanimodifier.cc"
@@ -130,6 +136,8 @@ set(STMMI_SOURCES
         "${STMMI_SOURCES_DIR}/themewidgets/xmltransparentthwidgetfactory.cc"
         "${STMMI_SOURCES_DIR}/themewidgets/xmlvarthwidgetfactory.cc"
         "${STMMI_SOURCES_DIR}/themewidgets/xmlvolatilethwidgetfactory.cc"
+        #
+        "${STMMI_SOURCES_DIR}/xmlgtkutil/xmlelapsedmapperparser.cc"
         #
         "${STMMI_SOURCES_DIR}/gamediskfiles.cc"
         "${STMMI_SOURCES_DIR}/themectx.cc"
@@ -355,6 +363,7 @@ install(FILES ${STMMI_HEADERS}                  DESTINATION "include/stmm-games-
 install(FILES ${STMMI_HEADERS_MODIFIERS}        DESTINATION "include/stmm-games-xml-gtk/modifiers")
 install(FILES ${STMMI_HEADERS_THEME_ANIMATIONS} DESTINATION "include/stmm-games-xml-gtk/themeanimations")
 install(FILES ${STMMI_HEADERS_THEME_WIDGETS}    DESTINATION "include/stmm-games-xml-gtk/themewidgets")
+install(FILES ${STMMI_HEADERS_XML_GTK_UTIL}     DESTINATION "include/stmm-games-xml-gtk/xmlgtkutil")
 
 install(FILES  "${PROJECT_BINARY_DIR}/stmm-games-xml-gtk.pc"   DESTINATION "lib/pkgconfig")
 

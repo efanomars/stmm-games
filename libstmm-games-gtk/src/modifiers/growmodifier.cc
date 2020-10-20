@@ -1,7 +1,5 @@
 /*
- * File:   growmodifier.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   growmodifier.cc
  */
 
 #include "modifiers/growmodifier.h"
@@ -90,12 +91,20 @@ StdThemeModifier::FLOW_CONTROL GrowModifier::drawTile(const Cairo::RefPtr<Cairo:
 			fElapsed = m_oData.m_fDefaultElapsed;
 		}
 	}
-
-	if ((fElapsed >= 0.0) && m_oData.m_bInvert) {
+	fElapsed = m_oData.m_oMapper.map(fElapsed);
+	if (fElapsed < 0.0) {
+		// draw normally
+		const FLOW_CONTROL eCtl = ContainerModifier::drawTile(refCc, oDc, oTile, nPlayer, aAniElapsed);
+		return eCtl; //---------------------------------------------------------
+	}
+	if (m_oData.m_bInvert) {
 		fElapsed = 1.0 - fElapsed;
 	}
-	if (fElapsed <= 0.0) {
-		// no grow
+	if (fElapsed == 0.0) {
+		// an invisible point, draw nothing
+		return FLOW_CONTROL_CONTINUE; //----------------------------------------
+	} else if (fElapsed == 1.0) {
+		// draw normally
 		const FLOW_CONTROL eCtl = ContainerModifier::drawTile(refCc, oDc, oTile, nPlayer, aAniElapsed);
 		return eCtl; //---------------------------------------------------------
 	}

@@ -1,6 +1,4 @@
 /*
- * File:   positionerevent.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   positionerevent.cc
  */
 
 #include "events/positionerevent.h"
@@ -281,7 +282,7 @@ void PositionerEvent::checkNewPositions() noexcept
 		oShowPosition.m_nGameTicksToTarget = m_oData.m_nTransitionTicks;
 		++m_nTotTransitioning;
 //std::cout << "PositionerEvent::checkNewPositions() m_nTotTransitioning=" << m_nTotTransitioning << '\n';
-	}	
+	}
 }
 FPoint PositionerEvent::ShowPosition::getPos(int32_t nViewTick, int32_t nTotViewTicks) noexcept
 {

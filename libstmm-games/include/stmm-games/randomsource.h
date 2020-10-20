@@ -1,7 +1,5 @@
 /*
- * File:   randomsource.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   randomsource.h
  */
 
 #ifndef STMG_RANDOM_SOURCE_H
@@ -31,8 +32,8 @@ public:
 	virtual ~RandomSource() noexcept = default;
 
 	/** Return a random value within a range.
-	 * All entities within the game should use the same implementation of this function 
-	 * to generate random numbers (and not keep a personal generator alongside) 
+	 * All entities within the game should use the same implementation of this function
+	 * to generate random numbers (and not keep a personal generator alongside)
 	 * so that the sequences can potentially be recorded and reproduced for debugging.
 	 * @param nFrom The first of the possible values.
 	 * @param nTo The last of the possible values.

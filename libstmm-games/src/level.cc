@@ -1,7 +1,5 @@
 /*
- * File:   level.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   level.cc
  */
 
 #include "level.h"
@@ -417,7 +418,7 @@ bool Level::eventsQueueIsDirty() const noexcept
 {
 	return m_bDirtyEvents;
 }
-void Level::othersReceive(int32_t 
+void Level::othersReceive(int32_t
 						#ifndef NDEBUG
 						nSenderLevel
 						#endif //NDEBUG
@@ -1548,7 +1549,7 @@ void Level::blockCycleControl(LevelBlock* p0LevelBlock, LevelBlock* p0Preferred)
 	const int32_t nTeam = p0LevelBlock->m_nTeam;
 	const int32_t nTeammate = p0LevelBlock->m_nTeammate;
 
-	if ((p0Preferred != nullptr) && 
+	if ((p0Preferred != nullptr) &&
 				( (p0Preferred->m_nPlayer >= 0) // controlled by another player
 				|| (!p0Preferred->m_bControllable) // not controllable
 					// wrong team
@@ -1735,7 +1736,7 @@ bool Level::coordsCanPlaceOnBoard(const Coords& oCoords, bool bStrict) const noe
 		}
 		if (bStrict && !boardGetTile(nBoardX, nBoardY).isEmpty()) {
 			return false;
-		} 
+		}
 		LevelBlock* p0BoardBlock = boardGetOwner(nBoardX, nBoardY);
 		if (p0BoardBlock != nullptr) {
 			return false;
@@ -1766,7 +1767,7 @@ bool Level::blockCanPlaceOnBoard(const LevelBlock& oLevelBlock, bool bStrict) co
 			if (bStrict && !boardGetTile(nBoardX, nBoardY).isEmpty()) {
 //std::cout << " Strict: not empty tile" << '\n';
 				return false;
-			} 
+			}
 			LevelBlock* p0BoardBlock = boardGetOwner(nBoardX, nBoardY);
 			if ((p0BoardBlock != nullptr) && (&oLevelBlock != p0BoardBlock)) {
 //std::cout << " Wrong Owner" << '\n';
@@ -1977,7 +1978,7 @@ void Level::animationPrivAdd(int32_t nLevAniId, const shared_ptr<LevelAnimation>
 	assert((fDelay >= 0) && (fDelay < fGameInterval));
 //std::cout << "Level::animationPrivAdd  id=" << nLevAniId << '\n';
 	#ifndef NDEBUG
-	auto oRes = 
+	auto oRes =
 	#endif //NDEBUG
 	m_oActiveLevAnis.insert(std::make_pair(nLevAniId, refLevelAnimation));
 	assert(oRes.second); // Make sure not called twice by mistake

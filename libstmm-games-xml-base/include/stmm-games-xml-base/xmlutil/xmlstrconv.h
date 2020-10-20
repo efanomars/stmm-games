@@ -1,6 +1,4 @@
 /*
- * File:   xmlstrconv.h
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,11 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlstrconv.h
+ */
 
 #ifndef STMG_XML_STR_CONV_H
 #define STMG_XML_STR_CONV_H
 
-#include "../xmlcommonerrors.h"
+#include "xmlcommonerrors.h"
 
 #include <stmm-games/tile.h>
 #include <stmm-games/util/util.h>
@@ -136,7 +137,7 @@ TileChar strToTileChar(ParserCtx& oCtx, const xmlpp::Element* p0Element, const s
 	* @param p0Element The element. Can be null.
 	* @param sAttrName The attribute name.
 	* @param sColor The string. Cannot be empty.
-	* @return The tile color. 
+	* @return The tile color.
 	* @throws If error.
 	*/
 TileColor strToTileColor(ParserCtx& oCtx, const xmlpp::Element* p0Element, const std::string& sAttrName, const std::string& sColor);

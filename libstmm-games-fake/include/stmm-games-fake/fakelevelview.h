@@ -1,7 +1,5 @@
 /*
- * File:   fakelevelview.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,24 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   fakelevelview.h
+ */
 /*   @DO_NOT_REMOVE_THIS_LINE_IT_IS_USED_BY_COMMONTESTING_CMAKE@   */
 
 #ifndef _ZIMTRIS_FAKE_LEVEL_VIEW_H_
 #define _ZIMTRIS_FAKE_LEVEL_VIEW_H_
 
-#ifdef STMG_TESTING_COPY_FROM_FAKE
-#include "levelview.h"
-#include "utile/tilecoords.h"
-#include "util/basictypes.h"
-#include "util/coords.h"
-#include "util/direction.h"
-#else
 #include <stmm-games/levelview.h>
 #include <stmm-games/utile/tilecoords.h>
 #include <stmm-games/util/basictypes.h>
 #include <stmm-games/util/coords.h>
 #include <stmm-games/util/direction.h>
-#endif
 
 #include <tuple>
 #include <memory>

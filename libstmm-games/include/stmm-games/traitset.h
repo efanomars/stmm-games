@@ -1,7 +1,5 @@
 /*
- * File:   traitset.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   traitset.h
  */
 
 #ifndef STMG_TRAIT_SET_H
@@ -49,11 +50,11 @@ public:
 	/** Sets the trait of a tile to the value identified by an index.
 	 * If the set contains the empty value the valid indexes are
 	 * &gt;=-1 and &lt; (getTotValues()-1).
-	 * 
+	 *
 	 * If the set doesn't contain the empty value the valid indexes are
 	 * &gt;=0 and &lt; getTotValues().
-	 * 
-	 * If the -1 index is passed for a set without empty value, the tile is 
+	 *
+	 * If the -1 index is passed for a set without empty value, the tile is
 	 * left untouched and `false` is returned, otherwise `true` is returned.
 	 * @param oTile The tile to modify.
 	 * @param nIdx The index of the value in the set.

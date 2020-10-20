@@ -1,6 +1,4 @@
 /*
- * File:   xmlarrayevent.cc
- *
  * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
@@ -16,14 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlarrayevent.cc
+ */
 
 #include "events/xmlarrayevent.h"
 
-#include "xmlcommonerrors.h"
-#include <stmm-games-xml-base/xmlconditionalparser.h>
 #include "gamectx.h"
 
-#include "xmlutil/xmlstrconv.h"
+#include <stmm-games-xml-base/xmlcommonerrors.h>
+#include <stmm-games-xml-base/xmlconditionalparser.h>
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
 
 #include <stmm-games/ownertype.h>
 #include <stmm-games/event.h>
@@ -171,7 +172,7 @@ std::tuple<int32_t, int32_t, int32_t> XmlArrayEventParser::parseVariableAndOwner
 		nVarTeam = -1;
 		nVarMate = -1;
 	}
-	oCtx.removeChecker(p0Element, true);	
+	oCtx.removeChecker(p0Element, true);
 
 	return std::make_tuple(nVarIndex, nVarTeam, nVarMate);
 }
@@ -271,7 +272,7 @@ void XmlArrayEventParser::parseEventArraySubArray(GameCtx& oCtx, const xmlpp::El
 			aIdxs.push_back(nRelIdx);
 			parseEventArraySubArray(oCtx, p0SubArray, oAInit, aIdxs, eValueType);
 			aIdxs.pop_back();
-			
+
 			nCurRelIdx = nRelIdx + 1;
 
 			oCtx.removeChecker(p0SubArray, true);

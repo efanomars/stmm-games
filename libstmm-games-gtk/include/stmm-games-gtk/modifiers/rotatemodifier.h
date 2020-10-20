@@ -1,7 +1,5 @@
 /*
- * File:   rotatemodifier.h
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   rotatemodifier.h
+ */
 
 #ifndef STMG_ROTATE_MODIFIER_H
 #define STMG_ROTATE_MODIFIER_H
@@ -23,6 +24,8 @@
 #include "containermodifier.h"
 
 #include "stdthememodifier.h"
+
+#include "gtkutil/elapsedmapper.h"
 
 #include <vector>
 
@@ -39,6 +42,7 @@ namespace stmg
 class StdTheme;
 
 /** Rotates the sub modifier according to a tile animator.
+ * An elapsed is -1 is the same as elapsed 0 (angle 0).
  */
 class RotateModifier : public ContainerModifier
 {
@@ -47,10 +51,11 @@ public:
 	{
 		int32_t m_nElapsedTileAniIdx = -1; /**< The tileanimation that determines the rotate value. Default -1 (undefined).*/
 		double m_fDefaultElapsed = -1.0; /**< The default elapsed value. From 0.0 to 1.0 or -1.0 if not defined. */
+		ElapsedMapper m_oMapper; /**< The elapsed mapper. */
 		bool m_bInvert = false; /**< Whether the rotation should be inverted. Default is false.*/
 	};
 	/** Constructor.
-	 * The two params m_nElapsedTileAniIdx and m_fDefaultElapsed cannot be both undefined.
+	 * The two params oInit.m_nElapsedTileAniIdx and oInit.m_fDefaultElapsed cannot be both undefined.
 	 * @param p1Owner The owner theme. Cannot be null.
 	 * @param oInit The initialization data.
 	 */

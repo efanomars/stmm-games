@@ -1,7 +1,5 @@
 /*
- * File:   xmlthememodifiersparser.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,15 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlthememodifiersparser.cc
+ */
 
 #include "xmlthememodifiersparser.h"
 
-#include "xmlutil/xmlstrconv.h"
 #include "xmlmodifierparser.h"
 #include "themectx.h"
-#include "xmlcommonerrors.h"
-#include <stmm-games-xml-base/xmlconditionalparser.h>
 #include "xmlthemeimageparser.h"
+
+#include <stmm-games-xml-base/xmlcommonerrors.h>
+#include <stmm-games-xml-base/xmlconditionalparser.h>
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
 
 #include <stmm-games-gtk/stdtheme.h>
 #include <stmm-games-gtk/stdthememodifier.h>
@@ -73,11 +75,26 @@ void XmlThemeModifiersParser::addXmlModifierParser(unique_ptr<XmlModifierParser>
 
 std::vector< unique_ptr<StdThemeModifier> > XmlThemeModifiersParser::parseModifiers(ThemeCtx& oCtx, const xmlpp::Element* p0ParentElement)
 {
+	return parseModifiers(oCtx, p0ParentElement, std::vector<std::string const*>{});
+}
+std::vector< unique_ptr<StdThemeModifier> > XmlThemeModifiersParser::parseModifiers(ThemeCtx& oCtx, const xmlpp::Element* p0ParentElement
+																	, const std::vector<std::string const*>& aSkipChildNames)
+{
 	std::vector< unique_ptr<StdThemeModifier> > aModifier;
 	m_oXmlConditionalParser.visitElementChildren(oCtx, p0ParentElement, [&](const xmlpp::Element* p0ModifierElement)
 	{
-		unique_ptr<StdThemeModifier> refModifier = parseModifier(oCtx, p0ModifierElement);
-		aModifier.push_back(std::move(refModifier));
+		const std::string sChildName = p0ModifierElement->get_name();
+		auto itFind = std::find_if(aSkipChildNames.begin(), aSkipChildNames.end(), [&](std::string const* p0ChildName)
+		{
+			return (sChildName == *p0ChildName);
+		});
+		if (itFind != aSkipChildNames.end()) {
+//std::cout << "XmlLayoutParser::parseChildWidgets() skip sChildName=" << sChildName << '\n';
+			oCtx.addValidChildElementName(p0ParentElement, sChildName);
+		} else {
+			unique_ptr<StdThemeModifier> refModifier = parseModifier(oCtx, p0ModifierElement);
+			aModifier.push_back(std::move(refModifier));
+		}
 	});
 	return aModifier;
 }

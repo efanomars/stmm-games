@@ -1,7 +1,5 @@
 /*
- * File:   alarmsevent.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
+ */
+/*
+ * File:   alarmsevent.cc
  */
 
 #include "events/alarmsevent.h"
@@ -56,41 +57,42 @@ void AlarmsEvent::commonInit() noexcept
 	m_nLastHandledTick = -1;
 	m_nTimeoutTicks = -1;
 	m_nTimeoutMillisec = -1;
-	m_nCurrentChange = -1; // Marks as never started
-
+	m_nCurrentStage = -1; // Marks as never started
+	m_nInStageCounter = -1;
+	m_nTimeoutCounter = -1;
 }
 void AlarmsEvent::checkParams() noexcept
 {
 	#ifndef NDEBUG
 	bool bFirst = false;
-	for (const auto& oAlarmTimeout : m_oData.m_aAlarmTimeouts) {
+	for (const auto& oAlarmsStage : m_oData.m_aAlarmsStages) {
 		if (bFirst) {
 			bFirst = true;
-			switch (oAlarmTimeout.m_eAlarmTimeoutType) {
-				case ALARMS_EVENT_SET_TICKS:
-					assert(oAlarmTimeout.m_nChange > 0);
+			switch (oAlarmsStage.m_eAlarmsStageType) {
+				case ALARMS_STAGE_SET_TICKS:
+					assert(oAlarmsStage.m_nChange > 0);
 				break;
-				case ALARMS_EVENT_SET_MILLISEC:
-					assert(oAlarmTimeout.m_nChange > 0);
+				case ALARMS_STAGE_SET_MILLISEC:
+					assert(oAlarmsStage.m_nChange > 0);
 				break;
 				default:
 					assert(false);
 				break;
 			}
 		} else {
-			switch (oAlarmTimeout.m_eAlarmTimeoutType) {
-				case ALARMS_EVENT_SET_TICKS:
-					assert(oAlarmTimeout.m_nChange > 0);
+			switch (oAlarmsStage.m_eAlarmsStageType) {
+				case ALARMS_STAGE_SET_TICKS:
+					assert(oAlarmsStage.m_nChange > 0);
 				break;
-				case ALARMS_EVENT_INC_TICKS:
+				case ALARMS_STAGE_INC_TICKS:
 				break;
-				case ALARMS_EVENT_SET_MILLISEC:
-					assert(oAlarmTimeout.m_nChange > 0);
+				case ALARMS_STAGE_SET_MILLISEC:
+					assert(oAlarmsStage.m_nChange > 0);
 				break;
-				case ALARMS_EVENT_INC_MILLISEC:
+				case ALARMS_STAGE_INC_MILLISEC:
 				break;
-				case ALARMS_EVENT_MULT_PERC:
-					assert(oAlarmTimeout.m_nChange > 0);
+				case ALARMS_STAGE_MULT_PERC:
+					assert(oAlarmsStage.m_nChange > 0);
 				break;
 				default:
 					assert(false);
@@ -119,11 +121,11 @@ void AlarmsEvent::alreadyActive(int32_t nGameTick) noexcept
 }
 void AlarmsEvent::incChangeCounter(int32_t nCurTimeoutRepeat) noexcept
 {
-	++m_nInChangeCounter;
-	if ((nCurTimeoutRepeat > 0) && (m_nInChangeCounter >= nCurTimeoutRepeat)) {
-		m_nInChangeCounter = 0;
-		++m_nCurrentChange;
-		assert(m_nCurrentChange <= static_cast<int32_t>(m_oData.m_aAlarmTimeouts.size()));
+	++m_nInStageCounter;
+	if ((nCurTimeoutRepeat > 0) && (m_nInStageCounter >= nCurTimeoutRepeat)) {
+		m_nInStageCounter = 0;
+		++m_nCurrentStage;
+		assert(m_nCurrentStage <= static_cast<int32_t>(m_oData.m_aAlarmsStages.size()));
 	}
 }
 void AlarmsEvent::trigger(int32_t nMsg, int32_t /*nValue*/, Event* p0TriggeringEvent) noexcept
@@ -139,7 +141,7 @@ void AlarmsEvent::trigger(int32_t nMsg, int32_t /*nValue*/, Event* p0TriggeringE
 		if (m_bStepping) {
 			assert(m_nTimeoutStartTicks >= 0);
 			assert(m_nTimeoutStartMillisec >= 0);
-//std::cout << "AlarmsEvent::trigger TIMEOUT m_nCurrentChange=" << m_nCurrentChange << " m_nInChangeCounter=" << m_nInChangeCounter << '\n';
+//std::cout << "AlarmsEvent::trigger TIMEOUT m_nCurrentStage=" << m_nCurrentStage << " m_nInStageCounter=" << m_nInStageCounter << '\n';
 			m_nLastHandledTick = nGameTick;
 			if (m_nTimeoutMillisec >= 0) {
 //std::cout << "AlarmsEvent::trigger m_nTimeoutStartMillisec=" << m_nTimeoutStartMillisec << " m_nTimeoutMillisec=" << m_nTimeoutMillisec << '\n';
@@ -148,6 +150,7 @@ void AlarmsEvent::trigger(int32_t nMsg, int32_t /*nValue*/, Event* p0TriggeringE
 				} else {
 //std::cout << "AlarmsEvent::trigger DELAYED m_nTimeoutStartMillisec=" << m_nTimeoutStartMillisec << '\n';
 					oLevel.activateEvent(this, nGameTick + 1);
+					return; //--------------------------------------------------
 				}
 			} else {
 				bTimeout = true;
@@ -160,47 +163,56 @@ void AlarmsEvent::trigger(int32_t nMsg, int32_t /*nValue*/, Event* p0TriggeringE
 			nMsg = MESSAGE_ALARMS_RESTART;
 		}
 		//
-	} else if (nMsg == MESSAGE_ALARMS_FINISH) {
+	}
+	switch (nMsg) {
+	case MESSAGE_ALARMS_FINISH: {
 //std::cout << "AlarmsEvent::trigger() FINISH" << '\n';
 		if (m_bStepping) {
 			m_bStepping = false;
 			m_nTimeoutStartTicks = -1;
 			m_nTimeoutStartMillisec = -1;
-			m_nCurrentChange = 0; // marks as finished
+			m_nCurrentStage = 0; // marks as finished (not set to -1 to avoid redoing initial start)
 			informListeners(LISTENER_GROUP_FINISHED, 0);
 		}
 		return; //--------------------------------------------------------------
-	}
-	if (nMsg == MESSAGE_ALARMS_RESTART) {
-		if (m_nTimeoutStartTicks >= 0) {
-			alreadyActive(nGameTick);
+	} break;
+	case MESSAGE_ALARMS_STAGE_NEXT: {
+		if (! m_bStepping) {
 			return; //----------------------------------------------------------
 		}
-		m_bStepping = true;
-		m_nCurrentChange = 0;
-		m_nInChangeCounter = 0;
-		m_nTimeoutCounter = 0;
+		if (m_nCurrentStage >= static_cast<int32_t>(m_oData.m_aAlarmsStages.size() - 1)) {
+			return; //----------------------------------------------------------
+		}
+		++m_nCurrentStage;
+		m_nInStageCounter = 0;
+		reactivate(nGameTick);
+		return; //--------------------------------------------------------------
+	} break;
+	case MESSAGE_ALARMS_STAGE_RESET: {
+		if (! m_bStepping) {
+			return; //----------------------------------------------------------
+		}
+		if (m_nCurrentStage >= static_cast<int32_t>(m_oData.m_aAlarmsStages.size())) {
+			return; //----------------------------------------------------------
+		}
+		m_nInStageCounter = 0;
+		reactivate(nGameTick);
+		return; //--------------------------------------------------------------
+	} break;
+	case MESSAGE_ALARMS_REDO_CURRENT: {
+		if (! m_bStepping) {
+			if (m_nCurrentStage < 0) {
+				oLevel.activateEvent(this, nGameTick);
+			}
+			return; //----------------------------------------------------------
+		}
 		m_nTimeoutStartTicks = nGameTick;
 		m_nTimeoutStartMillisec = nGameMillisec;
 		m_nLastHandledTick = nGameTick;
-		AlarmTimeout& oTimeout = m_oData.m_aAlarmTimeouts[m_nCurrentChange];
-		const int32_t nInitial = m_oData.m_aAlarmTimeouts[m_nCurrentChange].m_nChange;
-		incChangeCounter(oTimeout.m_nRepeat); // point to the next timeout
-//std::cout << "AlarmsEvent::trigger RESTART m_nTimeoutStartTicks=" << m_nTimeoutStartTicks << " m_nTimeoutStartMillisec=" << m_nTimeoutStartMillisec << " nInitial=" << nInitial << '\n';
-		if (oTimeout.m_eAlarmTimeoutType == ALARMS_EVENT_SET_TICKS) {
-			m_nTimeoutTicks = nInitial;
-			m_nTimeoutMillisec = -1;
-			oLevel.activateEvent(this, nGameTick + m_nTimeoutTicks);
-		} else {
-			assert(oTimeout.m_eAlarmTimeoutType == ALARMS_EVENT_SET_MILLISEC);
-			m_nTimeoutMillisec = nInitial;
-			m_nTimeoutTicks = -1;
-			oLevel.activateEvent(this, nGameTick + 1);
-		}
+		reactivate(nGameTick);
 		return; //--------------------------------------------------------------
-	}
-	if (nMsg == MESSAGE_ALARMS_NEXT) {
-//std::cout << "AlarmsEvent::trigger NEXT m_nTimeoutStartTicks=" << m_nTimeoutStartTicks << '\n';
+	} break;
+	case MESSAGE_ALARMS_NEXT: {
 		// activate next alarm
 		if (m_nTimeoutStartTicks >= 0) {
 			alreadyActive(nGameTick);
@@ -212,48 +224,67 @@ void AlarmsEvent::trigger(int32_t nMsg, int32_t /*nValue*/, Event* p0TriggeringE
 			m_nLastHandledTick = nGameTick;
 //std::cout << "AlarmsEvent::trigger NEXT m_nTimeoutStartTicks=" << m_nTimeoutStartTicks << " m_nTimeoutStartMillisec=" << m_nTimeoutStartMillisec << '\n';
 			reactivate(nGameTick);
-		} else if (m_nCurrentChange < 0) {
+		} else if (m_nCurrentStage < 0) {
 			oLevel.activateEvent(this, nGameTick);
 		}
 		return; //--------------------------------------------------------------
-	}
-	if (nMsg == MESSAGE_ALARMS_REDO_CURRENT) {
-//std::cout << "AlarmsEvent::trigger  MESSAGE_ALARMS_REDO_CURRENT  m_nTimeoutStartTicks=" << m_nTimeoutStartTicks << "  nGameTick=" << nGameTick << '\n';
-		if (! m_bStepping) {
-			if (m_nCurrentChange < 0) {
-				oLevel.activateEvent(this, nGameTick);
-			}
+	} break;
+	case MESSAGE_ALARMS_RESTART: {
+		if (m_nTimeoutStartTicks >= 0) {
+			alreadyActive(nGameTick);
 			return; //----------------------------------------------------------
 		}
+		m_bStepping = true;
+		m_nCurrentStage = 0;
+		m_nInStageCounter = 0;
+		m_nTimeoutCounter = 0;
 		m_nTimeoutStartTicks = nGameTick;
 		m_nTimeoutStartMillisec = nGameMillisec;
 		m_nLastHandledTick = nGameTick;
+		AlarmsStage& oTimeout = m_oData.m_aAlarmsStages[m_nCurrentStage];
+		const int32_t nInitial = m_oData.m_aAlarmsStages[m_nCurrentStage].m_nChange;
+		incChangeCounter(oTimeout.m_nRepeat); // point to the next timeout
+//std::cout << "AlarmsEvent::trigger RESTART m_nTimeoutStartTicks=" << m_nTimeoutStartTicks << " m_nTimeoutStartMillisec=" << m_nTimeoutStartMillisec << " nInitial=" << nInitial << '\n';
+		if (oTimeout.m_eAlarmsStageType == ALARMS_STAGE_SET_TICKS) {
+			m_nTimeoutTicks = nInitial;
+			m_nTimeoutMillisec = -1;
+			oLevel.activateEvent(this, nGameTick + m_nTimeoutTicks);
+		} else {
+			assert(oTimeout.m_eAlarmsStageType == ALARMS_STAGE_SET_MILLISEC);
+			m_nTimeoutMillisec = nInitial;
+			m_nTimeoutTicks = -1;
+			oLevel.activateEvent(this, nGameTick + 1);
+		}
+		return; //--------------------------------------------------------------
+	} break;
+	default: {
+	} break;
+	}
+	if (!bTimeout) {
+		// make it resilient to unknown messages
 		reactivate(nGameTick);
 		return; //--------------------------------------------------------------
 	}
-	if (!bTimeout) {
-		return; //--------------------------------------------------------------
-	}
-//std::cout << "AlarmsEvent::trigger  m_nCurrentChange=" << m_nCurrentChange << "  nGameTick=" << nGameTick << '\n';
+//std::cout << "AlarmsEvent::trigger  m_nCurrentStage=" << m_nCurrentStage << "  nGameTick=" << nGameTick << '\n';
 	const int32_t nElapsedTicks = nGameTick - m_nTimeoutStartTicks;
 	const int32_t nElapsedMillisec = nGameMillisec - m_nTimeoutStartMillisec;
 	m_nTimeoutStartTicks = -1;
 	m_nTimeoutStartMillisec = -1;
-	if (m_nCurrentChange >= static_cast<int32_t>(m_oData.m_aAlarmTimeouts.size())) {
+	if (m_nCurrentStage >= static_cast<int32_t>(m_oData.m_aAlarmsStages.size())) {
 		m_bStepping = false;
 	} else {
-		AlarmTimeout& oChange = m_oData.m_aAlarmTimeouts[m_nCurrentChange];
+		AlarmsStage& oChange = m_oData.m_aAlarmsStages[m_nCurrentStage];
 
 		int32_t nNewTicks = m_nTimeoutTicks;
 		int32_t nNewMillisec = m_nTimeoutMillisec;
-		switch (oChange.m_eAlarmTimeoutType) {
-			case ALARMS_EVENT_SET_TICKS:
+		switch (oChange.m_eAlarmsStageType) {
+			case ALARMS_STAGE_SET_TICKS:
 			{
 				nNewTicks = oChange.m_nChange;
 				nNewMillisec = -1;
 			}
 			break;
-			case ALARMS_EVENT_INC_TICKS:
+			case ALARMS_STAGE_INC_TICKS:
 			{
 				if (nNewTicks < 0) {
 					nNewTicks = nElapsedTicks;
@@ -262,13 +293,13 @@ void AlarmsEvent::trigger(int32_t nMsg, int32_t /*nValue*/, Event* p0TriggeringE
 				nNewMillisec = -1;
 			}
 			break;
-			case ALARMS_EVENT_SET_MILLISEC:
+			case ALARMS_STAGE_SET_MILLISEC:
 			{
 				nNewMillisec = oChange.m_nChange;
 				nNewTicks = -1;
 			}
 			break;
-			case ALARMS_EVENT_INC_MILLISEC:
+			case ALARMS_STAGE_INC_MILLISEC:
 			{
 				if (nNewMillisec < 0) {
 					nNewMillisec = nElapsedMillisec;
@@ -277,7 +308,7 @@ void AlarmsEvent::trigger(int32_t nMsg, int32_t /*nValue*/, Event* p0TriggeringE
 				nNewTicks = -1;
 			}
 			break;
-			case ALARMS_EVENT_MULT_PERC:
+			case ALARMS_STAGE_MULT_PERC:
 			{
 				if (nNewTicks >= 0) {
 					nNewTicks = nNewTicks * oChange.m_nChange / 100;
@@ -311,7 +342,7 @@ void AlarmsEvent::trigger(int32_t nMsg, int32_t /*nValue*/, Event* p0TriggeringE
 	informListeners(LISTENER_GROUP_TIMEOUT, nTimeoutCounter);
 
 	if (! m_bStepping) {
-		m_nCurrentChange = 0; // marks as finished
+		m_nCurrentStage = 0; // marks as finished
 		informListeners(LISTENER_GROUP_FINISHED, 0);
 	}
 }

@@ -1,7 +1,5 @@
 /*
- * File:   xmlprobtilegenparser.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,12 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmlprobtilegenparser.cc
+ */
 
 #include "xmlutile/xmlprobtilegenparser.h"
 
-#include "xmlutil/xmlstrconv.h"
-#include "conditionalctx.h"
-#include "xmlcommonerrors.h"
+#include <stmm-games-xml-base/conditionalctx.h>
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
+#include <stmm-games-xml-base/xmlcommonerrors.h>
 #include <stmm-games-xml-base/xmlconditionalparser.h>
 #include <stmm-games-xml-base/xmltraitsparser.h>
 

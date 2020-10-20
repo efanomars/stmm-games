@@ -1,7 +1,5 @@
 /*
- * File:   xmltileanimatorevent.cc
- *
- * Copyright © 2019  Stefano Marsili, <stemars@gmx.ch>
+ * Copyright © 2019-2020  Stefano Marsili, <stemars@gmx.ch>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,15 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
+/*
+ * File:   xmltileanimatorevent.cc
+ */
 
 #include "events/xmltileanimatorevent.h"
 
 #include "gamectx.h"
-#include "xmlcommonerrors.h"
+
+#include <stmm-games-xml-base/xmlcommonerrors.h>
 #include <stmm-games-xml-base/xmlconditionalparser.h>
 #include <stmm-games-xml-base/xmltraitsparser.h>
-#include "xmlutil/xmlstrconv.h"
-#include "xmlutil/xmlbasicparser.h"
+#include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
+#include <stmm-games-xml-base/xmlutil/xmlbasicparser.h>
 
 #include <stmm-games/level.h>
 #include <stmm-games/event.h>
@@ -104,7 +106,6 @@ unique_ptr<Event> XmlTileAnimatorEventParser::parseEventTileAnimator(GameCtx& oC
 	assert(oInit.m_nAniNameIdx >= 0);
 //std::cout << "XmlGameParser::parseEventTileAnimator  nAniNameIdx=" << nAniNameIdx << '\n';
 
-	oInit.m_bDoBoard = true;
 	const auto oPairDoBoard = getXmlConditionalParser().getAttributeValue(oCtx, p0Element, s_sEventTileAnimatorDoBoardAttr);
 	if (oPairDoBoard.first) {
 		const std::string& sDoBoard = oPairDoBoard.second;
@@ -121,7 +122,9 @@ unique_ptr<Event> XmlTileAnimatorEventParser::parseEventTileAnimator(GameCtx& oC
 		const std::string& sDoBlocks = oPairDoBlocks.second;
 		oInit.m_bDoBlocks = XmlUtil::strToBool(oCtx, p0Element, s_sEventTileAnimatorDoBlocksAttr, sDoBlocks);
 	}
-
+	if (! (oInit.m_bDoBlocks || oInit.m_bDoBoard)) {
+		XmlCommonErrors::errorAttrEitherMustBeDefined(oCtx, p0Element, s_sEventTileAnimatorDoBoardAttr, s_sEventTileAnimatorDoBlocksAttr);
+	}
 	getXmlConditionalParser().parseAttributeFromTo<int32_t>(oCtx, p0Element
 							, s_sEventTileAnimatorInitialWaitTicksAttr, s_sEventTileAnimatorInitialWaitTicksFromAttr, s_sEventTileAnimatorInitialWaitTicksToAttr
 							, false, true, 0, false, -1, oInit.m_oInitialWait.m_oTicks.m_nFrom, oInit.m_oInitialWait.m_oTicks.m_nTo);
