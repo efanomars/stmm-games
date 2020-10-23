@@ -12,11 +12,11 @@ include(FindPkgConfig)
 find_package(PkgConfig)
 
 # Version
-set(OMNI_VERSION "0.26") # !-U-!
+set(OMNI_VERSION "0.27") # !-U-!
 
 # Required libraries
-set(OMNI_REQ_STMM_GAMES_XML_GTK_VERSION "0.26") # !-U-!
-set(OMNI_REQ_STMM_INPUT_GTK_DM_VERSION "0.15") # !-U-!
+set(OMNI_REQ_STMM_GAMES_XML_GTK_VERSION "0.27") # !-U-!
+set(OMNI_REQ_STMM_INPUT_GTK_DM_VERSION "0.16") # !-U-!
 
 # Beware! The prefix passed to pkg_check_modules(PREFIX ...) shouldn't contain underscores!
 pkg_check_modules(STMMGAMESXMLGTK  REQUIRED  stmm-games-xml-gtk>=${OMNI_REQ_STMM_GAMES_XML_GTK_VERSION})

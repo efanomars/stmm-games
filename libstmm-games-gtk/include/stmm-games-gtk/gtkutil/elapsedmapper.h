@@ -41,7 +41,7 @@ public:
 										* result is clamped to `0.0` for negative values and `1.0` for positive values.
 										* Example: `-3.5` is mapped to `0.0`.*/
 		, MAPPING_TYPE_OOR_MODULO = 3 /**< When the function maps outside of `(0.0, 1.0)` the result is `y - std::floor(y)`.
-										* Example: If 'a * x + b' returns value `1.7`, The result is mapped to `0.7`.
+										* Example: If 'a * x + b' returns value `1.7`, the result is mapped to `0.7`.
 										* `-1.7` on the other hand would be mapped to `0.3`. */
 		, MAPPING_TYPE_OOR_ALT_MODULO = 4 /**< Same as MAPPING_TYPE_OOR_MODULO but the result is subtracted to `1.0`
 										* if `((int)std::trunc(a * x + b)) % 2` is not `0`.

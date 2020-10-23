@@ -12,7 +12,7 @@ depends=(
     'stmm-input-au>=@STMM_GAMES_REQ_STMM_INPUT_AU_VERSION@'
     'stmm-input>=@STMM_GAMES_GTK_REQ_STMM_INPUT_GTK_VERSION@'
     'gtkmm3' 'librsvg' 'libxml++2.6')
-makedepends=('cmake' 'gcc' 'doxygen' 'graphviz' 'python')
+makedepends=('cmake' 'doxygen' 'graphviz' 'python')
 optdepends=()
 
 #provides=("@STMMI_SOURCE_PROJECT@")
