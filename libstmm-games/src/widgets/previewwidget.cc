@@ -21,6 +21,7 @@
 #include "widgets/previewwidget.h"
 
 #include "gameproxy.h"
+#include "named.h"
 
 #include <cassert>
 #include <algorithm>
@@ -29,6 +30,8 @@
 
 namespace stmg
 {
+
+static const std::string s_sBlockPainterName = "PAINTER:BLOCK";
 
 PreviewWidget::PreviewWidget(Init&& oInit) noexcept
 : RelSizedGameWidget(std::move(oInit))
@@ -43,6 +46,15 @@ void PreviewWidget::reInit(Init&& oInit) noexcept
 	m_sText.clear();
 	m_aBlocks.clear();
 	m_nChangeGameTick = -1;
+}
+
+void PreviewWidget::onAddedToGame() noexcept
+{
+	if (m_oData.m_nPainterIdx >= 0) {
+		assert(game().getNamed().painters().isIndex(m_oData.m_nPainterIdx));
+	} else {
+		m_oData.m_nPainterIdx = game().getNamed().painters().getIndex(s_sBlockPainterName);
+	}
 }
 
 void PreviewWidget::changed() noexcept
@@ -83,6 +95,7 @@ bHeader
 		std::cout << sIndent << "PreviewWidget adr:" << reinterpret_cast<int64_t>(this) << '\n';
 	}
 	RelSizedGameWidget::dump(nIndentSpaces + 2, false);
+	std::cout << sIndent << "  " << "m_nPainterIdx:       " << m_oData.m_nPainterIdx << '\n';
 	std::cout << sIndent << "  " << "m_nMinTilesW:        " << m_oData.m_nMinTilesW << '\n';
 	std::cout << sIndent << "  " << "m_nMinTilesH:        " << m_oData.m_nMinTilesH << '\n';
 	if (! m_sText.empty()) {

@@ -22,7 +22,7 @@
 
 #include "themectx.h"
 
-#include <stmm-games-gtk/modifiers/nextthememodifier.h>
+#include <stmm-games-gtk/modifiers/nextsubpaintermodifier.h>
 #include <stmm-games-gtk/stdthememodifier.h>
 
 #include <string>
@@ -43,7 +43,7 @@ unique_ptr<StdThemeModifier> XmlNextThemeModifierParser::parseModifier(ThemeCtx&
 {
 	oCtx.addChecker(p0Element);
 	oCtx.removeChecker(p0Element, true);
-	return std::make_unique<NextThemeModifier>(&oCtx.theme(), oCtx.getThemeNr() + 1);
+	return std::make_unique<NextSubPainterModifier>(&oCtx.theme());
 }
 
 } // namespace stmg

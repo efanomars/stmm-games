@@ -117,6 +117,15 @@ public:
 	 * @return Theme widgets named index.
 	 */
 	inline const NamedIndex& widgets() const noexcept { return m_oWidgets; };
+
+	/** Theme painters.
+	 * @return Theme painters named index.
+	 */
+	inline NamedIndex& painters() noexcept { return m_oPainters; };
+	/** Theme painters.
+	 * @return Theme painters named index.
+	 */
+	inline const NamedIndex& painters() const noexcept { return m_oPainters; };
 protected:
 	/** Move assignment.
 	 * If you want to allow assignment you have to subclass Named and make it public
@@ -146,6 +155,7 @@ protected:
 		m_oSoundIds.clear();
 		m_oAnimations.clear();
 		m_oWidgets.clear();
+		m_oPainters.clear();
 	};
 private:
 	AssignableNamedIndex m_oColors;
@@ -160,6 +170,7 @@ private:
 	AssignableNamedIndex m_oAnimations;
 
 	AssignableNamedIndex m_oWidgets;
+	AssignableNamedIndex m_oPainters;
 };
 
 /** Assignable and clearable named class.

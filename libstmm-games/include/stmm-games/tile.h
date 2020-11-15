@@ -44,10 +44,10 @@ public:
 	// ssssssssssssssssssssssss00000011 s:COLOR_PAL
 	//
 	enum COLOR_TYPE {
-		COLOR_TYPE_EMPTY = 0,
-		COLOR_TYPE_INDEX = 1,
-		COLOR_TYPE_RGB = 2,
-		COLOR_TYPE_PAL = 3
+		  COLOR_TYPE_EMPTY = 0 /**< Empty tile. */
+		, COLOR_TYPE_INDEX = 1 /**< Named index. See Named::colors(). */
+		, COLOR_TYPE_RGB = 2 /**<  8bit RGB (red green blue). */
+		, COLOR_TYPE_PAL = 3 /**< Palette number. The actual colors of the palette are defined by a theme somewhere else. */
 	};
 	TileColor() noexcept : m_nColor(0) {}
 	inline bool isEmpty() const noexcept
@@ -80,25 +80,26 @@ public:
 		assert(nIdx <= COLOR_INDEX_MAX);
 		m_nColor = (nIdx & ((1 << 24) -1)) | (COLOR_TYPE_INDEX << 30);
 	}
+	/** The standard colors of a palette. */
 	enum COLOR_PAL {
-		COLOR_PAL_FIRST = 0,
+		  COLOR_PAL_FIRST = 0
 
-		COLOR_PAL_STD_FIRST = 0,
-		COLOR_PAL_STD_BLACK = 0,
-		COLOR_PAL_STD_WHITE = 1,
-		COLOR_PAL_STD_RED = 2,
-		COLOR_PAL_STD_GREEN = 3,
-		COLOR_PAL_STD_BLUE = 4,
-		COLOR_PAL_STD_YELLOW = 5,
-		COLOR_PAL_STD_MAGENTA = 6,
-		COLOR_PAL_STD_CYAN = 7,
-		COLOR_PAL_STD_ORANGE = 8,
-		COLOR_PAL_STD_BROWN = 9,
-		COLOR_PAL_STD_PINK = 10,
-		COLOR_PAL_STD_GRAY = 11,
-		COLOR_PAL_STD_LAST = 11,
+		, COLOR_PAL_STD_FIRST = 0
+		, COLOR_PAL_STD_BLACK = 0
+		, COLOR_PAL_STD_WHITE = 1
+		, COLOR_PAL_STD_RED = 2
+		, COLOR_PAL_STD_GREEN = 3
+		, COLOR_PAL_STD_BLUE = 4
+		, COLOR_PAL_STD_YELLOW = 5
+		, COLOR_PAL_STD_MAGENTA = 6
+		, COLOR_PAL_STD_CYAN = 7
+		, COLOR_PAL_STD_ORANGE = 8
+		, COLOR_PAL_STD_BROWN = 9
+		, COLOR_PAL_STD_PINK = 10
+		, COLOR_PAL_STD_GRAY = 11
+		, COLOR_PAL_STD_LAST = 11
 
-		COLOR_PAL_LAST = ((1 << 24) - 1)
+		, COLOR_PAL_LAST = ((1 << 24) - 1)
 	};
 	uint32_t getColorPal() const noexcept
 	{
@@ -200,10 +201,11 @@ class TileAlpha
 {
 public:
 	enum {
-		ALPHA_MIN = 0, //TODO RENAME to just MAX and MIN!!!
-		ALPHA_MAX = 255 /**< 255 corresponds to opaque. */
+		  ALPHA_MIN = 0 /**< Value 0 corresponds to complete transparency. */
+		, ALPHA_MAX = 255 /**< Value 255 corresponds to opaque. */
 	};
 	TileAlpha() noexcept : m_nAlpha(0), m_nNonEmpty(0) {}
+	/** Whether the alpha value is empty (not set). */
 	inline bool isEmpty() const noexcept
 	{
 		return m_nNonEmpty == 0;
@@ -238,13 +240,14 @@ public:
 	}
 	inline void setAlpha(uint8_t nA) noexcept
 	{
-		m_nNonEmpty = true;
+		static_assert(static_cast<uint8_t>(true) != 0, "");
+		m_nNonEmpty = static_cast<uint8_t>(true);
 		m_nAlpha = nA;
 	}
 	double getAlpha1() const noexcept
 	{
 		return 1.0 * getAlpha() / ALPHA_MAX;
-	};
+	}
 	double setAlpha1(double fA01) noexcept
 	{
 		assert((fA01 >= 0.0) && (fA01 <= 1.0));
@@ -288,28 +291,31 @@ public:
 	inline bool isEmpty() const noexcept
 	{
 		return m_nChar == 0;
-	};
+	}
 	inline bool operator==(const TileChar& oTileChar) const noexcept
 	{
 		return m_nChar == oTileChar.m_nChar;
-	};
+	}
 	inline void clear() noexcept
 	{
 		m_nChar = 0;
-	};
+	}
 private:
+	/** The type  of char. */
 	enum CHAR_TYPE {
-		CHAR_TYPE_UCS4 = 0,
-		CHAR_TYPE_INDEX = 1 << 31
+		  CHAR_TYPE_UCS4 = 0 /* Unicode character */
+		, CHAR_TYPE_INDEX = (1 << 31) /* Index into Named::chars(). */
 	};
 public:
+	/** The accepted unicode values. */
 	enum {
-		CHAR_UCS4_MIN = 1,
-		CHAR_UCS4_MAX = (1 << 30) + ((1 << 30) - 1)
+		  CHAR_UCS4_MIN = 1
+		, CHAR_UCS4_MAX = (1 << 30) + ((1 << 30) - 1)
 	};
+	/** The char index limits. */
 	enum {
-		CHAR_INDEX_MIN = 0,
-		CHAR_INDEX_MAX = (1 << 30) + ((1 << 30) - 1)
+		  CHAR_INDEX_MIN = 0
+		, CHAR_INDEX_MAX = (1 << 30) + ((1 << 30) - 1)
 	};
 
 	inline bool isCharIndex() const noexcept
@@ -358,9 +364,11 @@ private:
 class TileFont
 {
 public:
+	/** The font index limits into Named::fonts().
+	 */
 	enum {
-		CHAR_FONT_INDEX_MIN = 0,
-		CHAR_FONT_INDEX_MAX = ((1 << 8) - 2)
+		  CHAR_FONT_INDEX_MIN = 0
+		, CHAR_FONT_INDEX_MAX = ((1 << 8) - 2)
 	};
 	TileFont() noexcept : m_nFontIdx(0) {}
 	inline bool isEmpty() const noexcept

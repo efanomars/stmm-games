@@ -243,6 +243,14 @@ std::tuple<shared_ptr<Game>, bool, GameLoader::GameInfo> XmlGameParser::parseGam
 	if (std::get<2>(oTuple) > 0) {
 		oGameInit.m_fSoundScaleZ = std::get<2>(oTuple);
 	}
+	const int32_t nBoardPainterIdx = oCtx.getBoardPainterIdx();
+	if (nBoardPainterIdx >= 0) {
+		oGameInit.m_nBoardPainterIdx = nBoardPainterIdx;
+	}
+	const int32_t nBlockPainterIdx = oCtx.getBlockPainterIdx();
+	if (nBlockPainterIdx >= 0) {
+		oGameInit.m_nBlockPainterIdx = nBlockPainterIdx;
+	}
 	if (!bHighscoresIgnored) {
 		oGameInit.m_refHighscore = refHighscore;
 	}

@@ -39,6 +39,11 @@ class PreviewWidget : public RelSizedGameWidget
 public:
 	struct LocalInit
 	{
+		int32_t m_nPainterIdx = -1; /**< The index into Named::painters() to draw the tiles (must exists)
+									 * or -1 if painter named "Block" should be used.
+									 * If -1 and painter "Block" is not defined, the theme default should be used.
+									 * Default: `-1`. */
+
 		int32_t m_nMinTilesW = 1; /**< The minimum number of horizontal tiles. Default: `1`. */
 		int32_t m_nMinTilesH = 1; /**< The minimum number of vertical tiles. Default: `1`. */
 	};
@@ -51,6 +56,12 @@ public:
 	 * @param oBlocks The blocks to show. Can be empty.
 	 */
 	void set(const std::string& sText, std::vector<Block>& oBlocks) noexcept;
+
+	/** The painter that should draw the tiles.
+	 * You can assume that this value doesn't change after initialization.
+	 * @return the index into Named::painters().
+	 */
+	inline int32_t getPainterIdx() const noexcept { return m_oData.m_nPainterIdx; }
 
 	/** The minimum number of horizontal tiles. */
 	inline int32_t getMinTilesW() const noexcept { return m_oData.m_nMinTilesW; }
@@ -83,6 +94,8 @@ protected:
 	 * @param oInit The initialization data.
 	 */
 	void reInit(Init&& oInit) noexcept;
+
+	void onAddedToGame() noexcept override;
 private:
 	void changed() noexcept;
 private:

@@ -15,10 +15,10 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
 /*
- * File:   nextthememodifier.cc
+ * File:   nextsubpaintermodifier.cc
  */
 
-#include "modifiers/nextthememodifier.h"
+#include "modifiers/nextsubpaintermodifier.h"
 #include "stdtheme.h"
 
 #include <cassert>
@@ -34,24 +34,19 @@ namespace Cairo { template <typename T_CastFrom> class RefPtr; }
 namespace stmg
 {
 
-NextThemeModifier::NextThemeModifier(StdTheme* p1Owner, int32_t nThemeNr) noexcept
+NextSubPainterModifier::NextSubPainterModifier(StdTheme* p1Owner) noexcept
 : StdThemeModifier(p1Owner)
-, m_nThemeNr(nThemeNr)
-, m_nPPOfNextTheme(0)
+, m_nPPOfNextSubPainter(0)
 {
-	assert(nThemeNr > 0);
 }
-StdThemeModifier::FLOW_CONTROL NextThemeModifier::drawTile(const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeDrawingContext& oDc
+StdThemeModifier::FLOW_CONTROL NextSubPainterModifier::drawTile(const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeDrawingContext& oDc
 														, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
 {
 	StdTheme* p0Theme = owner();
 	assert(p0Theme != nullptr);
-	if (m_nPPOfNextTheme == 0) {
-		m_nPPOfNextTheme = p0Theme->getThemePP(m_nThemeNr, oDc);
-	}
-	if (m_nPPOfNextTheme > 0) {
+	if (m_nPPOfNextSubPainter > 0) {
 		assert(owner() != nullptr);
-		p0Theme->drawTileFromPP(m_nPPOfNextTheme, refCc, oDc, oTile, nPlayer, aAniElapsed);
+		p0Theme->drawTileFromPP(m_nPPOfNextSubPainter, refCc, oDc, oTile, nPlayer, aAniElapsed);
 	}
 	return StdThemeModifier::FLOW_CONTROL_CONTINUE;
 }

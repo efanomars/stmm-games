@@ -15,11 +15,11 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
 /*
- * File:   nextthememodifier.h
+ * File:   nextsubpaintermodifier.h
  */
 
-#ifndef STMG_NEXT_THEME_MODIFIER_H
-#define STMG_NEXT_THEME_MODIFIER_H
+#ifndef STMG_NEXT_SUB_PAINTER_MODIFIER_H
+#define STMG_NEXT_SUB_PAINTER_MODIFIER_H
 
 #include "stdthememodifier.h"
 
@@ -38,33 +38,31 @@ namespace stmg
 
 class StdTheme;
 
-/** Draw the modifiers after the closest next sub theme separator.
- * Sort of a function call to another set of modifiers following the current one.
- * Has no effect if there isn't a following "sub theme".
+/** Continue drawing jumping to the first modifier of the next sub-painter.
+ * 
+ * Sort of a "gosub" call to the sub painter following the current one.
+ * Has no effect if there isn't a following sub painter.
  */
-class NextThemeModifier : public StdThemeModifier
+class NextSubPainterModifier : public StdThemeModifier
 {
 public:
 	/** Constructor.
-	 * @param p1Owner The owner. Cannot be null.
-	 * @param nThemeNr The index in the sequence of sub theme modifiers. Must be &gt; 0.
+	 * @param p1Owner The owner theme. Cannot be null.
 	 */
-	NextThemeModifier(StdTheme* p1Owner, int32_t nThemeNr) noexcept;
+	explicit NextSubPainterModifier(StdTheme* p1Owner) noexcept;
 
 	FLOW_CONTROL drawTile(const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeDrawingContext& oDc
 						, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept override;
 private:
 	friend class StdTheme;
+	size_t m_nPPOfNextSubPainter; // set by StdTheme
 private:
-	int32_t m_nThemeNr;
-	size_t m_nPPOfNextTheme;
-private:
-	NextThemeModifier() = delete;
-	NextThemeModifier(const NextThemeModifier& oSource) = delete;
-	NextThemeModifier& operator=(const NextThemeModifier& oSource) = delete;
+	NextSubPainterModifier() = delete;
+	NextSubPainterModifier(const NextSubPainterModifier& oSource) = delete;
+	NextSubPainterModifier& operator=(const NextSubPainterModifier& oSource) = delete;
 };
 
 } // namespace stmg
 
-#endif	/* STMG_NEXT_THEME_MODIFIER_H */
+#endif	/* STMG_NEXT_SUB_PAINTER_MODIFIER_H */
 

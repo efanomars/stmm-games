@@ -175,7 +175,8 @@
 		</Assign>
 		<!--Tiles idAss="bomb" imgFile="bomb.svg" charName="BOMB"/-->
 	</Assigns>
-	<DrawTile>
+	<TilePainters>
+	<Painter name="PAINTER:BLOCK" default="true">
 		<Conditional>
 			<If><Char charName="SQUARSOR:SEL"/></If>
 				<Select>
@@ -215,5 +216,7 @@
 					<SelectedImage/>
 				</SelectCase>
 		</Conditional>
-	</DrawTile>
+	</Painter>
+	<ClonePainter name="PAINTER:BOARD" cloning="PAINTER:BLOCK"/>
+	</TilePainters>
 </Theme>

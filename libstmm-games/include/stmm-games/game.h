@@ -92,6 +92,8 @@ public:
 		double m_fSoundScaleX = 1.0; /**< The x axis scale from tiles to sound coordinates. Default: 1. */
 		double m_fSoundScaleY = 1.0; /**< The y axis scale from tiles to sound coordinates. Default: 1. */
 		double m_fSoundScaleZ = 1.0; /**< The z axis scale from tiles to sound coordinates. Default: 1. */
+		int32_t m_nBoardPainterIdx = -1; /**< The painter the view should use for drawing board tiles. Either a valid m_oNamed.painters() index or -1 if theme should use its default. Default: -1. */
+		int32_t m_nBlockPainterIdx = -1; /**< The painter the view should use for drawing block tiles. Either a valid m_oNamed.painters() index or -1 if theme should use its default. Default: -1. */
 	};
 	/** Constructor.
 	 * See Game::reInit().
@@ -371,6 +373,15 @@ public:
 	 */
 	double getSoundScaleZ() const noexcept { return m_fSoundScaleZ; }
 
+	/** The painter to use to draw board tiles.
+	 * @return The painter index into named().painters() or -1.
+	 */
+	int32_t getBoardPainterIdx() const noexcept { return m_nBoardPainterIdx; }
+	/** The painter to use to draw block tiles.
+	 * @return The painter index into named().painters() or -1.
+	 */
+	int32_t getBlockPainterIdx() const noexcept { return m_nBlockPainterIdx; }
+
 	int32_t random(int32_t nFrom, int32_t nTo) noexcept override;
 
 	/** Create a key action input event for a player from an xy event.
@@ -471,6 +482,8 @@ private:
 	double m_fSoundScaleZ;
 
 	AssignableNamed m_oNamed;
+	int32_t m_nBoardPainterIdx;
+	int32_t m_nBlockPainterIdx;
 
 	AssignableNamedObjIndex<Variable::VariableType> m_oGameVariableTypes;
 	AssignableNamedObjIndex<Variable::VariableType> m_oTeamVariableTypes;

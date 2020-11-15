@@ -608,7 +608,7 @@ public:
 	/** Tells the view it should animate a tile.
 	 * The tile will be animated during the view ticks following the current game tick
 	 * by calling the tile animator of the tile if present or just redrawing it.
-	 * @param oXY The tile to animate. Must be within board.
+	 * @param oXY The position to animate. Must be within board.
 	 */
 	inline void boardAnimateTile(NPoint oXY) noexcept
 	{

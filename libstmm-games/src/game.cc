@@ -62,6 +62,9 @@ static const std::string s_sTeamVarIdStatus = "__TeamStatus";
 static const std::string s_sPlayerVarIdFinishedTime = "PlayerVarIdFinishedTime";
 static const std::string s_sPlayerVarIdStatus = "__PlayerStatus";
 
+static const std::string s_sDefaultBoardPainter = "PAINTER:BOARD";
+static const std::string s_sDefaultBlockPainter = "PAINTER:BLOCK";
+
 int32_t Game::getNewGameId() noexcept
 {
 	const int32_t nNewId = ++s_nNewIdCounter;
@@ -124,6 +127,15 @@ void Game::reInit(Init&& oInit, CreateLevelCallback& oCreateLevelCallback, const
 	m_bAllTeamsInOneLevel = oInit.m_refLayout->isAllTeamsInOneLevel();
 
 	m_oNamed = std::move(oInit.m_oNamed);
+
+	m_nBoardPainterIdx = oInit.m_nBoardPainterIdx;
+	if (m_nBoardPainterIdx < 0) {
+		m_nBoardPainterIdx = m_oNamed.painters().getIndex(s_sDefaultBoardPainter);
+	}
+	m_nBlockPainterIdx = oInit.m_nBlockPainterIdx;
+	if (m_nBlockPainterIdx < 0) {
+		m_nBlockPainterIdx = m_oNamed.painters().getIndex(s_sDefaultBlockPainter);
+	}
 
 	m_oGameVariableTypes = std::move(oInit.m_oGameVariableTypes);
 	m_oTeamVariableTypes = std::move(oInit.m_oTeamVariableTypes);

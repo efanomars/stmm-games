@@ -117,7 +117,8 @@ public:
 	NSize getBestTileSize(int32_t nHintTileW) const noexcept override;
 	double getTileWHRatio() const noexcept override;
 
-	shared_ptr<ThemeContext> createContext(NSize oTileWH, bool bRegister, double fSoundScaleX, double fSoundScaleY, double fSoundScaleZ
+	shared_ptr<ThemeContext> createContext(NSize oTileWH, bool bRegister
+											, double fSoundScaleX, double fSoundScaleY, double fSoundScaleZ
 											, const Glib::RefPtr<Pango::Context>& refFontContext
 											, RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept override;
 	shared_ptr<ThemeWidget> createWidget(const shared_ptr<GameWidget>& refGameWidget, double fTileWHRatio
@@ -415,29 +416,33 @@ public:
 	 */
 	shared_ptr<Image> getAssignImage(int32_t sAssId, const Tile& oTile, int32_t nPlayer) const noexcept;
 
-	/** Add board modifiers.
-	 * Modifiers are sort of instructions used to draw a single tile taking into
-	 * account tile animations.
-	 * @param oModifiers The modifiers. The vector's values cannot be null.
-	 */
-	void addBoardModifiers(std::vector< unique_ptr<StdThemeModifier> >&& oModifiers) noexcept;
-	/** Add block modifiers.
-	 * Modifiers are sort of instructions used to draw a single tile taking into
-	 * account tile animations.
+	/** Add modifiers to a painter.
+	 * If a painter with given name doesn't already exist, one is created with an
+	 * associated (empty) array of modifiers. Modifiers are sort of instructions used
+	 * to draw a single tile taking into account tile animations.
 	 *
-	 * Note: if no block modifiers are added with this function or addBlockModifierNext()
-	 * the block is painted with the board modifiers.
-	 * @param oModifiers The modifiers. The vector's values cannot be null.
+	 * The passed aModifiers are appended to the array of modifiers of that painter,
+	 * followed by a StopModifier. These are considered as a sub painter.
+	 *
+	 * A painter starts painting from index 0 of the array of modifiers and stops
+	 * at the first occurrence of a StopModifier. If a NextSubPainterModifier is encountered
+	 * it jumps to the first modifier of the next sub painter or stops if there isn't one.
+	 * @param sPainterName The painter`s name. Cannot be empty.
+	 * @param aModifiers The modifiers. The vector's values cannot be null.
+	 * @return The painter index into Named::painters().
 	 */
-	void addBlockModifiers(std::vector< unique_ptr<StdThemeModifier> >&& oModifiers) noexcept;
-	/** Add a sub theme separator to the board modifiers.
-	 * The modifiers added after this can be drawn with the NextThemeModifier.
+	int32_t addPainter(const std::string& sPainterName, std::vector< unique_ptr<StdThemeModifier> >&& aModifiers) noexcept;
+	/** Sets the default painter name.
+	 * If a default was already set this function does nothing.
+	 *
+	 * The painter must have been previously added with addPainter().
+	 * @param nPainterIdx The default painter index into Named::painters(). Must be valid.
 	 */
-	void addBoardModifierNext() noexcept;
-	/** Add a sub theme separator to the block modifiers.
-	 * The modifiers added after this can be drawn with the NextThemeModifier.
+	void setDefaultPainter(int32_t nPainterIdx) noexcept;
+	/** The default painter.
+	 * @return The default painter index into Named::painters() or -1 if no painters defined.
 	 */
-	void addBlockModifierNext() noexcept;
+	int32_t getDefaultPainterIdx() noexcept;
 
 	int32_t getVariableIndex(const std::string& sVariableName) noexcept;
 private:
@@ -447,21 +452,17 @@ private:
 	friend class StdThemeContext;
 	void registerTileSize(int32_t nW, int32_t nH) noexcept;
 	void unregisterTileSize(int32_t nW, int32_t nH) noexcept;
-	void drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeContext& oTc
-						, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept;
-	void drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeContext& oTc
-						, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept;
+	void drawTile(int32_t nPainterId, const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeContext& oTc
+				, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept;
 	void drawTileFromPP(size_t nPP, const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeDrawingContext& oTc
 						, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed
 						, std::vector< unique_ptr<StdThemeModifier> >& aModifiers) noexcept;
 
 	void registerTileSize(int32_t nW, int32_t nH, bool bUn) noexcept;
 
-	friend class NextThemeModifier;
+	friend class NextSubPainterModifier;
 	void drawTileFromPP(size_t nPP, const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeDrawingContext& oTc
 						, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept;
-	// returns 0 if not found
-	size_t getThemePP(int32_t nThemeNr, const StdThemeDrawingContext& oTc) noexcept;
 
 	shared_ptr<ThemeAnimation> createAnimation(const shared_ptr<StdThemeContext>& refCtx, const shared_ptr<LevelAnimation>& refLevelAnimation) noexcept;
 	shared_ptr<ThemeSound> createSound(StdThemeContext* p0Ctx, int32_t nSoundIdx, const std::vector<shared_ptr<stmi::PlaybackCapability>>& aPlaybacks
@@ -579,11 +580,14 @@ private:
 	NamedIndex m_oAssignIds;
 	std::vector< AssignData > m_aAssign; // Size: m_oAssignId.size()
 
-	std::vector< unique_ptr<StdThemeModifier> > m_aBoardModifiers;
-	std::vector< unique_ptr<StdThemeModifier> > m_aBlockModifiers;
-
-	std::vector< size_t > m_aThemeStartBoardPP; // Size: number of (sub)themes, Value: Paint Pointer into m_aBoardModifiers
-	std::vector< size_t > m_aThemeStartBlockPP; // Size: number of (sub)themes, Value: Paint Pointer into m_aBlockModifiers
+	struct TilePainter
+	{
+		std::vector< unique_ptr<StdThemeModifier> > m_aModifiers;
+		bool m_bFinished = false; // set to true when an added sub painter has no NextSubPainterModifier in it
+//		std::vector< size_t > m_aSubStartPP; // Size: number of sub-painters, Value: Paint Pointer into TilePainter::m_aModifiers
+	};
+	std::vector< TilePainter > m_aTilePainters; // Size: m_oNamed.painters().size()
+	int32_t m_nDefaultPainterIdx; // -1 ot index into m_oNamed.painters()
 
 	NamedIndex m_oVariableNames;
 

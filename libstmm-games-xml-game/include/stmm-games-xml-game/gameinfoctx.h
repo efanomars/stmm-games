@@ -81,6 +81,8 @@ public:
 	 * @return The scales.
 	 */
 	std::tuple<double,double, double> getSoundScales() const;
+	int32_t getBoardPainterIdx() const { return m_nBoardPainterIdx; }
+	int32_t getBlockPainterIdx() const { return m_nBlockPainterIdx; }
 protected:
 	std::string err(const std::string& sErr) override;
 
@@ -97,6 +99,8 @@ private:
 	double m_fSoundScaleX;
 	double m_fSoundScaleY;
 	double m_fSoundScaleZ;
+	int32_t m_nBoardPainterIdx;
+	int32_t m_nBlockPainterIdx;
 	static AssignableNamed s_oDummy;
 private:
 	GameInfoCtx() = delete;

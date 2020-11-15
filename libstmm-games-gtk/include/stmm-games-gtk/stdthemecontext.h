@@ -57,13 +57,9 @@ public:
 	/** Constructor.
 	 */
 	StdThemeContext(Theme::RuntimeVariablesEnv* p0RuntimeVariablesEnv) noexcept;
-	void drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer
-						, const std::vector<double>& aAniElapsed) noexcept override;
-	void drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer) noexcept override;
-	void drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer
-						, const std::vector<double>& aAniElapsed) noexcept override;
-	void drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer) noexcept override;
-
+	void drawTile(int32_t nPainterIdx, const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer
+				, const std::vector<double>& aAniElapsed) noexcept override;
+	void drawTile(int32_t nPainterIdx, const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer) noexcept override;
 	shared_ptr<ThemeAnimation> createAnimation(const shared_ptr<LevelAnimation>& refLevelAnimation) noexcept override;
 
 	void preloadSound(int32_t nSoundIdx, const std::vector<shared_ptr<stmi::PlaybackCapability>>& aPlaybacks) noexcept override;
@@ -89,7 +85,7 @@ private:
 	int32_t m_nTileW;
 	int32_t m_nTileH;
 	bool m_bRegistered;
-	bool m_bDrawingBoardTile;
+	int32_t m_nDrawingPainterIdx;
 	double m_fSoundScaleX;
 	double m_fSoundScaleY;
 	double m_fSoundScaleZ;

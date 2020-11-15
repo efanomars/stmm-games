@@ -10,5 +10,8 @@
 		<FileArray arrayId="coloSquares" imgFile="color%%.png" sobstStr="%%" fromChar="A" toChar="D"
 					defaultImgFile="colorB.png"/>
 	</ImageArrays>
-	<DrawTile><Next/></DrawTile>
+	<TilePainters>
+	<Painter name="PAINTER:BLOCK" default="true"><Next/></Painter>
+	<ClonePainter name="PAINTER:BOARD" cloning="PAINTER:BLOCK"/>
+	</TilePainters>
 </Theme>

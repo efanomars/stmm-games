@@ -42,7 +42,7 @@ StdThemeContext::StdThemeContext(Theme::RuntimeVariablesEnv* p0RuntimeVariablesE
 , m_nTileW(-1)
 , m_nTileH(-1)
 , m_bRegistered(false)
-, m_bDrawingBoardTile(false)
+, m_nDrawingPainterIdx(-1)
 , m_fSoundScaleX(1.0)
 , m_fSoundScaleY(1.0)
 , m_fSoundScaleZ(1.0)
@@ -60,6 +60,7 @@ void StdThemeContext::reInit(Theme::RuntimeVariablesEnv* p0RuntimeVariablesEnv) 
 	m_nTileW = -1;
 	m_nTileH = -1;
 	m_bRegistered = false;
+	m_nDrawingPainterIdx = -1;
 	m_oDrawingContext.reInit(p0RuntimeVariablesEnv);
 	m_oDrawingContext.m_p1Owner = this;
 }
@@ -89,38 +90,44 @@ const Glib::RefPtr<Pango::Context>& StdThemeContext::getFontContext() noexcept
 {
 	return m_refFontContext;
 }
-void StdThemeContext::drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile
-									, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
+void StdThemeContext::drawTile(int32_t nPainterIdx, const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile
+								, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
 {
 //std::cout << "StdThemeContext::drawTile()" << '\n';
 	assert(m_p1Owner != nullptr);
-	m_bDrawingBoardTile = true;
-	m_p1Owner->drawBoardTile(refCc, *this, oTile, nPlayer, aAniElapsed);
+	if (nPainterIdx < 0) {
+		nPainterIdx = m_p1Owner->getDefaultPainterIdx();
+	}
+	m_nDrawingPainterIdx = nPainterIdx;
+	m_p1Owner->drawTile(nPainterIdx, refCc, *this, oTile, nPlayer, aAniElapsed);
 }
-void StdThemeContext::drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile
-									, int32_t nPlayer) noexcept
+void StdThemeContext::drawTile(int32_t nPainterIdx, const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile
+								, int32_t nPlayer) noexcept
 {
 //std::cout << "StdThemeContext::drawTile()" << '\n';
 	assert(m_p1Owner != nullptr);
-	m_bDrawingBoardTile = true;
-	m_p1Owner->drawBoardTile(refCc, *this, oTile, nPlayer, m_p1Owner->m_aNoAniElapsed);
+	if (nPainterIdx < 0) {
+		nPainterIdx = m_p1Owner->getDefaultPainterIdx();
+	}
+	m_nDrawingPainterIdx = nPainterIdx;
+	m_p1Owner->drawTile(nPainterIdx, refCc, *this, oTile, nPlayer, m_p1Owner->m_aNoAniElapsed);
 }
-void StdThemeContext::drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile
-									, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
-{
-//std::cout << "StdThemeContext::drawTile()" << '\n';
-	assert(m_p1Owner != nullptr);
-	m_bDrawingBoardTile = false;
-	m_p1Owner->drawBlockTile(refCc, *this, oTile, nPlayer, aAniElapsed);
-}
-void StdThemeContext::drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile
-									, int32_t nPlayer) noexcept
-{
-//std::cout << "StdThemeContext::drawTile()" << '\n';
-	assert(m_p1Owner != nullptr);
-	m_bDrawingBoardTile = false;
-	m_p1Owner->drawBlockTile(refCc, *this, oTile, nPlayer, m_p1Owner->m_aNoAniElapsed);
-}
+//void StdThemeContext::drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile
+//									, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
+//{
+////std::cout << "StdThemeContext::drawTile()" << '\n';
+//	assert(m_p1Owner != nullptr);
+//	m_bDrawingBoardTile = false;
+//	m_p1Owner->drawBlockTile(refCc, *this, oTile, nPlayer, aAniElapsed);
+//}
+//void StdThemeContext::drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile
+//									, int32_t nPlayer) noexcept
+//{
+////std::cout << "StdThemeContext::drawTile()" << '\n';
+//	assert(m_p1Owner != nullptr);
+//	m_bDrawingBoardTile = false;
+//	m_p1Owner->drawBlockTile(refCc, *this, oTile, nPlayer, m_p1Owner->m_aNoAniElapsed);
+//}
 shared_ptr<ThemeAnimation> StdThemeContext::createAnimation(const shared_ptr<LevelAnimation>& refLevelAnimation) noexcept
 {
 	assert(m_p1Owner != nullptr);

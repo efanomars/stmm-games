@@ -74,35 +74,23 @@ public:
 												, double fVolume, bool bLoop) noexcept = 0;
 
 	/** Draw a tile with tile animations.
-	 * The elapsed values in aAniElapsed are numbers from 0.0 to 1.0.
+	 * The elapsed values in aAniElapsed are numbers from 0.0 to 1.0 (or -1.0 if not defined).
 	 * The index into aAniElapsed is the index into Theme::getNamed().tileAnis().
+	 * @param nPainterIdx The painter to use. Must be valid. If -1 the theme's default is used.
 	 * @param refCc The drawing context. Cannot be null.
 	 * @param oTile The tile to draw.
 	 * @param nPlayer The level player or -1 if tile not part of a block.
 	 * @param aAniElapsed The elapsed tile animations.
 	 */
-	virtual void drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept = 0;
+	virtual void drawTile(int32_t nPainterIdx, const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer
+						, const std::vector<double>& aAniElapsed) noexcept = 0;
 	/** Draw a tile without tile animations.
+	 * @param nPainterIdx The painter to use. Must be valid. If -1 the theme's default is used.
 	 * @param refCc The drawing context. Cannot be null.
 	 * @param oTile The tile to draw.
 	 * @param nPlayer The level player or -1 if tile not part of a block.
 	 */
-	virtual void drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer) noexcept = 0;
-	/** Draw a tile with tile animations.
-	 * The elapsed values in aAniElapsed are numbers from 0.0 to 1.0.
-	 * The index into aAniElapsed is the index into Theme::getNamed().tileAnis().
-	 * @param refCc The drawing context. Cannot be null.
-	 * @param oTile The tile to draw.
-	 * @param nPlayer The level player or -1 if tile not part of a block.
-	 * @param aAniElapsed The elapsed tile animations.
-	 */
-	virtual void drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept = 0;
-	/** Draw a tile without tile animations.
-	 * @param refCc The drawing context. Cannot be null.
-	 * @param oTile The tile to draw.
-	 * @param nPlayer The level player or -1 if tile not part of a block.
-	 */
-	virtual void drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer) noexcept = 0;
+	virtual void drawTile(int32_t nPainterIdx, const Cairo::RefPtr<Cairo::Context>& refCc, const Tile& oTile, int32_t nPlayer) noexcept = 0;
 
 	/** Get the current tile size.
 	 * @return The tile size in pixels.

@@ -27,6 +27,9 @@
 
 #include <stmm-games/widgets/previewwidget.h>
 
+#include <stmm-games/named.h>
+#include <stmm-games/util/namedindex.h>
+
 #include <cstdint>
 #include <string>
 #include <utility>
@@ -41,6 +44,7 @@ namespace stmg
 static const std::string s_sGamePreviewWidgetNodeName = "PreviewWidget";
 static const std::string s_sGamePreviewWidgetMinTilesWAttr = "minTilesW";
 static const std::string s_sGamePreviewWidgetMinTilesHAttr = "minTilesH";
+static const std::string s_sGamePreviewWidgetPainterAttr = "painter";
 
 
 XmlPreviewWidgetParser::XmlPreviewWidgetParser()
@@ -66,6 +70,21 @@ shared_ptr<GameWidget> XmlPreviewWidgetParser::parseGameWidget(LayoutCtx& oCtx, 
 		oInit.m_nMinTilesH = XmlUtil::strToNumber<int32_t>(oCtx, p0WidgetElement, s_sGamePreviewWidgetMinTilesHAttr, sMinTilesH
 																	, false, true, 1, false, -1);
 	}
+	const auto oPairBlockPainter = XmlCommonParser::getAttributeValue(oCtx, p0WidgetElement, s_sGamePreviewWidgetPainterAttr);
+	if (oPairBlockPainter.first) {
+		const std::string& sBlockPainter = oPairBlockPainter.second;
+		if (sBlockPainter.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0WidgetElement, s_sGamePreviewWidgetPainterAttr);
+		}
+		Named& oNamed = oCtx.named();
+		NamedIndex& oPainters = oNamed.painters();
+		oInit.m_nPainterIdx = oPainters.getIndex(sBlockPainter);
+		if ((oInit.m_nPainterIdx < 0) && (oPainters.size() > 0)) {
+			auto oEx = oCtx.error(std::string("Warning! Painter named '") + sBlockPainter + "' not defined by theme!");
+			std::cout << oEx.what() << '\n';
+		}
+	}
+
 //std::cout << "XmlPreviewWidgetParser::parseGameWidget  oInit.m_nTeam=" << oInit.m_nTeam << "  oInit.m_nMate=" << oInit.m_nMate << '\n';
 	oCtx.removeChecker(p0WidgetElement, true);
 	return std::make_shared<PreviewWidget>(std::move(oInit));

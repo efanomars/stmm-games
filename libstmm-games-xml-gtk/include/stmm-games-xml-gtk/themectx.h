@@ -25,6 +25,8 @@
 
 #include <stmm-games-file/file.h>
 
+#include <stmm-games/util/namedobjindex.h>
+
 #include <string>
 #include <memory>
 
@@ -49,9 +51,11 @@ public:
 
 	inline StdTheme& theme() { return m_oTheme; }
 	inline bool isMain() const { return m_nThemeNr == 0; }
-	inline int32_t getThemeNr() const { return m_nThemeNr; }
 	inline const File& getThemeFile() const { return m_oCtxThemeFile; }
 	inline const std::string& getThemeName() const { return m_sCtxThemeName; }
+
+	// A painter name can appear only once in a theme.xml file
+	inline NamedObjIndex<const xmlpp::Element*>& localThemePainterNames() { return m_oLocalPainterNames; }
 protected:
 	std::string err(const std::string& sErr) override;
 private:
@@ -60,6 +64,7 @@ private:
 	const std::string m_sCtxThemeName;
 	const File m_oCtxThemeFile;
 	const xmlpp::Element* m_p0RootElement;
+	NamedObjIndex<const xmlpp::Element*> m_oLocalPainterNames;
 	int32_t m_nThemeNr; // set by XmlThemeParser
 private:
 	ThemeCtx() = delete;

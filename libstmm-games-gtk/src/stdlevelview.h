@@ -182,6 +182,9 @@ private:
 	shared_ptr<Theme> m_refTheme;
 	shared_ptr<ThemeContext> m_refThemeCtx;
 
+	int32_t m_nBoardPainterIdx;
+	int32_t m_nBlockPainterIdx;
+
 	int32_t m_nUniqueHumanPrefPlayer;
 
 	int32_t m_nThemeTotTileAnis;

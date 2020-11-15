@@ -80,7 +80,9 @@ private:
 	void parseFonts(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
 	void parseFontsFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element, bool bDefault);
 
-	bool parseDrawTile(ThemeCtx& oCtx, const xmlpp::Element* p0Element, std::vector< unique_ptr<StdThemeModifier> >& aModifiers);
+	void parsePainters(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
+	void parsePaintersPainter(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
+	void parsePaintersClonePainter(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
 
 private:
 	XmlVariantSetParser m_oXmlVariantSetParser;

@@ -175,7 +175,7 @@ void XmlThemeLoader::loadThemeInfos()
 	// mark all themes that are either valid themes for this gameId or dependencies thereof
 	for (const auto& sValidName : m_aValidNames) {
 		traverseAndMark(sValidName);
-//std::cout << "sValidName = " << sValidName << '\n';
+//std::cout << "XmlThemeLoader::loadThemeInfos()  sValidName = " << sValidName << '\n';
 	}
 	// go through the ThemeInfos and remove those that are not marked
 	auto itTI = m_oNamedThemeInfos.begin();
@@ -185,6 +185,10 @@ void XmlThemeLoader::loadThemeInfos()
 		ExtThemeInfo& oThemeInfo = m_oNamedThemeInfos[sThemeName];
 		if (!oThemeInfo.m_bVisited) {
 			itTI = m_oNamedThemeInfos.erase(itTI);
+			const auto itName = std::find(m_aValidNames.begin(), m_aValidNames.end(), sThemeName);
+			if (itName != m_aValidNames.end()) {
+				m_aValidNames.erase(itName);
+			}
 		} else {
 			++itTI;
 		}
@@ -253,6 +257,7 @@ const XmlThemeLoader::ThemeInfo& XmlThemeLoader::getThemeInfo(const std::string&
 }
 XmlThemeLoader::ExtThemeInfo& XmlThemeLoader::getExtThemeInfo(const std::string& sName)
 {
+//std::cout << "XmlThemeLoader::getExtThemeInfo " << sName << '\n';
 	assert(std::find(m_aValidNames.begin(), m_aValidNames.end(), sName) != m_aValidNames.end());
 	assert(m_oNamedThemeInfos.find(sName) != m_oNamedThemeInfos.end());
 	return m_oNamedThemeInfos[sName];
@@ -267,6 +272,10 @@ shared_ptr<Theme> XmlThemeLoader::getTheme(const std::string& sName) noexcept
 		return shared_ptr<Theme>(); //------------------------------------------
 	}
 	const std::string& sTheName = (sName.empty() ? m_aValidNames[0] : sName);
+	const auto itFindValid = std::find(m_aValidNames.begin(), m_aValidNames.end(), sTheName);
+	if (itFindValid == m_aValidNames.end()) {
+		return shared_ptr<Theme>(); //------------------------------------------
+	}
 	ExtThemeInfo& oThemeInfo = getExtThemeInfo(sTheName);
 //std::cout << "XmlThemeLoader::getTheme()    sName=" << sTheName << '\n';
 

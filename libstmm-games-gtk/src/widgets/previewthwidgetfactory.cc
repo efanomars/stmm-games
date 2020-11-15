@@ -131,6 +131,7 @@ void PreviewThWidgetFactory::PreviewTWidget::reInitCommon(const Glib::RefPtr<Pan
 	// set the initial size in tiles
 	m_nTotTilesW = m_p0PreviewWidget->getMinTilesW();
 	m_nTotTilesH = m_p0PreviewWidget->getMinTilesH();
+	m_nPainterIdx = m_p0PreviewWidget->getPainterIdx();
 
 	m_refFontContext = refFontContext;
 	m_refFontLayout = Pango::Layout::create(refFontContext);
@@ -366,7 +367,7 @@ void PreviewThWidgetFactory::PreviewTWidget::drawPreviewBlock(const Cairo::RefPt
 //std::cout << "PreviewThWidgetFactory::PreviewTWidget::drawPreviewBlock nPixX=" << nPixX << " nPixY=" << nPixY << '\n';
 			constexpr int32_t nSkin = 0; // TODO Maybe it should be -1?
 			refCc->translate(nPixX, nPixY);
-			m_refPreviewTc->drawBlockTile(refCc, oBlock.brick(nBrickId), nSkin);
+			m_refPreviewTc->drawTile(m_nPainterIdx, refCc, oBlock.brick(nBrickId), nSkin);
 			refCc->translate(-nPixX, -nPixY);
 		}
 	}

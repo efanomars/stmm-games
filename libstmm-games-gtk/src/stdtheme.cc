@@ -24,6 +24,7 @@
 #include "stdthemesound.h"
 #include "modifiers/stopmodifier.h"
 #include "gtkutil/image.h"
+#include "modifiers/nextsubpaintermodifier.h"
 
 #include <stmm-games/traitset.h>
 #include <stmm-games/gamewidget.h>
@@ -63,11 +64,12 @@ const std::string StdTheme::s_sSansFontDesc = "Sans";
 
 StdTheme::StdTheme() noexcept
 : m_sDefaultFont("")
+, m_nDefaultPainterIdx(-1)
 {
 	m_oDefaultPalColor.setColorRGB(0,0,0);
 	m_aPal256.resize(256);
-	m_aThemeStartBoardPP.push_back(0);
-	m_aThemeStartBlockPP.push_back(0);
+//	m_aThemeStartBoardPP.push_back(0);
+//	m_aThemeStartBlockPP.push_back(0);
 }
 
 NSize StdTheme::getBestTileSize(int32_t nHintTileW) const noexcept
@@ -89,18 +91,13 @@ void StdTheme::unregisterTileSize(int32_t nW, int32_t nH) noexcept
 }
 void StdTheme::registerTileSize(int32_t nW, int32_t nH, bool bUn) noexcept
 {
-	for (auto& refMod : m_aBoardModifiers) {
-		if (bUn) {
-			refMod->unregisterTileSize(nW,nH);
-		} else {
-			refMod->registerTileSize(nW,nH);
-		}
-	}
-	for (auto& refMod : m_aBlockModifiers) {
-		if (bUn) {
-			refMod->unregisterTileSize(nW,nH);
-		} else {
-			refMod->registerTileSize(nW,nH);
+	for (TilePainter& oTP : m_aTilePainters) {
+		for (auto& refMod : oTP.m_aModifiers) {
+			if (bUn) {
+				refMod->unregisterTileSize(nW,nH);
+			} else {
+				refMod->registerTileSize(nW,nH);
+			}
 		}
 	}
 	for (auto& oAssign : m_aAssign) {
@@ -963,30 +960,58 @@ shared_ptr<Image> StdTheme::getAssignImage(int32_t nIdAss, const Tile& oTile, in
 }
 
 
-void StdTheme::addBoardModifiers(std::vector< unique_ptr<StdThemeModifier> >&& aModifiers) noexcept
+int32_t StdTheme::addPainter(const std::string& sPainterName, std::vector< unique_ptr<StdThemeModifier> >&& aModifiers) noexcept
 {
+//std::cout << "StdTheme::addPainter " << sPainterName << '\n';
+	assert(!sPainterName.empty());
+	int32_t nPainterIdx = m_oNamed.painters().getIndex(sPainterName);
+	if (nPainterIdx < 0) {
+		nPainterIdx = m_oNamed.painters().addName(sPainterName);
+		m_aTilePainters.resize(nPainterIdx + 1);
+	}
+	TilePainter& oTP = m_aTilePainters[nPainterIdx];
+	if (oTP.m_bFinished) {
+		// unreachable
+		return nPainterIdx; //--------------------------------------------------
+	}
+	const size_t nStartPP = oTP.m_aModifiers.size();
+	const size_t nNextPP = nStartPP + aModifiers.size() + 1;
+	oTP.m_aModifiers.reserve(nNextPP);
+	bool bHasNextSubPainter = false;
 	for (auto& refMod : aModifiers) {
-		m_aBoardModifiers.push_back(std::move(refMod));
+		auto p0NextSubPainter = dynamic_cast<NextSubPainterModifier*>(refMod.get());
+		if (p0NextSubPainter != nullptr) {
+			p0NextSubPainter->m_nPPOfNextSubPainter = nNextPP;
+			bHasNextSubPainter = true;
+		}
+		oTP.m_aModifiers.push_back(std::move(refMod));
+	}
+	auto refStopModifier = std::make_unique<StopModifier>(this);
+	oTP.m_aModifiers.push_back(std::move(refStopModifier));
+	oTP.m_bFinished = ! bHasNextSubPainter;
+
+	return nPainterIdx;
+}
+void StdTheme::setDefaultPainter(int32_t nPainterIdx) noexcept
+{
+	assert(nPainterIdx >= 0);
+	assert(m_oNamed.painters().isIndex(nPainterIdx));
+	if (m_nDefaultPainterIdx < 0) {
+		m_nDefaultPainterIdx = nPainterIdx;
 	}
 }
-void StdTheme::addBlockModifiers(std::vector< unique_ptr<StdThemeModifier> >&& aModifiers) noexcept
+int32_t StdTheme::getDefaultPainterIdx() noexcept
 {
-	for (auto& refMod : aModifiers) {
-		m_aBlockModifiers.push_back(std::move(refMod));
+	if (m_nDefaultPainterIdx < 0) {
+		if (m_aTilePainters.empty()) {
+			// no painters available
+			return -1;
+		}
+		return 0;
 	}
+	return m_nDefaultPainterIdx;
 }
-void StdTheme::addBoardModifierNext() noexcept
-{
-	auto refStopModifier = std::make_unique<StopModifier>(this);
-	m_aBoardModifiers.push_back(std::move(refStopModifier));
-	m_aThemeStartBoardPP.push_back(m_aBoardModifiers.size());
-}
-void StdTheme::addBlockModifierNext() noexcept
-{
-	auto refStopModifier = std::make_unique<StopModifier>(this);
-	m_aBlockModifiers.push_back(std::move(refStopModifier));
-	m_aThemeStartBlockPP.push_back(m_aBlockModifiers.size());
-}
+
 int32_t StdTheme::getVariableIndex(const std::string& sVariableName) noexcept
 {
 	return m_oVariableNames.addName(sVariableName);
@@ -1024,21 +1049,16 @@ shared_ptr<ThemeContext> StdTheme::createContext(NSize oTileWH, bool bRegister, 
 	}
 	return refNew;
 }
-void StdTheme::drawBoardTile(const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeContext& oTc
-							, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
+void StdTheme::drawTile(int32_t nPainterIdx, const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeContext& oTc
+						, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
 {
 //std::cout << "StdTheme::drawTile()" << '\n';
 //if ((!oTile.isEmpty()) && (!oTile.getTileChar().isEmpty()) && oTile.getTileFont().isDefined()) {
 //std::cout << "StdTheme::drawTile()"; dumpTile(oTile);
 ////dumpNames(true, false, true);
 //}
-	drawTileFromPP(0, refCc, oTc.m_oDrawingContext, oTile, nPlayer, aAniElapsed, m_aBoardModifiers);
-}
-void StdTheme::drawBlockTile(const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeContext& oTc
-							, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
-{
-	const bool bSameAsBoard = m_aBlockModifiers.empty();
-	drawTileFromPP(0, refCc, oTc.m_oDrawingContext, oTile, nPlayer, aAniElapsed, (bSameAsBoard ? m_aBoardModifiers : m_aBlockModifiers));
+	assert(nPainterIdx >= 0);
+	drawTileFromPP(0, refCc, oTc.m_oDrawingContext, oTile, nPlayer, aAniElapsed, m_aTilePainters[nPainterIdx].m_aModifiers);
 }
 void StdTheme::drawTileFromPP(size_t nPP, const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeDrawingContext& oTc
 							, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed
@@ -1051,25 +1071,15 @@ void StdTheme::drawTileFromPP(size_t nPP, const Cairo::RefPtr<Cairo::Context>& r
 		if (eCtl == StdThemeModifier::FLOW_CONTROL_STOP) {
 			break; // while -------------
 		}
-		//nPP += nStep;
 		++nPP;
 	}
 }
 void StdTheme::drawTileFromPP(size_t nPP, const Cairo::RefPtr<Cairo::Context>& refCc, StdThemeDrawingContext& oTc
 							, const Tile& oTile, int32_t nPlayer, const std::vector<double>& aAniElapsed) noexcept
 {
-	const bool bSameAsBoard = m_aBlockModifiers.empty();
-	std::vector< unique_ptr<StdThemeModifier> >& aModifiers = ((bSameAsBoard || oTc.m_p1Owner->m_bDrawingBoardTile) ? m_aBoardModifiers : m_aBlockModifiers);
+	const int32_t nPainterIdx = oTc.m_p1Owner->m_nDrawingPainterIdx;
+	auto& aModifiers = m_aTilePainters[nPainterIdx].m_aModifiers;
 	drawTileFromPP(nPP, refCc, oTc, oTile, nPlayer, aAniElapsed, aModifiers);
-}
-size_t StdTheme::getThemePP(int32_t nThemeNr, const StdThemeDrawingContext& oTc) noexcept
-{
-	const bool bSameAsBoard = m_aBlockModifiers.empty();
-	const std::vector< size_t >& aThemeStartPP = ((bSameAsBoard || oTc.m_p1Owner->m_bDrawingBoardTile) ? m_aThemeStartBoardPP : m_aThemeStartBlockPP);
-	if ((nThemeNr < 0) || (nThemeNr >= static_cast<int32_t>(aThemeStartPP.size()))) {
-		return 0;
-	}
-	return aThemeStartPP[nThemeNr];
 }
 
 #ifndef NDEBUG

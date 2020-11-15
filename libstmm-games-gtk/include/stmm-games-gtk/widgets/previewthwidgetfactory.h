@@ -133,6 +133,7 @@ private:
 		// The number of shown tiles should be adjusted if the blocks get bigger
 		int32_t m_nTotTilesW;
 		int32_t m_nTotTilesH;
+		int32_t m_nPainterIdx;
 		shared_ptr<ThemeContext> m_refPreviewTc;
 		//
 		static const int32_t s_nPixCanvasMinSizeW;

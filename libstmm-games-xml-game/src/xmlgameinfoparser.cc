@@ -72,6 +72,11 @@ static const std::string s_sGameSoundScaleXAttr = "soundScaleX";
 static const std::string s_sGameSoundScaleYAttr = "soundScaleY";
 static const std::string s_sGameSoundScaleZAttr = "soundScaleZ";
 
+static const std::string s_sGameBoardPainterAttr = "boardPainter";
+static const std::string s_sGameBlockPainterAttr = "blockPainter";
+static const std::string s_sGamePreferBoardPainterAttr = "preferBoardPainter";
+static const std::string s_sGamePreferBlockPainterAttr = "preferBlockPainter";
+
 static const std::string s_sGameDescriptionNodeName = "Description";
 
 static const std::string s_sGameAuthorNodeName = "Author";
@@ -300,7 +305,62 @@ const GameLoader::GameInfo& XmlGameInfoParser::parseGameInfo(GameInfoCtx& oCtx, 
 		oCtx.m_fSoundScaleZ = XmlUtil::strToNumber<double>(oCtx, p0RootElement, s_sGameSoundScaleZAttr, sSoundScaleZ
 																	, false, true, 0.00001, false, -1.0);
 	}
-	// no child element check since we only parse some elements of the game root element
+
+	Named& oNamed = oCtx.named();
+	NamedIndex& oPainters = oNamed.painters();
+
+	oCtx.m_nBoardPainterIdx = -1;
+	const auto oPairBoardPainter = XmlCommonParser::getAttributeValue(oCtx, p0RootElement, s_sGameBoardPainterAttr);
+	if (oPairBoardPainter.first) {
+		const std::string& sBoardPainter = oPairBoardPainter.second;
+		if (sBoardPainter.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0RootElement, s_sGameBoardPainterAttr);
+		}
+		oCtx.m_nBoardPainterIdx = oPainters.getIndex(sBoardPainter);
+		// if there are no painters at all it's a dummy theme,  keep going
+		if ((oCtx.m_nBoardPainterIdx < 0) && (oPainters.size() > 0)) {
+			throw XmlCommonErrors::error(oCtx, p0RootElement, s_sGameBoardPainterAttr
+										, std::string{"Painter named '"} + sBoardPainter + "' not defined by current theme!");
+		}
+	}
+	const auto oPairPreferBoardPainter = XmlCommonParser::getAttributeValue(oCtx, p0RootElement, s_sGamePreferBoardPainterAttr);
+	if (oPairPreferBoardPainter.first) {
+		if (oPairBoardPainter.first) {
+			throw XmlCommonErrors::errorAttrCannotBothBeDefined(oCtx, p0RootElement, s_sGamePreferBoardPainterAttr, s_sGameBoardPainterAttr);
+		}
+		const std::string& sPreferBoardPainter = oPairPreferBoardPainter.second;
+		if (sPreferBoardPainter.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0RootElement, s_sGamePreferBoardPainterAttr);
+		}
+		oCtx.m_nBoardPainterIdx = oPainters.getIndex(sPreferBoardPainter);
+	}
+
+	oCtx.m_nBlockPainterIdx = -1;
+	const auto oPairBlockPainter = XmlCommonParser::getAttributeValue(oCtx, p0RootElement, s_sGameBlockPainterAttr);
+	if (oPairBlockPainter.first) {
+		const std::string& sBlockPainter = oPairBlockPainter.second;
+		if (sBlockPainter.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0RootElement, s_sGameBlockPainterAttr);
+		}
+		oCtx.m_nBlockPainterIdx = oPainters.getIndex(sBlockPainter);
+		if ((oCtx.m_nBlockPainterIdx < 0) && (oPainters.size() > 0)) {
+			throw XmlCommonErrors::error(oCtx, p0RootElement, s_sGameBoardPainterAttr
+										, std::string{"Painter named '"} + sBlockPainter + "' not defined by current theme!");
+		}
+	}
+	const auto oPairPreferBlockPainter = XmlCommonParser::getAttributeValue(oCtx, p0RootElement, s_sGamePreferBlockPainterAttr);
+	if (oPairPreferBlockPainter.first) {
+		if (oPairBlockPainter.first) {
+			throw XmlCommonErrors::errorAttrCannotBothBeDefined(oCtx, p0RootElement, s_sGamePreferBlockPainterAttr, s_sGameBlockPainterAttr);
+		}
+		const std::string& sPreferBlockPainter = oPairPreferBlockPainter.second;
+		if (sPreferBlockPainter.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0RootElement, s_sGamePreferBlockPainterAttr);
+		}
+		oCtx.m_nBlockPainterIdx = oPainters.getIndex(sPreferBlockPainter);
+	}
+
+	// no child element check since we only parse some elements of the game`s root element
 	oCtx.removeChecker(p0RootElement, false, true);
 
 	return oCtx.m_oGameInfo;

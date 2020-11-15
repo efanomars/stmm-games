@@ -75,6 +75,9 @@ StdLevelView::StdLevelView() noexcept
 , m_bAllTeamsInOneLevel(false)
 , m_nLevel(-1)
 , m_nBasePrefPlayer(-1)
+, m_nBoardPainterIdx(-1)
+, m_nBlockPainterIdx(-1)
+, m_nUniqueHumanPrefPlayer(-1)
 , m_nThemeTotTileAnis(-1)
 , m_nTileW(-1)
 , m_nTileH(-1)
@@ -134,6 +137,8 @@ void StdLevelView::reInit(bool bSubshows, const std::vector< shared_ptr<LevelSho
 	m_refLevel = m_refGame->level(m_nLevel);
 	m_refTheme = refTheme;
 	m_refThemeCtx = refThemeCtx;
+	m_nBoardPainterIdx = m_refGame->getBoardPainterIdx();
+	m_nBlockPainterIdx = m_refGame->getBlockPainterIdx();
 	m_nBasePrefPlayer = m_refGame->getPlayer(nLevel, 0);
 
 	clearAniDatas(m_aAniDataNotStarted);
@@ -754,7 +759,7 @@ void StdLevelView::drawBoard(const Cairo::RefPtr<Cairo::Context>& refCc, int32_t
 					const double fElapsed = m_refLevel->boardGetTileAniElapsed(nCurX, nCurY, nIdxAni, nViewTick, nTotViewTicks);
 					m_aTileAniElapsed[nIdxAni] = fElapsed;
 				}
-				m_refThemeCtx->drawBoardTile(refCc, oTile, -1, m_aTileAniElapsed);
+				m_refThemeCtx->drawTile(m_nBoardPainterIdx, refCc, oTile, -1, m_aTileAniElapsed);
 			}
 			refCc->translate(0, nTileH);
 		}
@@ -789,7 +794,7 @@ void StdLevelView::drawLevelBlock(const Cairo::RefPtr<Cairo::Context>& refCc, Le
 			const Tile& oTile =  oLevelBlock.blockVTBrickTile(nViewTick, nTotViewTicks, nBrickId);
 //std::cout << "StdLevelView::drawLevelBlock nPixX=" << nPixX << " nPixY=" << nPixY << '\n';
 			refCc->translate(nPixX, nPixY);
-			m_refThemeCtx->drawBlockTile(refCc, oTile, nPlayer, m_aTileAniElapsed);
+			m_refThemeCtx->drawTile(m_nBlockPainterIdx, refCc, oTile, nPlayer, m_aTileAniElapsed);
 			refCc->translate(-nPixX, -nPixY);
 		}
 	}

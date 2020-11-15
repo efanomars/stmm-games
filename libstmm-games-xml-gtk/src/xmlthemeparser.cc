@@ -33,8 +33,7 @@
 #include <stmm-games-gtk/stdtheme.h>
 #include <stmm-games-gtk/stdthememodifier.h>
 #include <stmm-games-gtk/themeloader.h>
-
-#include <stmm-games-gtk/modifiers/nextthememodifier.h>
+#include <stmm-games-gtk/modifiers/nextsubpaintermodifier.h>
 
 #include <stmm-games/appconfig.h>
 #include <stmm-games/tile.h>
@@ -88,9 +87,15 @@ static const std::string s_sTileAnisNodeName = "TileAnimations";
 static const std::string s_sAssignsNodeName = "Assigns";
 static const std::string s_sWidgetsNodeName = "WidgetFactories";
 
-static const std::string s_sDrawTileNodeName = "DrawTile";
-static const std::string s_sDrawBoardTileNodeName = "DrawBoardTile";
-static const std::string s_sDrawBlockTileNodeName = "DrawBlockTile";
+static const std::string s_sPaintersNodeName = "TilePainters";
+static const std::string s_sPaintersPainterNodeName = "Painter";
+static const std::string s_sPaintersPainterNameAttr = "name";
+static const std::string s_sPaintersPainterNameAttrBoard = "PAINTER:BOARD";
+static const std::string s_sPaintersPainterNameAttrBlock = "PAINTER:BLOCK";
+static const std::string s_sPaintersPainterDefaultAttr = "default";
+static const std::string s_sPaintersClonePainterNodeName = "ClonePainter";
+static const std::string s_sPaintersClonePainterNameAttr = "name";
+static const std::string s_sPaintersClonePainterCloningNameAttr = "cloning";
 
 
 XmlThemeParser::XmlThemeParser()
@@ -257,95 +262,126 @@ void XmlThemeParser::parseXmlTheme(const std::vector< unique_ptr<ThemeCtx> >& aC
 		}
 	}
 
-	std::vector< unique_ptr<StdThemeModifier> > aBoardModifiers;
-	std::vector< unique_ptr<StdThemeModifier> > aBlockModifiers;
-	bool bBoardAndBlockDiverge = false;
-	bool bStopBoardParsing = false;
-	bool bStopBlockParsing = false;
 	for (auto& refCtx : aCtxs) {
-		const xmlpp::Element* p0Element = m_oXmlConditionalParser.parseUniqueElement(*refCtx, refCtx->m_p0RootElement, s_sDrawTileNodeName, false);
-		const bool bBoth = (p0Element != nullptr);
-		if (bBoth) {
-			if (! bStopBoardParsing) {
-				const bool bHasNextThemeModifier = parseDrawTile(*refCtx, p0Element, aBoardModifiers);
-				if (! bHasNextThemeModifier) {
-					bStopBoardParsing = true;
-				}
-			}
-			if (bStopBlockParsing) {
-				const bool bHasNextThemeModifier = parseDrawTile(*refCtx, p0Element, aBlockModifiers);
-				if (! bHasNextThemeModifier) {
-					bStopBlockParsing = true;
-				}
-			}
-			// No modifiers for drawing block means use board modifiers
-		}
-		p0Element = m_oXmlConditionalParser.parseUniqueElement(*refCtx, refCtx->m_p0RootElement, s_sDrawBoardTileNodeName, false);
-		const bool bBoard = (p0Element != nullptr);
-		if (bBoard) {
-			if (bBoth) {
-				throw XmlCommonErrors::errorElementCannotBothBeDefined(*refCtx, refCtx->m_p0RootElement, s_sDrawBoardTileNodeName, s_sDrawTileNodeName);
-			}
-			if (! bStopBoardParsing) {
-				bBoardAndBlockDiverge = true;
-				//
-				const bool bHasNextThemeModifier = parseDrawTile(*refCtx, p0Element, aBoardModifiers);
-				if (! bHasNextThemeModifier) {
-					bStopBoardParsing = true;
-				}
-			}
-		} else if (! bBoth) {
-			throw XmlCommonErrors::errorElementEitherMustBeDefined(*refCtx, refCtx->m_p0RootElement, s_sDrawTileNodeName, s_sDrawBoardTileNodeName);
-		}
-		p0Element = m_oXmlConditionalParser.parseUniqueElement(*refCtx, refCtx->m_p0RootElement, s_sDrawBlockTileNodeName, false);
-		const bool bBlock = (p0Element != nullptr);
-		if (bBlock) {
-			if (bBoth) {
-				throw XmlCommonErrors::errorElementCannotBothBeDefined(*refCtx, refCtx->m_p0RootElement, s_sDrawBlockTileNodeName, s_sDrawTileNodeName);
-			}
-			if (! bStopBlockParsing) {
-				assert(bBoardAndBlockDiverge);
-				//
-				const bool bHasNextThemeModifier = parseDrawTile(*refCtx, p0Element, aBlockModifiers);
-				if (! bHasNextThemeModifier) {
-					bStopBlockParsing = true;
-				}
-			}
-		} else if (! bBoth) {
-			throw XmlCommonErrors::errorElementExpected(*refCtx, refCtx->m_p0RootElement, s_sDrawBlockTileNodeName);
+		const xmlpp::Element* p0Element = m_oXmlConditionalParser.parseUniqueElement(*refCtx, refCtx->m_p0RootElement, s_sPaintersNodeName, false);
+		if (p0Element != nullptr) {
+			parsePainters(*refCtx, p0Element);
 		}
 	}
 
-	StdTheme& oStdTheme = aCtxs[0]->theme();
-	{
-		std::vector< unique_ptr<StdThemeModifier> > aThemeModifiers;
-		for (auto& refModifier : aBoardModifiers) {
-			if (refModifier) {
-				aThemeModifiers.push_back(std::move(refModifier));
-			} else {
-				oStdTheme.addBoardModifiers(std::move(aThemeModifiers));
-				aThemeModifiers.clear();
-				oStdTheme.addBoardModifierNext();
-			}
-		}
-		assert(aThemeModifiers.empty());
+	auto& refManiCtx = aCtxs[0];
+	StdTheme& oStdTheme = refManiCtx->theme();
+	const int32_t nDefaultPainterIdx = oStdTheme.getDefaultPainterIdx();
+	if (nDefaultPainterIdx < 0) {
+		const xmlpp::Element* p0Element = m_oXmlConditionalParser.parseUniqueElement(*refManiCtx, refManiCtx->m_p0RootElement, s_sPaintersNodeName, true);
+		throw XmlCommonErrors::errorElementExpected(*refManiCtx, p0Element, s_sPaintersPainterNodeName);
 	}
-	if (bBoardAndBlockDiverge) {
-		std::vector< unique_ptr<StdThemeModifier> > aThemeModifiers;
-		for (auto& refModifier : aBlockModifiers) {
-			if (refModifier) {
-				aThemeModifiers.push_back(std::move(refModifier));
-			} else {
-				oStdTheme.addBlockModifiers(std::move(aThemeModifiers));
-				aThemeModifiers.clear();
-				oStdTheme.addBlockModifierNext();
-			}
-		}
-		assert(aThemeModifiers.empty());
+
+	Named& oNamed = refManiCtx->named();
+	NamedIndex& oPaintersIndex = oNamed.painters();
+	if (oPaintersIndex.getIndex(s_sPaintersPainterNameAttrBoard) < 0) {
+		std::cout << "Board painter '" << s_sPaintersPainterNameAttrBoard << "' not explicitely defined" << '\n';
+		std::cout << " -> using default painter '" << oPaintersIndex.getName(nDefaultPainterIdx) << "'!" << '\n';
 	}
+	if (oPaintersIndex.getIndex(s_sPaintersPainterNameAttrBlock) < 0) {
+		std::cout << "Block painter '" << s_sPaintersPainterNameAttrBlock << "' not explicitely defined" << '\n';
+		std::cout << " -> using default painter '" << oPaintersIndex.getName(nDefaultPainterIdx) << "'!" << '\n';
+	}
+
 	for (auto& refCtx : aCtxs) {
 		refCtx->removeChecker(refCtx->m_p0RootElement, true);
 	}
+}
+void XmlThemeParser::parsePainters(ThemeCtx& oCtx, const xmlpp::Element* p0Element)
+{
+	oCtx.addChecker(p0Element);
+	m_oXmlConditionalParser.visitNamedElementChildren(oCtx, p0Element, s_sPaintersPainterNodeName, [&](const xmlpp::Element* p0Painter)
+	{
+		parsePaintersPainter(oCtx, p0Painter);
+	});
+	m_oXmlConditionalParser.visitNamedElementChildren(oCtx, p0Element, s_sPaintersClonePainterNodeName, [&](const xmlpp::Element* p0ClonePainter)
+	{
+		parsePaintersClonePainter(oCtx, p0ClonePainter);
+	});
+	oCtx.removeChecker(p0Element, true);
+}
+void XmlThemeParser::parsePaintersPainter(ThemeCtx& oCtx, const xmlpp::Element* p0Element)
+{
+	oCtx.addChecker(p0Element);
+
+	StdTheme& oTheme = oCtx.theme();
+	const auto oPairPainterName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sPaintersPainterNameAttr);
+	const bool bNameDefined = oPairPainterName.first;
+	if (! bNameDefined) {
+		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sPaintersPainterNameAttr);
+	}
+	const std::string& sPainterName = oPairPainterName.second;
+	XmlCommonParser::validateName(oCtx, p0Element, s_sPaintersPainterNameAttr, sPainterName, false);
+
+	if (oCtx.localThemePainterNames().getIndex(sPainterName) >= 0) {
+		throw XmlCommonErrors::error(oCtx, p0Element, s_sPaintersPainterNameAttr
+									, Util::stringCompose("A painter with name '%1' is already defined in this file"
+														, sPainterName));
+	}
+	oCtx.localThemePainterNames().addNamedObj(sPainterName, p0Element);
+
+	std::vector< unique_ptr<StdThemeModifier> > aThemeModifiers = m_oXmlThemeModifiersParser.parseModifiers(oCtx, p0Element);
+
+	const int32_t nPainterIdx = oTheme.addPainter(sPainterName, std::move(aThemeModifiers));
+	//
+	bool bDefaultPainter = false;
+	const auto oPairDefault = XmlCommonParser::getAttributeValue(oCtx, p0Element, s_sPaintersPainterDefaultAttr);
+	if (oPairDefault.first) {
+		bDefaultPainter = XmlUtil::strToBool(oCtx, p0Element, s_sPaintersPainterDefaultAttr, oPairDefault.second);
+	}
+	if (bDefaultPainter) {
+		oTheme.setDefaultPainter(nPainterIdx);
+	}
+
+	oCtx.removeChecker(p0Element, false, true);
+}
+void XmlThemeParser::parsePaintersClonePainter(ThemeCtx& oCtx, const xmlpp::Element* p0Element)
+{
+//std::cout << "XmlThemeParser::parsePaintersClonePainter " << oCtx.error("").what() << '\n';
+	oCtx.addChecker(p0Element);
+
+	StdTheme& oTheme = oCtx.theme();
+
+	const auto oPairPainterName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sPaintersClonePainterNameAttr);
+	const bool bNameDefined = oPairPainterName.first;
+	if (! bNameDefined) {
+		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sPaintersClonePainterNameAttr);
+	}
+	const std::string& sPainterName = oPairPainterName.second;
+	XmlCommonParser::validateName(oCtx, p0Element, s_sPaintersClonePainterNameAttr, sPainterName, false);
+
+	if (oCtx.localThemePainterNames().getIndex(sPainterName) >= 0) {
+		throw XmlCommonErrors::error(oCtx, p0Element, s_sPaintersClonePainterNameAttr
+									, Util::stringCompose("A painter with name '%1' is already defined in this file"
+														, sPainterName));
+	}
+
+	const auto oPairCloningPainterName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sPaintersClonePainterCloningNameAttr);
+	const bool bCloningNameDefined = oPairCloningPainterName.first;
+	if (! bCloningNameDefined) {
+		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sPaintersClonePainterCloningNameAttr);
+	}
+	const std::string& sCloningPainterName = oPairCloningPainterName.second;
+
+	const int32_t nCloningIdx = oCtx.localThemePainterNames().getIndex(sCloningPainterName);
+	if (nCloningIdx < 0) {
+		throw XmlCommonErrors::error(oCtx, p0Element, s_sPaintersClonePainterCloningNameAttr
+									, Util::stringCompose("A local painter with name '%1' was not defined in this file"
+														, sCloningPainterName));
+	}
+	const xmlpp::Element* p0CloningElement = oCtx.localThemePainterNames().getObj(nCloningIdx);
+	std::vector< unique_ptr<StdThemeModifier> > aThemeModifiers = m_oXmlThemeModifiersParser.parseModifiers(oCtx, p0CloningElement);
+
+	oTheme.addPainter(sPainterName, std::move(aThemeModifiers));
+
+	oCtx.localThemePainterNames().addNamedObj(sPainterName, p0CloningElement);
+
+	oCtx.removeChecker(p0Element, true);
 }
 
 void XmlThemeParser::parseRoot(ParserCtx& oCtx, const xmlpp::Element* p0RootElement, std::string& sThemeName)
@@ -475,22 +511,22 @@ void XmlThemeParser::parseFontsFont(ThemeCtx& oCtx, const xmlpp::Element* p0Elem
 	oCtx.removeChecker(p0Element, true);
 }
 
-bool XmlThemeParser::parseDrawTile(ThemeCtx& oCtx, const xmlpp::Element* p0Element, std::vector< unique_ptr<StdThemeModifier> >& aModifiers)
-{
-	oCtx.addChecker(p0Element);
-	std::vector< unique_ptr<StdThemeModifier> > aThemeModifiers = m_oXmlThemeModifiersParser.parseModifiers(oCtx, p0Element);
-	bool bHasNextThemeModifier = false;
-	for (auto& refModifer : aModifiers) {
-		if (dynamic_cast<stmg::NextThemeModifier*>(refModifer.get()) != nullptr) {
-			bHasNextThemeModifier = true;
-			break;
-		}
-	}
-	std::move(aThemeModifiers.begin(), aThemeModifiers.end(), std::back_inserter(aModifiers));
-	aModifiers.emplace_back();
-	// parseModifiers already checks the validity of child elements
-	oCtx.removeChecker(p0Element, false, true);
-	return bHasNextThemeModifier;
-}
+//void XmlThemeParser::parseDrawTile(ThemeCtx& oCtx, const xmlpp::Element* p0Element, std::vector< unique_ptr<StdThemeModifier> >& aModifiers)
+//{
+//	oCtx.addChecker(p0Element);
+//	std::vector< unique_ptr<StdThemeModifier> > aThemeModifiers = m_oXmlThemeModifiersParser.parseModifiers(oCtx, p0Element);
+//	bool bHasNextThemeModifier = false;
+//	for (auto& refModifer : aThemeModifiers) {
+//		if (dynamic_cast<stmg::NextThemeModifier*>(refModifer.get()) != nullptr) {
+//			bHasNextThemeModifier = true;
+//			break;
+//		}
+//	}
+//	std::move(aThemeModifiers.begin(), aThemeModifiers.end(), std::back_inserter(aModifiers));
+//	aModifiers.emplace_back();
+//	// parseModifiers already checks the validity of child elements
+//	oCtx.removeChecker(p0Element, false, true);
+//	return bHasNextThemeModifier;
+//}
 
 } // namespace stmg
