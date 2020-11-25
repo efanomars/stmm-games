@@ -57,7 +57,7 @@ namespace stmg { class TileRect; }
 namespace stmg
 {
 
-static const int32_t s_nZObjectZBoardTileDestruct = 2;
+static const int32_t s_nZObjectZBoardTileDestruct = 20000;
 
 class PrivateExplosionAnimation : public ExplosionAnimation
 {

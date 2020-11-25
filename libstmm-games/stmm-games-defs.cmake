@@ -20,7 +20,7 @@
 #   MINOR is REVISION (implementation of interface)
 #   AGE is always 0
 set(STMM_GAMES_MAJOR_VERSION 0)
-set(STMM_GAMES_MINOR_VERSION 28) # !-U-!
+set(STMM_GAMES_MINOR_VERSION 29) # !-U-!
 set(STMM_GAMES_VERSION "${STMM_GAMES_MAJOR_VERSION}.${STMM_GAMES_MINOR_VERSION}.0")
 
 # required stmm-input-ev version

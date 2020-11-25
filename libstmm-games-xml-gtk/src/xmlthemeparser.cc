@@ -511,22 +511,4 @@ void XmlThemeParser::parseFontsFont(ThemeCtx& oCtx, const xmlpp::Element* p0Elem
 	oCtx.removeChecker(p0Element, true);
 }
 
-//void XmlThemeParser::parseDrawTile(ThemeCtx& oCtx, const xmlpp::Element* p0Element, std::vector< unique_ptr<StdThemeModifier> >& aModifiers)
-//{
-//	oCtx.addChecker(p0Element);
-//	std::vector< unique_ptr<StdThemeModifier> > aThemeModifiers = m_oXmlThemeModifiersParser.parseModifiers(oCtx, p0Element);
-//	bool bHasNextThemeModifier = false;
-//	for (auto& refModifer : aThemeModifiers) {
-//		if (dynamic_cast<stmg::NextThemeModifier*>(refModifer.get()) != nullptr) {
-//			bHasNextThemeModifier = true;
-//			break;
-//		}
-//	}
-//	std::move(aThemeModifiers.begin(), aThemeModifiers.end(), std::back_inserter(aModifiers));
-//	aModifiers.emplace_back();
-//	// parseModifiers already checks the validity of child elements
-//	oCtx.removeChecker(p0Element, false, true);
-//	return bHasNextThemeModifier;
-//}
-
 } // namespace stmg

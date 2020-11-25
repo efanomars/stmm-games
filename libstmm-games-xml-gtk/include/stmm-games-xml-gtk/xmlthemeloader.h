@@ -129,4 +129,3 @@ private:
 } // namespace stmg
 
 #endif	/* STMG_XML_THEME_LOADER_H */
-

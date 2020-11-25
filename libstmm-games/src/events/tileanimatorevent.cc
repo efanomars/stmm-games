@@ -229,7 +229,7 @@ bool TileAnimatorEvent::createTileAniBoard(int32_t nNotAniIdx, int32_t nGameTick
 	m_aWaitingAnisPos.push_back(NPoint{nX, nY});
 	m_aWaitingAnisStart.push_back(nNextStartTick);
 	m_aWaitingAnis.push_back(std::move(refTileAni));
-//	++m_nAnis;
+
 	// remove
 	vectorRemoveIndex(m_aNotAnisPos, nNotAniIdx);
 	return true;
@@ -631,7 +631,13 @@ void TileAnimatorEvent::boardAddSelected(const NRect& oRect) noexcept
 {
 	auto& oLevel = level();
 	for (int32_t nY = oRect.m_nY; nY < oRect.m_nY + oRect.m_nH; ++nY) {
+		if ((nY < m_oInit.m_oArea.m_nY) || (nY >= m_oInit.m_oArea.m_nY + m_oInit.m_oArea.m_nH)) {
+			continue;
+		}
 		for (int32_t nX = oRect.m_nX; nX < oRect.m_nX + oRect.m_nW; ++nX) {
+			if ((nX < m_oInit.m_oArea.m_nX) || (nX >= m_oInit.m_oArea.m_nX + m_oInit.m_oArea.m_nW)) {
+				continue;
+			}
 			const Tile& oTile = oLevel.boardGetTile(nX, nY);
 			if ((!oTile.isEmpty()) && ((!m_oInit.m_refSelect) || m_oInit.m_refSelect->select(oTile))) {
 				m_aNotAnisPos.push_back(NPoint{nX,  nY});
@@ -645,6 +651,9 @@ void TileAnimatorEvent::boardAddSelected(const Coords& oCoords) noexcept
 	for (Coords::const_iterator it = oCoords.begin(); it != oCoords.end(); it.next()) {
 		const int32_t nX = it.x();
 		const int32_t nY = it.y();
+		if (! m_oInit.m_oArea.containsPoint(NPoint{nX, nY})) {
+			continue;
+		}
 		const Tile& oTile = oLevel.boardGetTile(nX, nY);
 		if ((!oTile.isEmpty()) && ((!m_oInit.m_refSelect) || m_oInit.m_refSelect->select(oTile))) {
 			m_aNotAnisPos.push_back(NPoint{nX,  nY});
@@ -655,50 +664,71 @@ void TileAnimatorEvent::boardMoveSelected(const NRect& oRect, Direction::VALUE e
 {
 	const int32_t nDx = Direction::deltaX(eDir);
 	const int32_t nDy = Direction::deltaY(eDir);
-	for (NPoint& oXY : m_aNotAnisPos) {
-		if ((oXY.m_nX < 0) || (! oRect.containsPoint(oXY))) {
-			continue;
-		}
-		oXY.m_nX += nDx;
-		oXY.m_nY += nDy;
-	}
-	#ifndef NDEBUG
-	auto& oLevel = level();
+//std::cout << "boardMoveSelected  nDx=" << nDx << " nDy=" << nDy << '\n';
 	int32_t nIdx = 0;
-	#endif //NDEBUG
-	for (NPoint& oXY : m_aWaitingAnisPos) {
+	while (nIdx < static_cast<int32_t>(m_aNotAnisPos.size())) {
+		NPoint& oXY = m_aNotAnisPos[nIdx];
 		if ((oXY.m_nX < 0) || (! oRect.containsPoint(oXY))) {
-			#ifndef NDEBUG
-			++nIdx;
-			#endif //NDEBUG
 			continue;
 		}
 		oXY.m_nX += nDx;
 		oXY.m_nY += nDy;
+//std::cout << "boardMoveSelected  m_aNotAnisPos  oXY=(" << oXY.m_nX << "," << oXY.m_nY << ")" << '\n';
+		if (! m_oInit.m_oArea.containsPoint(oXY)) {
+			vectorRemoveIndex(m_aNotAnisPos, nIdx);
+//std::cout << "boardMoveSelected  m_aNotAnisPos  out of area" << '\n';
+		} else {
+			++nIdx;
+		}
+	}
+	auto& oLevel = level();
+	nIdx = 0;
+	while (nIdx < static_cast<int32_t>(m_aWaitingAnisPos.size())) {
+		NPoint& oXY = m_aWaitingAnisPos[nIdx];
+		if ((oXY.m_nX < 0) || (! oRect.containsPoint(oXY))) {
+			++nIdx;
+			continue;
+		}
+		oXY.m_nX += nDx;
+		oXY.m_nY += nDy;
+//std::cout << "boardMoveSelected  m_aWaitingAnisPos  oXY=(" << oXY.m_nX << "," << oXY.m_nY << ")" << '\n';
 		#ifndef NDEBUG
 		shared_ptr<TileAni>& refTileAni = m_aWaitingAnis[nIdx];
 		assert(oLevel.boardGetTileAnimator(oXY.m_nX, oXY.m_nY, m_oInit.m_nAniNameIdx) == refTileAni.operator->());
-		++nIdx;
 		#endif //NDEBUG
-	}
-	#ifndef NDEBUG
-	nIdx = 0;
-	#endif //NDEBUG
-	for (NPoint& oXY : m_aRunningAnisPos) {
-		if ((oXY.m_nX < 0) || (! oRect.containsPoint(oXY))) {
-			#ifndef NDEBUG
+		if (! m_oInit.m_oArea.containsPoint(oXY)) {
+			oLevel.boardSetTileAnimator(oXY.m_nX, oXY.m_nY, m_oInit.m_nAniNameIdx, nullptr, 0);
+			vectorRemoveIndex(m_aWaitingAnisPos, nIdx);
+			vectorRemoveIndex(m_aWaitingAnisStart, nIdx);
+			vectorRemoveIndex(m_aWaitingAnis, nIdx);
+//std::cout << "boardMoveSelected  m_aWaitingAnisPos  out of area" << '\n';
+		} else {
 			++nIdx;
-			#endif //NDEBUG
+		}
+	}
+	nIdx = 0;
+	while (nIdx < static_cast<int32_t>(m_aRunningAnisPos.size())) {
+		NPoint& oXY = m_aRunningAnisPos[nIdx];
+		if ((oXY.m_nX < 0) || (! oRect.containsPoint(oXY))) {
+			++nIdx;
 			continue;
 		}
 		oXY.m_nX += nDx;
 		oXY.m_nY += nDy;
+//std::cout << "boardMoveSelected  m_aRunningAnisPos  oXY=(" << oXY.m_nX << "," << oXY.m_nY << ")" << '\n';
 		#ifndef NDEBUG
 		shared_ptr<TileAni>& refTileAni = m_aRunningAnis[nIdx];
 		assert(oLevel.boardGetTileAnimator(oXY.m_nX, oXY.m_nY, m_oInit.m_nAniNameIdx) == refTileAni.operator->());
-		oLevel.boardAnimateTile(oXY);
-		++nIdx;
 		#endif //NDEBUG
+		//oLevel.boardAnimateTile(oXY);
+		if (! m_oInit.m_oArea.containsPoint(oXY)) {
+			oLevel.boardSetTileAnimator(oXY.m_nX, oXY.m_nY, m_oInit.m_nAniNameIdx, nullptr, 0);
+			vectorRemoveIndex(m_aRunningAnisPos, nIdx);
+			vectorRemoveIndex(m_aRunningAnis, nIdx);
+//std::cout << "boardMoveSelected  m_aRunningAnisPos  out of area" << '\n';
+		} else {
+			++nIdx;
+		}
 	}
 }
 

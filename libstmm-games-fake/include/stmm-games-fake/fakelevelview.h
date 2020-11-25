@@ -56,6 +56,8 @@ class FakeLevelView : public LevelView
 public:
 	FakeLevelView(Game* p0Game, Level* p0Level) noexcept;
 
+	/** Base class for retaining callback information.
+	 */
 	class Called
 	{
 	public:
@@ -65,6 +67,7 @@ public:
 	struct BoardAnimateTiles : public Called
 	{
 		NRect m_oArea;
+		static bool pointWasAnimated(const std::vector<BoardAnimateTiles*>& aCalled, const NPoint& oXY) noexcept;
 	};
 	void boardAnimateTiles(NRect oArea) noexcept override;
 	void boardAnimateTile(NPoint oXY) noexcept override;
@@ -211,8 +214,14 @@ public:
 						, const std::unordered_map<int32_t, int32_t>& oFusedToBrickIds
 						, const std::unordered_map<int32_t, int32_t>& oFusedBrickIds) noexcept override;
 
+	/** The Called objects.
+	 * @return The Called objects in the order they were added.
+	 */
 	const std::vector<unique_ptr<Called>>& getAllCalled() noexcept;
-	// Use the following like this: getCalled<BlockPreDestroy>()
+	/** The Called objects with a given template type.
+	 * Example usage: getCalled<BlockPreDestroy>().
+	 * @return The vector of (non owning) pointers to Called objects in the order they were added.
+	 */
 	template<typename T>
 	const std::vector<T*> getCalled() noexcept
 	{
@@ -225,6 +234,9 @@ public:
 		}
 		return aRes;
 	}
+	/** Clear all Called data structures.
+	 */
+	void clear() noexcept;
 private:
 	int32_t totCalled(const shared_ptr<LevelAnimation>& refLevelAnimation) noexcept;
 private:

@@ -49,6 +49,10 @@ FakeLevelView::FakeLevelView(Game* p0Game, Level* p0Level) noexcept
 	assert(p0Game->level(nLevel).operator->() == p0Level);
 	p0Game->setLevelView(nLevel, this);
 }
+void FakeLevelView::clear() noexcept
+{
+	m_oAllCalls.clear();
+}
 void FakeLevelView::boardAnimateTiles(NRect oArea) noexcept
 {
 	auto refCalled = make_unique<BoardAnimateTiles>();
@@ -66,6 +70,18 @@ void FakeLevelView::boardAnimateTile(NPoint oXY) noexcept
 	refCalled->m_oArea = std::move(oArea);
 	m_oAllCalls.push_back(std::move(refCalled));
 }
+bool FakeLevelView::BoardAnimateTiles::pointWasAnimated(const std::vector<BoardAnimateTiles*>& aCalled
+														, const NPoint& oXY) noexcept
+{
+	for (auto& p0Called : aCalled) {
+		assert(p0Called != nullptr);
+		if (p0Called->m_oArea.containsPoint(oXY)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool FakeLevelView::animationCreate(const shared_ptr<LevelAnimation>& refLevelAnimation) noexcept
 {
 	assert(refLevelAnimation);

@@ -225,13 +225,13 @@ TEST_CASE_METHOD(STFX<TAEOneTileGameFixture>, "Block")
 
 TEST_CASE_METHOD(STFX<TAEManyTileGameFixture>, "InsertUp")
 {
-	REQUIRE_FALSE( m_refGame->isRunning() );
+	assert( ! m_refGame->isRunning() );
 	auto& refLevel = m_refGame->level(0);
 	assert(refLevel);
-	REQUIRE( refLevel->boardWidth() == 10 );
-	REQUIRE( refLevel->boardHeight() == 12 );
+	assert( refLevel->boardWidth() == 10 );
+	assert( refLevel->boardHeight() == 12 );
 	Level* p0Level = refLevel.get();
-	FakeLevelView oFakeLevelView(m_refGame.get(), p0Level);
+	//FakeLevelView oFakeLevelView(m_refGame.get(), p0Level);
 	TileAnimatorEvent::Init oInit;
 	oInit.m_p0Level = p0Level;
 	const int32_t nTileAniCharA = m_refGame->getNamed().tileAnis().addName("TestTileAni");
@@ -310,6 +310,70 @@ TEST_CASE_METHOD(STFX<TAEManyTileGameFixture>, "InsertUp")
 	REQUIRE( p0TA != nullptr );
 	p0TA = p0Level->boardGetTileAnimator(6, 7, nTileAniCharA);
 	REQUIRE( p0TA != nullptr );
+}
+
+TEST_CASE_METHOD(STFX<TAEManyTileGameFixture>, "InsertUpAnimatedSubArea")
+{
+	assert( ! m_refGame->isRunning() );
+	auto& refLevel = m_refGame->level(0);
+	assert(refLevel);
+	assert( refLevel->boardWidth() == 10 );
+	assert( refLevel->boardHeight() == 12 );
+	Level* p0Level = refLevel.get();
+	//FakeLevelView oFakeLevelView(m_refGame.get(), p0Level);
+	TileAnimatorEvent::Init oInit;
+	oInit.m_p0Level = p0Level;
+	const int32_t nTileAniCharA = m_refGame->getNamed().tileAnis().addName("TestTileAni");
+	oInit.m_nAniNameIdx = nTileAniCharA;
+	oInit.m_oArea = NRect{3,5, 4,3};
+	oInit.m_oDuration.m_oTicks.m_nFrom = 100;
+	oInit.m_oDuration.m_oTicks.m_nTo = 100;
+	auto refCTS = make_unique<CharTraitSet>(make_unique<CharUcs4TraitSet>(65));
+	oInit.m_refSelect = make_unique<TileSelector>(make_unique<TileSelector::Trait>(false, std::move(refCTS)));
+	auto refTileAnimatorEvent = make_unique<TileAnimatorEvent>(std::move(oInit));
+	TileAnimatorEvent* p0TileAnimatorEvent = refTileAnimatorEvent.get();
+	p0Level->addEvent(std::move(refTileAnimatorEvent));
+	p0Level->activateEvent(p0TileAnimatorEvent, 0);
+
+	NRect oArea;
+	oArea.m_nX = 3;
+	oArea.m_nY = 2;
+	oArea.m_nW = 4;
+	oArea.m_nH = 6;
+	const shared_ptr<TileBuffer>& refTiles = std::make_shared<TileBuffer>(NSize{4, 1});
+	Tile oTile1;
+	oTile1.getTileChar().setChar(65);
+	refTiles->setAll(oTile1);
+
+	MockEvent::Init oMockInit;
+	oMockInit.m_p0Level = p0Level;
+	auto refMockEvent = make_unique<MockEvent>(std::move(oMockInit), [&](Level& oLevel)
+	{
+		oLevel.boardInsert(Direction::UP, oArea, refTiles);
+	});
+	MockEvent* p0MockEvent = refMockEvent.get();
+	p0Level->addEvent(std::move(refMockEvent));
+	p0Level->activateEvent(p0MockEvent, 1);
+
+	m_refGame->start();
+	REQUIRE( m_refGame->isRunning() );
+	REQUIRE( m_refGame->gameElapsed() == 0 );
+	m_refGame->handleTimer();
+	REQUIRE( m_refGame->gameElapsed() == 1 );
+	// the  tile animator is active
+	const TileAnimator* p0TA = p0Level->boardGetTileAnimator(3, 2, nTileAniCharA);
+	REQUIRE( p0TA == nullptr );
+	p0TA = p0Level->boardGetTileAnimator(4, 5, nTileAniCharA);
+	REQUIRE( p0TA != nullptr );
+	m_refGame->handleTimer();
+	REQUIRE( m_refGame->gameElapsed() == 2 );
+	// the insert hs taken place
+	p0TA = p0Level->boardGetTileAnimator(4, 4, nTileAniCharA);
+	REQUIRE( p0TA == nullptr );
+	p0TA = p0Level->boardGetTileAnimator(3, 5, nTileAniCharA);
+	REQUIRE( p0TA != nullptr );
+	p0TA = p0Level->boardGetTileAnimator(4, 5, nTileAniCharA);
+	REQUIRE( p0TA == nullptr );
 }
 
 } // namespace testing

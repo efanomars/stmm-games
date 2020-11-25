@@ -52,10 +52,10 @@ namespace stmg { class XmlTraitsParser; }
 namespace stmg
 {
 
-static const std::string s_sDrawTileModifierTileAniNameAttr = "aniName";
-static const std::string s_sDrawTileModifierTileAniElapsedFactorAttr = "aniFactor";
-static const std::string s_sDrawTileModifierTileAniInvertAttr = "invert";
-static const std::string s_sDrawTileModifierTileAniIdAttr = "aniId";
+static const std::string s_sPainterModifierTileAniNameAttr = "aniName";
+static const std::string s_sPainterModifierTileAniElapsedFactorAttr = "aniFactor";
+static const std::string s_sPainterModifierTileAniInvertAttr = "invert";
+static const std::string s_sPainterModifierTileAniIdAttr = "aniId";
 
 XmlThemeModifiersParser::XmlThemeModifiersParser(XmlConditionalParser& oXmlConditionalParser, XmlTraitsParser& oXmlTraitsParser
 												, XmlThemeImageParser& oXmlThemeImageParser)
@@ -122,18 +122,18 @@ shared_ptr<TileAni> XmlThemeModifiersParser::parseModifierTileAniId(ThemeCtx& oC
 {
 	oCtx.addChecker(p0Element);
 	StdTheme& oTheme = oCtx.theme();
-	const auto oPairAniId = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sDrawTileModifierTileAniIdAttr);
+	const auto oPairAniId = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sPainterModifierTileAniIdAttr);
 	const bool bAniIdDefined = oPairAniId.first;
 	const std::string& sAniId = oPairAniId.second;
 	if (bAniIdDefined && !oTheme.hasTileAniId(sAniId)) {
-		throw XmlCommonErrors::errorAttrWithValueNotDefined(oCtx, p0Element, s_sDrawTileModifierTileAniIdAttr, sAniId);
+		throw XmlCommonErrors::errorAttrWithValueNotDefined(oCtx, p0Element, s_sPainterModifierTileAniIdAttr, sAniId);
 	}
 
 	shared_ptr<TileAni> refTileAni;
 	if (bAniIdDefined) {
 		refTileAni = oTheme.getTileAni(sAniId);
 	} else if (bMandatory) {
-		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sDrawTileModifierTileAniIdAttr);
+		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sPainterModifierTileAniIdAttr);
 	}
 
 	oCtx.removeChecker(p0Element, false);
@@ -145,13 +145,13 @@ int32_t XmlThemeModifiersParser::parseModifierTileAniName(ThemeCtx& oCtx, const 
 	StdTheme& oTheme = oCtx.theme();
 	//
 	int32_t nTileAniNameIdx = -1;
-	const auto oPairAniName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sDrawTileModifierTileAniNameAttr);
+	const auto oPairAniName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sPainterModifierTileAniNameAttr);
 	const bool bAniNameDefined = oPairAniName.first;
 	const std::string& sAniName = oPairAniName.second;
 	if (bAniNameDefined) {
 		nTileAniNameIdx = oTheme.getNamed().tileAnis().addName(sAniName);
 	} else if (bMandatory) {
-		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sDrawTileModifierTileAniNameAttr);
+		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sPainterModifierTileAniNameAttr);
 	}
 	oCtx.removeChecker(p0Element, false);
 	return nTileAniNameIdx;
@@ -160,11 +160,11 @@ double XmlThemeModifiersParser::parseModifierElapsedDefault(ThemeCtx& oCtx, cons
 {
 	oCtx.addChecker(p0Element);
 	double fElapsed = -1.0;
-	const auto oPairAniElapsed = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sDrawTileModifierTileAniElapsedFactorAttr);
+	const auto oPairAniElapsed = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sPainterModifierTileAniElapsedFactorAttr);
 	const bool bElapsedDefined = oPairAniElapsed.first;
 	if (bElapsedDefined) {
 		const std::string& sAniElapsed = oPairAniElapsed.second;
-		fElapsed = XmlUtil::strToNumber<double>(oCtx, p0Element, s_sDrawTileModifierTileAniElapsedFactorAttr, sAniElapsed, true
+		fElapsed = XmlUtil::strToNumber<double>(oCtx, p0Element, s_sPainterModifierTileAniElapsedFactorAttr, sAniElapsed, true
 														, true, -1.0, true, 1.0);
 		if (fElapsed < 0.0) {
 			fElapsed = -1.0;
@@ -177,11 +177,11 @@ bool XmlThemeModifiersParser::parseModifierInvert(ThemeCtx& oCtx, const xmlpp::E
 {
 	oCtx.addChecker(p0Element);
 	bool bInvert = false;
-	const auto oPairInvert = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sDrawTileModifierTileAniInvertAttr);
+	const auto oPairInvert = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sPainterModifierTileAniInvertAttr);
 	const bool bInvertDefined = oPairInvert.first;
 	if (bInvertDefined) {
 		const std::string& sInvert = oPairInvert.second;
-		bInvert = XmlUtil::strToBool(oCtx, p0Element, s_sDrawTileModifierTileAniInvertAttr, sInvert);
+		bInvert = XmlUtil::strToBool(oCtx, p0Element, s_sPainterModifierTileAniInvertAttr, sInvert);
 	}
 	oCtx.removeChecker(p0Element, false);
 	return bInvert;
@@ -191,8 +191,8 @@ std::tuple<int32_t, double, bool> XmlThemeModifiersParser::parseTileAniNameDefau
 	const int32_t nAniIdx = parseModifierTileAniName(oCtx, p0Element, false);
 	const double fElapsedDefault = parseModifierElapsedDefault(oCtx, p0Element);
 	if (bMandatory && (nAniIdx < 0) && (fElapsedDefault < 0.0)) {
-		throw XmlCommonErrors::errorAttrEitherMustBeDefined(oCtx, p0Element, s_sDrawTileModifierTileAniElapsedFactorAttr
-																, s_sDrawTileModifierTileAniNameAttr);
+		throw XmlCommonErrors::errorAttrEitherMustBeDefined(oCtx, p0Element, s_sPainterModifierTileAniElapsedFactorAttr
+																, s_sPainterModifierTileAniNameAttr);
 	}
 	const bool bInvert = parseModifierInvert(oCtx, p0Element);
 	return std::make_tuple(nAniIdx, fElapsedDefault, bInvert);
@@ -210,7 +210,7 @@ std::tuple<int32_t, double, bool, shared_ptr<Image>, shared_ptr<TileAni>> XmlThe
 	const bool bAniIdDefined = refTileAni.operator bool();
 
 	if ((!bAniIdDefined) && !bImageDefined) {
-		throw XmlCommonErrors::errorAttrEitherMustBeDefined(oCtx, p0Element, s_sDrawTileModifierTileAniIdAttr
+		throw XmlCommonErrors::errorAttrEitherMustBeDefined(oCtx, p0Element, s_sPainterModifierTileAniIdAttr
 															, XmlThemeImageParser::s_sImagesImageFileAttr);
 	}
 	const int32_t nAniIdx = parseModifierTileAniName(oCtx, p0Element, false);
@@ -224,18 +224,18 @@ std::tuple<int32_t, double, bool, shared_ptr<Image>, shared_ptr<TileAni>> XmlThe
 
 	if (!bAniIdDefined) {
 		if ((nAniIdx >= 0) || (fElapsedDefault >= 0.0) || bInvert) {
-			throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sDrawTileModifierTileAniIdAttr);
+			throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sPainterModifierTileAniIdAttr);
 		}
 	} else if (!bImageDefined) {
 		if (! ((fElapsedDefault >= 0.0) || (nAniIdx >= 0) || refTileAni->getDefaultImage())) {
-			throw XmlCommonErrors::errorAttrEitherMustBeDefined(oCtx, p0Element, s_sDrawTileModifierTileAniNameAttr, s_sDrawTileModifierTileAniElapsedFactorAttr);
+			throw XmlCommonErrors::errorAttrEitherMustBeDefined(oCtx, p0Element, s_sPainterModifierTileAniNameAttr, s_sPainterModifierTileAniElapsedFactorAttr);
 		}
 	} else {
 		if (nAniIdx < 0) {
-			throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sDrawTileModifierTileAniNameAttr);
+			throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sPainterModifierTileAniNameAttr);
 		}
 		if (fElapsedDefault >= 0.0) {
-			throw XmlCommonErrors::errorAttrCannotBothBeDefined(oCtx, p0Element, s_sDrawTileModifierTileAniNameAttr, s_sDrawTileModifierTileAniElapsedFactorAttr);
+			throw XmlCommonErrors::errorAttrCannotBothBeDefined(oCtx, p0Element, s_sPainterModifierTileAniNameAttr, s_sPainterModifierTileAniElapsedFactorAttr);
 		}
 	}
 
