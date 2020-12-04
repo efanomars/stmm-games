@@ -25,6 +25,9 @@
 
 #include <cassert>
 #include <vector>
+#ifndef NDEBUG
+#include <iostream>
+#endif //NDEBUG
 
 #include <stdint.h>
 
@@ -65,6 +68,11 @@ public:
 	T& get(const NPoint& oXY) noexcept;
 	void set(const NPoint& oXY, const T& oT) noexcept;
 	void setAll(const T& oT) noexcept;
+
+	#ifndef NDEBUG
+	void dump(int32_t nIndentSpaces) const noexcept;
+	void dump() const noexcept;
+	#endif //NDEBUG
 
 private:
 	XYBuffer() noexcept;
@@ -142,6 +150,28 @@ void XYBuffer<T>::setAll(const T& oT) noexcept
 		m_aT[nIdx] = oT;
 	}
 }
+
+#ifndef NDEBUG
+template <class T>
+void XYBuffer<T>::dump(int32_t nIndentSpaces) const noexcept
+{
+	auto sIndent = std::string(nIndentSpaces, ' ');
+	for (int32_t nY = 0; nY < m_oWH.m_nH; ++nY) {
+		std::cout << sIndent;
+		for (int32_t nX = 0; nX < m_oWH.m_nW; ++nX) {
+			const T& oT = m_aT[idx(nX, nY)];
+			oT.dump();
+			std::cout << " ";
+		}
+		std::cout << '\n';
+	}
+}
+template <class T>
+void XYBuffer<T>::dump() const noexcept
+{
+	dump(0);
+}
+#endif //NDEBUG
 
 } // namespace stmg
 

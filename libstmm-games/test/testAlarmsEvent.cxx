@@ -122,7 +122,7 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "ConstructorTicks")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 0 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last();
@@ -132,7 +132,7 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "ConstructorTicks")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 1 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
 }
 
@@ -192,7 +192,7 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "RepeatTicks")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 0 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last(1);
@@ -202,7 +202,7 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "RepeatTicks")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 1 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last();
@@ -212,7 +212,7 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "RepeatTicks")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 2 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
 }
 
@@ -285,7 +285,7 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "SetMillisec")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 0 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last(1);
@@ -295,7 +295,7 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "SetMillisec")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 1 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last();
@@ -305,7 +305,7 @@ TEST_CASE_METHOD(STFX<AlarmsGameFixture>, "SetMillisec")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 2 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0AlarmsEvent) );
 	}
 }
 

@@ -327,7 +327,7 @@ public:
 	 */
 	static shared_ptr<BoolOption> createPerPlayerSoundOption(const std::string& sOptionDesc) noexcept;
 	/** Create a SoundVolume option to pass to the constructor of StdConfig.
-	 * @param eOwnerType The owner type. Must either OwnerTyoe::GAME or c.
+	 * @param eOwnerType The owner type. Must either OwnerTyoe::GAME or OwnerTyoe::PLAYER.
 	 * @param sOptionDesc The description of the option.
 	 * @param refPerPlayerSound The master PerPlayerSound option possibly created with createSoundEnabledOption(). Cannot be null
 	 * @param refAIPlayer The master AI option if `eOwnerType == OwnerTyoe::PLAYER` and AI allowed, otherwise must be null.

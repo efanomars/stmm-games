@@ -92,7 +92,7 @@ TEST_CASE_METHOD(STFX<LogEventGameFixture>, "Constructor")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 0 );
 	REQUIRE( oEntry.m_nValue == 0 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(nullptr) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(nullptr) );
 	REQUIRE( m_refGame->gameElapsed() == 2 );
 }
 
@@ -130,7 +130,7 @@ TEST_CASE_METHOD(STFX<LogEventGameFixture>, "Trigger")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 44 );
 	REQUIRE( oEntry.m_nValue == 11 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0MockEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0MockEvent) );
 }
 
 } // namespace testing

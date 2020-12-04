@@ -53,7 +53,7 @@ static const std::vector<int32_t> s_aEmptyVector{};
 template <class TValue>
 void vectorRemoveIndex(std::vector<TValue>& oV, int32_t nIdx) noexcept
 {
-	oV[nIdx] = oV[oV.size() - 1];
+	oV[nIdx] = std::move(oV[oV.size() - 1]);
 	oV.pop_back();
 }
 
@@ -83,7 +83,7 @@ void TileAnimatorEvent::commonInit() noexcept
 
 	m_eState = TILE_ANIMATOR_STATE_ACTIVATE;
 	m_nCounter = 0;
-	m_nStartedRunning = 0;
+	m_nLastReportedRunningAnis = 0;
 
 	if (m_oInit.m_bDoBoard) {
 		assert((m_oInit.m_oArea.m_nX >= 0) && (m_oInit.m_oArea.m_nY >= 0));
@@ -120,6 +120,7 @@ void TileAnimatorEvent::deInit() noexcept
 
 	m_eState = TILE_ANIMATOR_STATE_ACTIVATE;
 	m_nCounter = 0;
+	m_nLastReportedRunningAnis = 0;
 }
 
 void TileAnimatorEvent::trigger(int32_t /*nMsg*/, int32_t /*nValue*/, Event* p0TriggeringEvent) noexcept
@@ -169,9 +170,10 @@ void TileAnimatorEvent::trigger(int32_t /*nMsg*/, int32_t /*nValue*/, Event* p0T
 				oLevel.activateEvent(this, nGameTick + 1);
 				break; //switch
 			}
+			const int32_t nLastReportedRunningAnis = m_nLastReportedRunningAnis;
 			const bool bTerminate = (m_oInit.m_nRepeat != -1) && (m_nCounter >= m_oInit.m_nRepeat);
-			if (bTerminate && (m_aWaitingAnisPos.size() + m_aRunningAnisPos.size() == 0)) {
-				//m_eState = TILE_ANIMATOR_STATE_DEAD; // TODO TILE_ANIMATOR_STATE_INIT?
+			const bool bFinished = bTerminate && (m_aWaitingAnisPos.size() + m_aRunningAnisPos.size() == 0);
+			if (bFinished) {
 				if (m_oInit.m_bDoBoard) {
 					oLevel.boardRemoveListener(this);
 				}
@@ -182,17 +184,18 @@ void TileAnimatorEvent::trigger(int32_t /*nMsg*/, int32_t /*nValue*/, Event* p0T
 				informListeners(LISTENER_GROUP_FINISHED, 0);
 			} else {
 				++m_nCounter;
-				m_nStartedRunning = 0;
-				if (!bTerminate) {
+				if (! bTerminate) {
 					checkNewTileAnis(nGameTick, fGameInterval);
 				}
 				animate(nGameTick, fGameInterval);
 				//
 				oLevel.activateEvent(this, nGameTick + 1);
 				//
-				if (m_nStartedRunning > 0) {
-					informListeners(LISTENER_GROUP_TILEANI_STARTED, m_nStartedRunning);
-				}
+			}
+			const int32_t nNewRunningAnis = static_cast<int32_t>(m_aRunningAnisPos.size());
+			if (nNewRunningAnis != nLastReportedRunningAnis) {
+				m_nLastReportedRunningAnis = nNewRunningAnis;
+				informListeners(LISTENER_GROUP_TILEANI_CHANGED, nNewRunningAnis);
 			}
 		}
 		break;
@@ -357,8 +360,6 @@ void TileAnimatorEvent::animate(int32_t nGameTick, double fGameInterval) noexcep
 			m_aRunningAnis.push_back(std::move(m_aWaitingAnis[nCurIdx]));
 			m_aWaitingAnis[nCurIdx] = m_aWaitingAnis[nTotWaiting - 1];
 			m_aWaitingAnis.pop_back();
-
-			++m_nStartedRunning;
 		} else {
 			++nCurIdx;
 		}

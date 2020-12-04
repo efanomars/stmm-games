@@ -215,15 +215,15 @@ bHeader
 		if (m_bEmptyChar) {
 			std::cout << sIndent << "  (Empty) ";
 		}
-		m_refSubCharTraitSet->dump(nIndentSpaces + 2, false);
+		m_refSubCharTraitSet->dump(nIndentSpaces + 2, true);
 	} else {
 		std::cout << sIndent << "  ";
 		if (m_bEmptyChar) {
 			std::cout << "(Empty) ";
 		}
 		std::cout << sIndent;
-		for (const auto& oTileColor : m_aTileChars) {
-			oTileColor.dump();
+		for (const auto& oTileChar : m_aTileChars) {
+			oTileChar.dump();
 			std::cout << " ";
 		}
 		std::cout << '\n';

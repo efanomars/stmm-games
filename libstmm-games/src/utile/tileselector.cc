@@ -213,7 +213,7 @@ void TileSelector::Trait::dump(int32_t nIndentSpaces) const noexcept
 		std::cout << sIndent << "Trait NOT" << '\n';
 		nIndentSpaces += 2;
 	}
-	m_refTraitSet->dump(nIndentSpaces + 2, false);
+	m_refTraitSet->dump(nIndentSpaces + 2, true);
 	#endif //NDEBUG
 }
 void TileSelector::Skin::dump(int32_t nIndentSpaces) const noexcept

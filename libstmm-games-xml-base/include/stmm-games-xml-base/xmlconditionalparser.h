@@ -346,7 +346,7 @@ public:
 	/** Parse single or from-to pair attribute.
 	 * If bMin is false oMin is overridden to std::numeric_limits<T>::lowest().
 	 * If bMax is false oMax is overridden to std::numeric_limits<T>::max().
-	 * If both true, oMin must not be smaller than oMin.
+	 * If both true, oMax must not be smaller than oMin.
 	 *
 	 * If no attribute is defined, the values oFrom and oTo are untouched if
 	 * their current value satisfies the optional min and max conditions. Otherwise

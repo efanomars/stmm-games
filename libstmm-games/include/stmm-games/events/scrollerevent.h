@@ -36,6 +36,7 @@ namespace stmg { class QueryTileRemoval; }
 namespace stmg { class Tile; }
 namespace stmg { class TileAnimator; }
 namespace stmg { class TileBuffer; }
+namespace stmg { class TileSelector; }
 
 namespace stmg
 {
@@ -43,9 +44,37 @@ namespace stmg
 using std::shared_ptr;
 using std::unique_ptr;
 
+/** Event that scrolls the board.
+ * The scrolling is done by moving the Show area (see Level::showGet())
+ * fractions of a tile (see LocalInit::m_nSlices) over the board.
+ * When the next tile is reached a new row is inserted at the bottom of the board.
+ *
+ * How a new row is generated can be controlled by input messages.
+ *
+ * If new rows are generated randomly, it is possible to discard a
+ * row if certain tiles appear in it by setting an inhibitor, which can be
+ * activated or deactivated with input messages.
+ *
+ * It is also possible to try to minimize free tile removals
+ * (the meaning of which is implementation specific) when new rows are added.
+ *
+ * This class can currently only scroll down (new rows appear at the bottom of
+ * the board).
+ */
 class ScrollerEvent : public Event, public ExtendedBoard
 {
 public:
+	struct NewRowCheckRemover
+	{
+		QueryTileRemoval* m_p0TileRemover = nullptr; /**< The tile remover that checks new rows. Must be persistent while the game
+														 * is running. This interface is usually implemented by an event added to the same Level.
+														 * Non owning. Cannot be null. */
+		int32_t m_nFrom = 0; /**< The start position of the new row segment that m_p0TileRemover should check.
+								 * Must be within the board. Default is 0. */
+		int32_t m_nTo = -1; /**< The end position of the new row segment that m_p0TileRemover should check.
+								 * Must be either -1 or within the board and not smaller than m_nFrom.
+								 * If -1 means last position in the board. Default is -1.  */
+	};
 	struct LocalInit
 	{
 		int32_t m_nRepeat = -1; /**< The number of scrolls. The default is -1 (means infinite). */
@@ -56,11 +85,15 @@ public:
 		int32_t m_nTopNotEmptyWaitMillisec = 0; /**< Number of millisec scrolling is suspended when top row not empty.
 												 * Adds to m_nTopNotEmptyWaitTicks. Default is 0. */
 		unique_ptr< NewRows > m_refNewRows; /**< The new rows generator. Cannot be null. */
-		QueryTileRemoval* m_p0TileRemover = nullptr; /**< The tile remover that checks new rows. Must be persistent while the game
-														 * is running. This interface is usually implemented by an event added to the same Level.
-														 * Non owning. Can be null. Default is null. */
-		int32_t m_nCheckNewRowTries = 5; /**< The maximum number of random rows to be generated to minimize "free" removals.
-										 * Only used if m_p0TileRemover is set. Default is 5. */
+		std::vector< NewRowCheckRemover > m_aRemovers; /**< The removal checkers. Can be empty. */
+		std::vector< unique_ptr<TileSelector> > m_aInhibitors; /**< Array of inhibitors. When active, the more tiles selected by an inhibitor
+																 * appear in a new row the more likely a new row is discarded.
+																 * See m_nCheckNewRowTries.
+																 * The size of the array shouldn't exceed 100. */
+		int32_t m_nCheckNewRowTries = 5; /**< The maximum number of random rows to be generated to minimize inhibited tiles and "free" removals.
+										 * Only used if m_p0TileRemover is set or m_aInhibitors is not empty.
+										 * If set to 1 inhibitors and tile remover are ignored.
+										 * Must be positive. Default is 5. */
 	};
 	struct Init : public Event::Init, public LocalInit
 	{
@@ -90,6 +123,10 @@ public:
 										 * If bigger than vector size sets last. */
 		, MESSAGE_NEXT_NEW_ROW_GEN = 121 /**< Switches to next row generator. If last stays on last. */
 		, MESSAGE_PREV_NEW_ROW_GEN = 122 /**< Switches to previous row generator. If first stays on first. */
+		, MESSAGE_INHIBIT_START_INDEX_BASE = 200 /**< Starts applying an inhibitor to new rows. The inhibitor index into Init::m_aInhibitors
+												 * is determined by subtracting MESSAGE_INHIBIT_START_INDEX_BASE from the message number.
+												 * There can be at most 100 inhibitors. */
+		, MESSAGE_INHIBIT_STOP_INDEX_BASE = 300 /**< Stops applying an ibhibitor to new rows. Like MESSAGE_INHIBIT_START_INDEX_BASE. */
 	};
 	// output
 	enum {
@@ -117,6 +154,9 @@ private:
 
 	void pushRow() noexcept;
 
+	int32_t getInhibited(const TileBuffer& oTiles) const noexcept;
+	int32_t getWillRemove() const noexcept;
+
 	void informNotEmptyTopLineColumns() noexcept;
 
 private:
@@ -132,14 +172,19 @@ private:
 
 	unique_ptr< NewRows > m_refNewRows;
 
+	std::vector< unique_ptr<TileSelector> > m_aInhibitors;
+	std::vector< bool > m_aInhibitorActive; // Size: m_aInhibitors.size()
+
+	std::vector< NewRowCheckRemover > m_aRemovers;
+
 	int32_t m_nBoardW;
 	int32_t m_nBoardH;
 
 	int32_t m_nRepeat;
 	int32_t m_nStep;
 	int32_t m_nSlices;
-	QueryTileRemoval* m_p0TileRemover;
 	int32_t m_nCheckNewRowTries;
+//	QueryTileRemoval* m_p0TileRemover;
 
 	bool m_bKeepTopVisible;
 	int32_t m_nTopNotEmptyWaitMillisec;

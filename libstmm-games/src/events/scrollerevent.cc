@@ -30,6 +30,7 @@
 #include "util/namedindex.h"
 #include "utile/querytileremoval.h"
 #include "utile/tilebuffer.h"
+#include "utile/tileselector.h"
 
 #include <cassert>
 #include <iostream>
@@ -70,7 +71,23 @@ void ScrollerEvent::commonInit(LocalInit&& oInit) noexcept
 	m_nTopNotEmptyWaitTicks = oInit.m_nTopNotEmptyWaitTicks;
 	m_nTopNotEmptyWaitMillisec = oInit.m_nTopNotEmptyWaitMillisec;
 	m_refNewRows = std::move(oInit.m_refNewRows);
-	m_p0TileRemover = oInit.m_p0TileRemover;
+	m_aInhibitors = std::move(oInit.m_aInhibitors);
+	constexpr int32_t nMaxInhibitors = MESSAGE_INHIBIT_STOP_INDEX_BASE - MESSAGE_INHIBIT_START_INDEX_BASE;
+	if (static_cast<int32_t>(m_aInhibitors.size()) > nMaxInhibitors) {
+		m_aInhibitors.resize(nMaxInhibitors);
+	}
+
+	m_aRemovers = std::move(oInit.m_aRemovers);
+	for (auto& oRemover : m_aRemovers) {
+		assert(oRemover.m_p0TileRemover != nullptr);
+		assert((oRemover.m_nFrom >= 0) && (oRemover.m_nFrom < m_nBoardW));
+		if (oRemover.m_nTo < 0) {
+			oRemover.m_nTo = m_nBoardW - 1;
+		} else {
+			assert((oRemover.m_nTo >= oRemover.m_nFrom) && (oRemover.m_nTo < m_nBoardW));
+		}
+	}
+//	m_p0TileRemover = oInit.m_p0TileRemover;
 
 	m_oTileBufferRecycler.create(m_refCurTileBuf, NSize{m_nBoardW, 1});
 	m_nCheckNewRowTries = oInit.m_nCheckNewRowTries;
@@ -108,11 +125,13 @@ void ScrollerEvent::resetRuntime() noexcept
 	m_nLastPushUpTime = -1;
 	m_bWaitingBecauseNotEmptyTop = false;
 	m_oCoords.reInit();
+	m_aInhibitorActive.clear();
+	m_aInhibitorActive.resize(m_aInhibitors.size(), false);
 }
 
 void ScrollerEvent::trigger(int32_t nMsg, int32_t nValue, Event* p0TriggeringEvent) noexcept
 {
-//std::cout << "ScrollerEvent::trigger" << '\n';
+//std::cout << "ScrollerEvent::trigger this=" << reinterpret_cast<int64_t>(this) << "  p0TriggeringEvent=" << reinterpret_cast<int64_t>(p0TriggeringEvent) << '\n';
 	//TODO
 	// ACTIVATE activate event
 	// INIT init
@@ -121,79 +140,96 @@ void ScrollerEvent::trigger(int32_t nMsg, int32_t nValue, Event* p0TriggeringEve
 	//          send messages to finished-group listeners
 	Level& oLevel = level();
 	const int32_t nTimer = oLevel.game().gameElapsed();
+//std::cout << "ScrollerEvent::trigger nTimer=" << nTimer << "  nMsg=" << nMsg << "  state=" << static_cast<int32_t>(m_eState) << '\n';
 	//TODO every time a push row is executed also a scroll is (which is not good)
 	switch (m_eState)
 	{
 		case SCROLLER_STATE_ACTIVATE:
 		{
 			m_eState = SCROLLER_STATE_INIT;
-			if (p0TriggeringEvent != nullptr) {
-				// never scroll when triggered by another event
-				oLevel.activateEvent(this, nTimer);
-				break;
-			}
 		} //fallthrough
 		case SCROLLER_STATE_INIT:
 		{
+			m_eState = SCROLLER_STATE_RUN;
 		} //fallthrough
 		case SCROLLER_STATE_RUN:
 		{
 			if (p0TriggeringEvent != nullptr) {
 				switch (nMsg)
 				{
-					case MESSAGE_PAUSE_TICKS:
-					{
-						m_nWaitTicks += std::max<int32_t>(nValue, 0);
+				case MESSAGE_PAUSE_TICKS:
+				{
+					m_nWaitTicks += std::max<int32_t>(nValue, 0);
 //std::cout << "ScrollerEvent::trigger MESSAGE_PAUSE_TICKS nValue=" << nValue << "  m_nWaitTicks=" << m_nWaitTicks << '\n';
+					if (m_bWaitingBecauseNotEmptyTop) {
+						informListeners(LISTENER_GROUP_TOP_NOT_EMPTY_TICK, m_nWaitTicks);
+					}
+				}
+				break;
+				case MESSAGE_PAUSE_MILLISEC:
+				{
+					if (nValue > 0) {
+						nValue = nValue / oLevel.game().gameInterval();
+						m_nWaitTicks += std::max<int32_t>(nValue, 1);
 						if (m_bWaitingBecauseNotEmptyTop) {
 							informListeners(LISTENER_GROUP_TOP_NOT_EMPTY_TICK, m_nWaitTicks);
 						}
 					}
-					break;
-					case MESSAGE_PAUSE_MILLISEC:
-					{
-						if (nValue > 0) {
-							nValue = nValue / oLevel.game().gameInterval();
-							m_nWaitTicks += std::max<int32_t>(nValue, 1);
-							if (m_bWaitingBecauseNotEmptyTop) {
-								informListeners(LISTENER_GROUP_TOP_NOT_EMPTY_TICK, m_nWaitTicks);
+//std::cout << "ScrollerEvent::trigger MESSAGE_PAUSE_MILLISEC nValue=" << nValue << "  m_nWaitTicks=" << m_nWaitTicks << '\n';
+				}
+				break;
+				case MESSAGE_PUSH_ROW:
+				{
+					m_nToPushUp += std::max(1, nValue);
+					if (! m_bWaitingBecauseNotEmptyTop) {
+						m_nWaitTicks = 1;
+					}
+				}
+				break;
+				case MESSAGE_SET_SLICES:
+				{
+					m_nNextSlices = std::max(1, nValue);
+				}
+				break;
+				case MESSAGE_SET_NEW_ROW_GEN:
+				{
+					m_nCurRandomGen = std::min(std::max(0, nValue), m_refNewRows->getTotNewRowGens() - 1);
+				}
+				break;
+				case MESSAGE_NEXT_NEW_ROW_GEN:
+				{
+					if (m_nCurRandomGen < m_refNewRows->getTotNewRowGens() - 1) {
+						++m_nCurRandomGen;
+					}
+				}
+				break;
+				case MESSAGE_PREV_NEW_ROW_GEN:
+				{
+					if (m_nCurRandomGen > 0) {
+						--m_nCurRandomGen;
+					}
+				}
+				break;
+				default:
+				{
+					if (nMsg >= MESSAGE_INHIBIT_START_INDEX_BASE) {
+						int32_t nInhibitor;
+						bool bEnabled;
+						if (nMsg < MESSAGE_INHIBIT_STOP_INDEX_BASE) {
+							nInhibitor = nMsg - MESSAGE_INHIBIT_START_INDEX_BASE;
+							bEnabled = true;
+						} else {
+							nInhibitor = nMsg - MESSAGE_INHIBIT_STOP_INDEX_BASE;
+							bEnabled = false;
+						}
+						if (nInhibitor < static_cast<int32_t>(m_aInhibitorActive.size())) {
+							if (bEnabled != m_aInhibitorActive[nInhibitor]) {
+								m_aInhibitorActive[nInhibitor] = bEnabled;
 							}
 						}
-//std::cout << "ScrollerEvent::trigger MESSAGE_PAUSE_MILLISEC nValue=" << nValue << "  m_nWaitTicks=" << m_nWaitTicks << '\n';
 					}
-					break;
-					case MESSAGE_PUSH_ROW:
-					{
-						m_nToPushUp += std::max(1, nValue);
-						if (! m_bWaitingBecauseNotEmptyTop) {
-							m_nWaitTicks = 1;
-						}
-					}
-					break;
-					case MESSAGE_SET_SLICES:
-					{
-						m_nNextSlices = std::max(1, nValue);
-					}
-					break;
-					case MESSAGE_SET_NEW_ROW_GEN:
-					{
-						m_nCurRandomGen = std::min(std::max(0, nValue), m_refNewRows->getTotNewRowGens() - 1);
-					}
-					break;
-					case MESSAGE_NEXT_NEW_ROW_GEN:
-					{
-						if (m_nCurRandomGen < m_refNewRows->getTotNewRowGens() - 1) {
-							++m_nCurRandomGen;
-						}
-					}
-					break;
-					case MESSAGE_PREV_NEW_ROW_GEN:
-					{
-						if (m_nCurRandomGen > 0) {
-							--m_nCurRandomGen;
-						}
-					}
-					break;
+				}
+				break;
 				}
 				oLevel.activateEvent(this, nTimer);
 				break;
@@ -340,41 +376,97 @@ void ScrollerEvent::pushRow() noexcept
 //std::cout << "ScrollerEvent::pushRow" << '\n';
 	Level& oLevel = level();
 
-	int32_t nBestToRemove = std::numeric_limits<int32_t>::max();
-
-	NRect oExtRect;
-	oExtRect.m_nX = 0;
-	oExtRect.m_nY = m_nBoardH;
-	oExtRect.m_nW = m_nBoardW;
-	oExtRect.m_nH = 1;
+//	NRect oExtRect;
+//	oExtRect.m_nX = 0;
+//	oExtRect.m_nY = m_nBoardH;
+//	oExtRect.m_nW = m_nBoardW;
+//	oExtRect.m_nH = 1;
 	// Some listener might have kept a reference to the current m_refBestTileBuffer
 	// during last boardScroll call
 	m_oTileBufferRecycler.create(m_refBestTileBuffer, NSize{m_nBoardW, 1});
 	//
-	const bool bHasTileRemover = (m_p0TileRemover != nullptr);
+	m_refCurTileBuf->setAll(Tile{});
+	m_refNewRows->createNewRow(m_nCurRandomGen, *m_refCurTileBuf, 0);
+
+	const bool bHasTileRemovers = ! m_aRemovers.empty();
+	const bool bHasInhibitors = ! m_aInhibitors.empty();
 	const int32_t nTotTries = m_nCheckNewRowTries;
-	for (int32_t nTry = 0; nTry < nTotTries; ++nTry) {
-//std::cout << "ScrollerEvent::pushRow nTry=" << nTry << '\n';
-		m_refNewRows->createNewRow(m_nCurRandomGen, *m_refCurTileBuf, 0);
-		if (! bHasTileRemover) {
-			m_refBestTileBuffer.swap(m_refCurTileBuf);
-			break; // for nTry ---
-		}
-		const int32_t nToRemove = m_p0TileRemover->wouldRemoveTiles(*this, oExtRect);
-		if (nToRemove < nBestToRemove) {
-			m_refBestTileBuffer.swap(m_refCurTileBuf);
-			if (nToRemove == 0) {
-				// can't get better than this
-				break; // for nTry ---
+	if ((nTotTries > 1) && (bHasTileRemovers || bHasInhibitors)) {
+		int64_t nBestValue = std::numeric_limits<int64_t>::max();
+		// inhibitors have precedence over removed tiles
+		int32_t nTry = 1;
+		while (true) {
+			int32_t nInhibited = 0;
+			if (bHasInhibitors) {
+				nInhibited = getInhibited(*m_refCurTileBuf);
 			}
-			nBestToRemove = nToRemove;
+			int32_t nToRemove = 0;
+			if (bHasTileRemovers) {
+				nToRemove = getWillRemove();
+			}
+			const int64_t nCurValue = (static_cast<int64_t>(nInhibited) << 32) + nToRemove;
+			if (nCurValue < nBestValue) {
+				m_refBestTileBuffer.swap(m_refCurTileBuf);
+				if (nCurValue == 0) {
+					// can't get better than this
+					break; // while ---
+				}
+				nBestValue = nCurValue;
+			}
+			++nTry;
+			if (nTry > nTotTries) {
+				break; // while ---
+			}
+			m_refCurTileBuf->setAll(Tile{});
+			m_refNewRows->createNewRow(m_nCurRandomGen, *m_refCurTileBuf, 0);
+//std::cout << "ScrollerEvent::pushRow buf:"  << '\n';
+//m_refCurTileBuf->dump(3);
 		}
+	} else {
+		m_refBestTileBuffer.swap(m_refCurTileBuf);
 	}
+
 //std::cout << "ScrollerEvent::pushRow 2" << '\n';
+//m_refBestTileBuffer->dump(5);
 	oLevel.boardScroll(Direction::UP, m_refBestTileBuffer);
 	informListeners(LISTENER_GROUP_PUSHED, m_nCurRandomGen);
 }
-
+int32_t ScrollerEvent::getWillRemove() const noexcept
+{
+	int32_t nToRemove = 0;
+	for (auto& oRemover : m_aRemovers) {
+		NRect oExtRect;
+		oExtRect.m_nX = oRemover.m_nFrom;
+		oExtRect.m_nY = m_nBoardH;
+		oExtRect.m_nW = oRemover.m_nTo - oRemover.m_nFrom + 1;
+		oExtRect.m_nH = 1;
+		nToRemove += oRemover.m_p0TileRemover->wouldRemoveTiles(*this, oExtRect);
+		//assert((oRemover.m_nFrom >= 0) && (oRemover.m_nFrom < m_nBoardW));
+	}
+	return nToRemove;
+}
+int32_t ScrollerEvent::getInhibited(const TileBuffer& oTiles) const noexcept
+{
+	const int32_t nTotInihibitors = m_aInhibitorActive.size();
+	int32_t nTotInhibited = 0;
+	const int32_t nW = oTiles.getW();
+	const int32_t nH = oTiles.getH();
+	for (int32_t nX = 0; nX < nW; ++nX) {
+		for (int32_t nY = 0; nY < nH; ++nY) {
+			const Tile& oTile = oTiles.get(NPoint{nX, nY});
+			for (int32_t nInhibitor = 0; nInhibitor < nTotInihibitors; ++nInhibitor) {
+				if (m_aInhibitorActive[nInhibitor]) {
+					auto& refSelector = m_aInhibitors[nInhibitor];
+					if (refSelector->select(oTile)) {
+						++nTotInhibited;
+						break; // for (nInhibitor ---
+					}
+				}
+			}
+		}
+	}
+	return nTotInhibited;
+}
 const Tile& ScrollerEvent::boardGetTile(int32_t nX, int32_t nY) const noexcept
 {
 	assert((nX >= 0) && (nX < m_nBoardW));

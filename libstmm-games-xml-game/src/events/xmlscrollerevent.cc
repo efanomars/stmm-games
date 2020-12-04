@@ -26,9 +26,11 @@
 #include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
 #include <stmm-games-xml-base/xmlcommonerrors.h>
 #include <stmm-games-xml-base/xmlconditionalparser.h>
+#include <stmm-games-xml-base/xmltraitsparser.h>
 
 #include <stmm-games/util/util.h>
 #include <stmm-games/utile/querytileremoval.h>
+#include <stmm-games/utile/tileselector.h>
 #include <stmm-games/event.h>
 #include <stmm-games/level.h>
 #include <stmm-games/events/scrollerevent.h>
@@ -54,6 +56,13 @@ static const std::string s_sEventScrollerTopNotEmptyWaitMillisecAttr = "topNotEm
 static const std::string s_sEventScrollerNewRowsNodeName = "NewRows";
 static const std::string s_sEventScrollerNewRowCheckerNodeName = "NewRowChecker";
 static const std::string s_sEventScrollerNewRowCheckerTriesAttr = "tries";
+static const std::string s_sEventScrollerNewRowCheckerRemoverNodeName = "Remover";
+static const std::string s_sEventScrollerNewRowCheckerRemoverFromXAttr = "fromX";
+static const std::string s_sEventScrollerNewRowCheckerRemoverToXAttr = "toX";
+static const std::string s_sEventScrollerNewRowCheckerInhibitorNodeName = "Inhibitor";
+
+static const std::string s_sEventScrollerInhibitStartMessage = "INHIBIT_START_";
+static const std::string s_sEventScrollerInhibitStopMessage = "INHIBIT_STOP_";
 
 XmlScrollerEventParser::XmlScrollerEventParser()
 : XmlEventParser(s_sEventScrollerNodeName)
@@ -109,7 +118,7 @@ Event* XmlScrollerEventParser::parseEventScroller(GameCtx& oCtx, const xmlpp::El
 	if (p0Checker != nullptr) {
 		parseNewRowChecker(oCtx, p0Checker, oInit);
 	}
-	// TODO make sure random prob doesn't exceed some reasonable value (to stay within int32_t boundaries)
+
 	Level& oLevel = oCtx.level();
 	if (oLevel.showGet().getH() >= oLevel.boardHeight()) {
 		throw XmlCommonErrors::error(oCtx, p0Element, Util::s_sEmptyString, s_sEventScrollerNodeName + " requires Show height to be smaller than board height!");
@@ -130,6 +139,24 @@ void XmlScrollerEventParser::parseNewRowChecker(GameCtx& oCtx, const xmlpp::Elem
 																			, sCheckNewRowTries, false, true, 1, true, 1000);
 	}
 	;
+	getXmlConditionalParser().visitElementChildren(oCtx, p0Element, [&](const xmlpp::Element* p0EventElement)
+	{
+		const std::string sElementName = p0EventElement->get_name();
+		if (sElementName == s_sEventScrollerNewRowCheckerInhibitorNodeName) {
+			parseInhibitor(oCtx, p0EventElement, oInit);
+		} else if (sElementName == s_sEventScrollerNewRowCheckerRemoverNodeName) {
+			parseRemover(oCtx, p0EventElement, oInit);
+		}
+	});
+	oCtx.removeChecker(p0Element, false, true);
+}
+void XmlScrollerEventParser::parseRemover(GameCtx& oCtx, const xmlpp::Element* p0Element, ScrollerEvent::Init& oInit)
+{
+	ScrollerEvent::NewRowCheckRemover oRemover;
+	getXmlConditionalParser().parseAttributeFromTo<int32_t>(oCtx, p0Element, "</>"
+															, s_sEventScrollerNewRowCheckerRemoverFromXAttr, s_sEventScrollerNewRowCheckerRemoverToXAttr
+															, false, true, 0, true, oCtx.level().boardWidth(), oRemover.m_nFrom, oRemover.m_nTo);
+	;
 	QueryTileRemoval* p0QueryTileRemoval = nullptr;
 	getXmlConditionalParser().visitElementChildren(oCtx, p0Element, [&](const xmlpp::Element* p0EventElement)
 	{
@@ -140,12 +167,18 @@ void XmlScrollerEventParser::parseNewRowChecker(GameCtx& oCtx, const xmlpp::Elem
 		assert(p0Event != nullptr);
 		p0QueryTileRemoval = dynamic_cast<QueryTileRemoval*>(p0Event);
 		if (p0QueryTileRemoval == nullptr) {
-			throw XmlCommonErrors::error(oCtx, p0EventElement, Util::s_sEmptyString, "QueryTileRemoval implementing event expected!");
+			throw XmlCommonErrors::error(oCtx, p0EventElement, Util::s_sEmptyString, "Event implementing interface QueryTileRemoval expected!");
 		}
 	});
-	oCtx.removeChecker(p0Element, false, true);
-	oInit.m_p0TileRemover = p0QueryTileRemoval;
+	oRemover.m_p0TileRemover = p0QueryTileRemoval;
+	;
+	oInit.m_aRemovers.push_back(std::move(oRemover));
 }
+void XmlScrollerEventParser::parseInhibitor(GameCtx& oCtx, const xmlpp::Element* p0Element, ScrollerEvent::Init& oInit)
+{
+	oInit.m_aInhibitors.push_back(getXmlTraitsParser().parseTileSelectorAnd(oCtx, p0Element));
+}
+
 int32_t XmlScrollerEventParser::parseEventMsgName(ConditionalCtx& oCtx, const xmlpp::Element* p0Element, const std::string& sAttr
 												, const std::string& sMsgName)
 {
@@ -165,7 +198,20 @@ int32_t XmlScrollerEventParser::parseEventMsgName(ConditionalCtx& oCtx, const xm
 	} else if (sMsgName == "PREV_NEW_ROW_GEN") {
 		nMsg = ScrollerEvent::MESSAGE_PREV_NEW_ROW_GEN;
 	} else {
-		nMsg = XmlEventParser::parseEventMsgName(oCtx, p0Element, sAttr, sMsgName);
+		const auto nStartMsgSize = s_sEventScrollerInhibitStartMessage.size();
+		const auto nStopMsgSize = s_sEventScrollerInhibitStopMessage.size();
+		const int32_t nMaxInhibitors = ScrollerEvent::MESSAGE_INHIBIT_STOP_INDEX_BASE - ScrollerEvent::MESSAGE_INHIBIT_START_INDEX_BASE;
+		if (sMsgName.substr(0, nStartMsgSize) == s_sEventScrollerInhibitStartMessage) {
+			std::string sNr = sMsgName.substr(nStartMsgSize);
+			const int32_t nNr = XmlUtil::strToNumber(oCtx, p0Element, sAttr, sNr, false, true, 0, true, nMaxInhibitors - 1);
+			nMsg = ScrollerEvent::MESSAGE_INHIBIT_START_INDEX_BASE + nNr;
+		} else if (sMsgName.substr(0, nStopMsgSize) == s_sEventScrollerInhibitStopMessage) {
+			std::string sNr = sMsgName.substr(nStopMsgSize);
+			const int32_t nNr = XmlUtil::strToNumber(oCtx, p0Element, sAttr, sNr, false, true, 0, true, nMaxInhibitors - 1);
+			nMsg = ScrollerEvent::MESSAGE_INHIBIT_STOP_INDEX_BASE + nNr;
+		} else {
+			nMsg = XmlEventParser::parseEventMsgName(oCtx, p0Element, sAttr, sMsgName);
+		}
 	}
 	return nMsg;
 }

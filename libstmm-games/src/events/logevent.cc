@@ -92,7 +92,7 @@ void LogEvent::MsgLog::dump() const noexcept
 		std::cout << "   tag:         " << oEntry.m_nTag << '\n';
 		std::cout << "   msg:         " << oEntry.m_nMsg << '\n';
 		std::cout << "   value:       " << oEntry.m_nValue << '\n';
-		std::cout << "   trig. addr.: " << oEntry.m_nTriggeringEventAdr << '\n';
+		std::cout << "   trig. addr.: " << oEntry.m_nTriggeringEventAddr << '\n';
 	}
 }
 #endif //NDEBUG
@@ -125,7 +125,7 @@ void LogEvent::trigger(int32_t nMsg, int32_t nValue, Event* p0TriggeringEvent) n
 	oEntry.m_nTag = m_oData.m_nTag;
 	oEntry.m_nMsg = nMsg;
 	oEntry.m_nValue = nValue;
-	oEntry.m_nTriggeringEventAdr = reinterpret_cast<int64_t>(p0TriggeringEvent);
+	oEntry.m_nTriggeringEventAddr = reinterpret_cast<int64_t>(p0TriggeringEvent);
 
 	if (m_oData.m_bToStdOut) {
 		std::string sElapsed;
@@ -173,7 +173,7 @@ void LogEvent::trigger(int32_t nMsg, int32_t nValue, Event* p0TriggeringEvent) n
 				<< " Value:" << oEntry.m_nValue;
 		}
 		std::cout
-			<< " TriggeringEventAdr:" << oEntry.m_nTriggeringEventAdr
+			<< " TriggeringEventAdr:" << oEntry.m_nTriggeringEventAddr
 			<< '\n';
 	}
 	msgLog().addEntry(std::move(oEntry));

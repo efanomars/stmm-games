@@ -45,8 +45,8 @@ public:
 	virtual void handleXYEvent(const shared_ptr<stmi::Event>& refXYEvent) noexcept = 0;
 	/** Create a game sound.
 	 * The team or mate select the player(s) that should hear the sound.
-	 * When nTeam is not -1, the sound can only be heard in per player sound mode
-	 * or there is only one human player and nTeamand nMate select it (or its team).
+	 * When nTeam is not -1, the sound can only be heard in "per player" sound mode
+	 * or there is only one human player and nTeam and nMate select it (or its team).
 	 * @param nSoundIdx The sound index according to Named::sounds(). Must be valid.
 	 * @param nTeam The team or -1 if a sound directed to all.
 	 * @param nMate The mate or -1 if a sound directed to all or team.

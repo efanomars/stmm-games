@@ -29,7 +29,7 @@ namespace stmg
 {
 
 /** Keeps two numbers and compares them if requested.
- * The two numbers are called "left" and "right" and have initial value 0.
+ * The two numbers are called "left" and "right".
  */
 class CumulCmpEvent : public Event
 {

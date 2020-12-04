@@ -239,7 +239,7 @@ TEST_CASE_METHOD(STFX<ArrayGameFixture>, "Array5x10_Level_nValue")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 1 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0ArrayEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0ArrayEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last(1);
@@ -249,7 +249,7 @@ TEST_CASE_METHOD(STFX<ArrayGameFixture>, "Array5x10_Level_nValue")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == (nSize0 - 1) * 1 + 1 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0ArrayEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0ArrayEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last();
@@ -259,7 +259,7 @@ TEST_CASE_METHOD(STFX<ArrayGameFixture>, "Array5x10_Level_nValue")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == (nSize0 - 1) * (nSize1 - 1) + 1 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0ArrayEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0ArrayEvent) );
 	}
 }
 
@@ -346,7 +346,7 @@ TEST_CASE_METHOD(STFX<ArrayGameFixture>, "Array5x10x20_Level_nValue_Lives")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 3 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0ArrayEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0ArrayEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last(1);
@@ -356,7 +356,7 @@ TEST_CASE_METHOD(STFX<ArrayGameFixture>, "Array5x10x20_Level_nValue_Lives")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == (nSize0 - 1) * 1 * (nSize2 - 1) + 3 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0ArrayEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0ArrayEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last();
@@ -366,7 +366,7 @@ TEST_CASE_METHOD(STFX<ArrayGameFixture>, "Array5x10x20_Level_nValue_Lives")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == (nSize0 - 1) * (nSize1 - 1) * (nSize2 / 2) + 3 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0ArrayEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0ArrayEvent) );
 	}
 }
 

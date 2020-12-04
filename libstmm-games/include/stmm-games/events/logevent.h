@@ -62,32 +62,51 @@ public:
 	void trigger(int32_t nMsg, int32_t nValue, Event* p0TriggeringEvent) noexcept override;
 
 public:
+	/** Holds information about the messages received by all instances of LogEvent.
+	 * Only the last MsgLog::s_nMaxLastBufferedEntries entries are buffered and
+	 * can be accessed with MsgLog::last(int32_t nBack). */
 	class MsgLog {
 	public:
+		/** Information about one received message. */
 		class Entry
 		{
 		public:
-			int32_t m_nTag = -1;
-			int32_t m_nGameTick = -1;
-			int32_t m_nGameMillisec = -1;
-			int32_t m_nLevel = -1;
-			int32_t m_nMsg = -1;
-			int32_t m_nValue = -1;
-			int64_t m_nTriggeringEventAdr = -1;
+			int32_t m_nTag = -1; /**< The tag number. The value passed with LocalInit::m_nTag. */
+			int32_t m_nGameTick = -1; /**< The game tick the message was received. */
+			int32_t m_nGameMillisec = -1; /**< The game's elapsed time in milliseconds. */
+			int32_t m_nLevel = -1; /**< The level of the LogEvent that received the message. */
+			int32_t m_nMsg = -1; /**< The message number. */
+			int32_t m_nValue = -1; /**< The message value. */
+			int64_t m_nTriggeringEventAddr = -1; /**< The address of the event sending the message.
+													* Is a reinterpret_cast<int64_t>(Event *). */
 			bool isEmpty() const noexcept
 			{
 				return (m_nLevel < 0);
 			}
 		};
-
+		/** Clear the log.
+		 */
 		void reset() noexcept;
-		// Total of the Entries that were added by LogEvent
+		/** The number of entries added to the log.
+		 * Since creation or the last reset().
+		 * @return The number of entries.
+		 */
 		int32_t totEntries() const noexcept { return m_nTotEntries; }
 		// Total of the buffered entries that can be retrieved via last(nBack)
+		/** The number of buffered entries.
+		 * @return The number of buffered entries.
+		 */
 		int32_t totBuffered() const noexcept { return static_cast<int32_t>(m_aEntry.size()); }
-		// Same as last(0)
+		/** The last buffered entry.
+		 * Corresponds to the last message received by any instance of LogEvent.
+		 * Is the same as calling last(0).
+		 * @return The last entry or an empty entry if totBuffered() is 0.
+		 */
 		const Entry& last() const noexcept;
-		// The nBack before the last of the buffered Entries
+		/** The n-th last buffered entry.
+		 * @param nBack The back index. Must be &gt;= 0 and &lt; totBuffered().
+		 * @return The last entry or an empty entry if nBack not smaller than totBuffered().
+		 */
 		const Entry& last(int32_t nBack) const noexcept;
 
 		/** Find for a specific entry.
@@ -109,6 +128,7 @@ public:
 		#ifndef NDEBUG
 		void dump() const noexcept;
 		#endif //NDEBUG
+		/** The maximum number of entries that can be buffered.*/
 		static const int32_t s_nMaxLastBufferedEntries;
 	private:
 		friend class LogEvent;

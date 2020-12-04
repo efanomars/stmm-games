@@ -57,6 +57,8 @@ public:
 private:
 	Event* parseEventScroller(GameCtx& oCtx, const xmlpp::Element* p0Element);
 	void parseNewRowChecker(GameCtx& oCtx, const xmlpp::Element* p0Element, ScrollerEvent::Init& oInit);
+	void parseRemover(GameCtx& oCtx, const xmlpp::Element* p0Element, ScrollerEvent::Init& oInit);
+	void parseInhibitor(GameCtx& oCtx, const xmlpp::Element* p0Element, ScrollerEvent::Init& oInit);
 
 private:
 	XmlScrollerEventParser(const XmlScrollerEventParser& oSource) = delete;

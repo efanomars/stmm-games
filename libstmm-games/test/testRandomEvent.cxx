@@ -127,7 +127,7 @@ TEST_CASE_METHOD(STFX<RandomGameFixture>, "GeneratePermutations")
 		REQUIRE( oEntry.m_nValue >= 0 );
 		REQUIRE( oEntry.m_nValue <= 9 );
 		nSum += oEntry.m_nValue;
-		REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0RandomEvent) );
+		REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0RandomEvent) );
 	}
 	REQUIRE( nSum == nExpectSum );
 	//
@@ -150,7 +150,7 @@ TEST_CASE_METHOD(STFX<RandomGameFixture>, "GeneratePermutations")
 		REQUIRE( oEntry.m_nValue >= 0 );
 		REQUIRE( oEntry.m_nValue <= 9 );
 		nSum += oEntry.m_nValue;
-		REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0RandomEvent) );
+		REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0RandomEvent) );
 	}
 	REQUIRE( nSum == nExpectSum * 2 );
 }

@@ -81,6 +81,10 @@ public:
 	{
 		m_oBuf.setAll(oTile);
 	}
+	#ifndef NDEBUG
+	void dump(int32_t nIndentSpaces) const noexcept;
+	void dump() const noexcept;
+	#endif //NDEBUG
 private:
 	XYBuffer<Tile> m_oBuf;
 };

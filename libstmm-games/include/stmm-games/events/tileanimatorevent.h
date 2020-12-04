@@ -49,6 +49,16 @@ namespace stmg
 
 using std::unique_ptr;
 
+/** Event that animates selected tiles of board and blocks.
+ * One animation cycle has a duration in ticks and/or milliseconds (see LocalInit::m_oDuration).
+ * At each game tick (and view tick) the progress value of the animation is brought from `0.0` to `1.0`
+ * (see TileAnimator::getElapsed01). So it is up to the theme to choose how to use the
+ * number to display the tile. For example a tile could be progressively faded: it is shown opaque at
+ * value `0.0` and becomes more and more invisible as it gets to value `1.0`.
+ * Another possibility would be for the theme to show the tile at full scale at `0.0`,
+ * progressively decrease the size, reaching half size at `0.5` and from there increase
+ * the size again to reach full scale at `1.0`, creating a pulse effect.
+ */
 class TileAnimatorEvent : public Event, public BoardListener, public BlocksBricksIdListener
 {
 public:
@@ -121,7 +131,7 @@ public:
 
 	// Outputs
 	enum {
-		LISTENER_GROUP_TILEANI_STARTED = 10
+		LISTENER_GROUP_TILEANI_CHANGED = 10 /**< The number of animated tiles changed. nValue contains the new number. */
 	};
 
 private:
@@ -192,12 +202,11 @@ private:
 	std::vector< NPoint > m_aRunningAnisPos; // if m_nX is negated it's the brick id and m_nY the block id, if positive position in board
 	std::vector< shared_ptr<TileAni> > m_aRunningAnis; // Size: m_aPosRunningAnis.size()
 
-	//int32_t m_nAnis; // == m_oRunningAnis.size() + m_oWaitingAnis.size()
-
 	Recycler<TileAni> m_oTileAniRecycler;
 
 	// utility var to informListeners
-	int32_t m_nStartedRunning;
+	int32_t m_nLastReportedRunningAnis;
+
 	static const int32_t s_nMaxTry;
 private:
 	TileAnimatorEvent() = delete;

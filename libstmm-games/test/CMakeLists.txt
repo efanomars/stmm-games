@@ -70,6 +70,7 @@ if (BUILD_TESTING)
             "${STMMI_TEST_SOURCES_DIR}/testLayout.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testLogEvent.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testRandomEvent.cxx"
+            "${STMMI_TEST_SOURCES_DIR}/testScrollerEvent.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testStdConfig.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testStdPreferences.cxx"
             "${STMMI_TEST_SOURCES_DIR}/testSysEvent.cxx"

@@ -169,7 +169,7 @@ TEST_CASE_METHOD(STFX<SysEventGameFixture>, "PlayerOut")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == nSaveElapsedMillisec2 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0SysEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0SysEvent) );
 
 	Variable& oVarStatus0_0 = p0Level->variable(m_refGame->getPlayerVarIdStatus(), 0, 0);
 	Variable& oVarStatus0_1 = p0Level->variable(m_refGame->getPlayerVarIdStatus(), 0, 1);

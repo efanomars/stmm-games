@@ -140,7 +140,7 @@ TEST_CASE_METHOD(STFX<DelayedQueueGameFixture>, "ConstructorTicks")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 121 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0DelayedQueueEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0DelayedQueueEvent) );
 	}
 	{
 	const LogEvent::MsgLog::Entry& oEntry = LogEvent::msgLog().last();
@@ -150,7 +150,7 @@ TEST_CASE_METHOD(STFX<DelayedQueueGameFixture>, "ConstructorTicks")
 	REQUIRE( oEntry.m_nLevel == 0 );
 	REQUIRE( oEntry.m_nMsg == 1001 );
 	REQUIRE( oEntry.m_nValue == 122 );
-	REQUIRE( oEntry.m_nTriggeringEventAdr == reinterpret_cast<int64_t>(p0DelayedQueueEvent) );
+	REQUIRE( oEntry.m_nTriggeringEventAddr == reinterpret_cast<int64_t>(p0DelayedQueueEvent) );
 	}
 }
 

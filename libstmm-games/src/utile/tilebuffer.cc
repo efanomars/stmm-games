@@ -20,7 +20,19 @@
 
 #include "utile/tilebuffer.h"
 
-namespace stmg
+#include "tile.h"
+
+namespace stmg {
+
+#ifndef NDEBUG
+void TileBuffer::dump(int32_t nIndentSpaces) const noexcept
 {
+	m_oBuf.dump(nIndentSpaces);
+}
+void TileBuffer::dump() const noexcept
+{
+	m_oBuf.dump();
+}
+#endif //NDEBUG
 
 } // namespace stmg

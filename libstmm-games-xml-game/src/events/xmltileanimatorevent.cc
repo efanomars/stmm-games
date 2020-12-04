@@ -178,8 +178,8 @@ int32_t XmlTileAnimatorEventParser::parseEventListenerGroupName(GameCtx& oCtx, c
 																, const std::string& sListenerGroupName)
 {
 	int32_t nListenerGroup;
-	if (sListenerGroupName == "TILEANI_STARTED") {
-		nListenerGroup = TileAnimatorEvent::LISTENER_GROUP_TILEANI_STARTED;
+	if (sListenerGroupName == "TILEANI_CHANGED") {
+		nListenerGroup = TileAnimatorEvent::LISTENER_GROUP_TILEANI_CHANGED;
 	} else {
 		return XmlEventParser::parseEventListenerGroupName(oCtx, p0Element, sAttr, sListenerGroupName);
 	}
