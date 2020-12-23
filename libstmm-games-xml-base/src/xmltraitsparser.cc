@@ -275,10 +275,11 @@ bool XmlTraitsParser::parseFontAttrs(ConditionalCtx& oCtx, const xmlpp::Element*
 	bool bFontDefined = false;
 	const auto oPairName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sTileFontNameAttr);
 	if (oPairName.first) {
-		//const std::string sUpName = Glib::ustring{sName}.uppercase();
 		auto& sName = oPairName.second;
+//std::cout << "XmlTraitsParser::parseFontAttrs  sName=" << sName << '\n';
 		XmlCommonParser::validateName(oCtx, p0Element, s_sTileFontNameAttr, sName, false);
 		const int32_t nFontIndex = oCtx.named().fonts().addName(sName);
+//std::cout << "XmlTraitsParser::parseFontAttrs  nFontIndex=" << nFontIndex << '\n';
 		if (nFontIndex > TileFont::CHAR_FONT_INDEX_MAX) {
 			throw XmlCommonErrors::errorAttrOneTooManyNames(oCtx, p0Element, s_sTileFontNameAttr);
 		}

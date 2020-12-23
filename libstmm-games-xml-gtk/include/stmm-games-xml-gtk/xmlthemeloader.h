@@ -45,6 +45,7 @@ using std::unique_ptr;
 
 class GameDiskFiles;
 class XmlThemeParser;
+class FontConfigLoader;
 
 class XmlThemeLoader : public ThemeLoader
 {
@@ -104,6 +105,7 @@ private:
 	const shared_ptr<GameDiskFiles> m_refGameDiskFiles;
 
 	unique_ptr<XmlThemeParser> m_refXmlThemeParser;
+	unique_ptr<FontConfigLoader> m_refFontConfigLoader;
 
 	bool m_bInfosLoaded;
 	std::vector<std::string> m_aValidNames;

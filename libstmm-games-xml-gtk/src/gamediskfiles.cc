@@ -49,9 +49,11 @@ static const std::string s_sPreferencesXmlExt = ".prefs";
 static const std::string s_sThemesFolder = "themes";
 static const std::string s_sImagesSubFolder = "images";
 static const std::string s_sSoundsSubFolder = "sounds";
+static const std::string s_sFontsSubFolder = "fonts";
 static const std::string s_sDefaultsFolder = s_sThemesFolder + "/common";
 static const std::string s_sDefaultImagesFolder = s_sDefaultsFolder + "/" + s_sImagesSubFolder;
 static const std::string s_sDefaultSoundsFolder = s_sDefaultsFolder + "/" + s_sSoundsSubFolder;
+static const std::string s_sDefaultFontsFolder = s_sDefaultsFolder + "/" + s_sFontsSubFolder;
 static const std::string s_sThemeXmlFolderExt = ".thm";
 static const std::string s_sThemeXmlFileName = "theme.xml";
 static const std::string s_sGameXmlExt = ".xml";
@@ -66,6 +68,9 @@ const std::string::value_type* GameDiskFiles::s_aImageFileExt[] = {
 const std::string::value_type* GameDiskFiles::s_aSoundFileExt[] = {
 	".wav", ".mp3", ".ogg"
 	, ".it", ".xm"
+};
+const std::string::value_type* GameDiskFiles::s_aFontFileExt[] = {
+	".ttf", ".otf"
 };
 
 const File GameDiskFiles::s_oEmptyFile{};
@@ -383,6 +388,36 @@ const std::vector< std::pair<std::string, File> >& GameDiskFiles::getThemeSoundF
 	}
 	return oFileData.m_aResourceFiles;
 }
+const std::vector< std::pair<std::string, File> >& GameDiskFiles::getThemeFontFiles(const File& oThemeFile)
+{
+	assert(oThemeFile.isDefined() && !oThemeFile.isBuffered());
+	const std::string& sThemeFullPath = oThemeFile.getFullPath();
+	assert(!sThemeFullPath.empty());
+
+	ResourceFileData& oFileData = getResourceData(sThemeFullPath, m_oThemeFontsData);
+	if (!oFileData.m_bLoaded) {
+		// ex.: /usr/share/stmm-games/themes/bang.thm/theme.xml -> returns sound files in
+		//      /usr/share/stmm-games/themes/bang.thm/sounds
+		const std::string sThemeName = Glib::path_get_basename(sThemeFullPath);
+		assert(sThemeName.size() > 0);
+
+		std::string sThemeFontsPath = sThemeFullPath.substr(0, sThemeFullPath.size() - sThemeName.size()) + s_sFontsSubFolder;
+		std::vector<std::string> aNames;
+		const bool bDirs = false;
+		const bool bRecurse = true;
+		const bool bRegularFiles = true;
+		getDirSubTreeFiles(sThemeFontsPath, bDirs, bRecurse, bRegularFiles, aNames);
+		//
+		removeNonFontFiles(aNames);
+		//
+		std::vector<std::string> aPaths;
+		getAbsPathFromBaseAndRel(sThemeFontsPath, aNames, aPaths);
+
+		loadResourceFiles(oFileData, aNames, aPaths);
+		oFileData.m_bLoaded = true;
+	}
+	return oFileData.m_aResourceFiles;
+}
 void GameDiskFiles::getFilesAndPathsOfImages(const std::string& sTheDir, bool bDoSubdirs
 											, std::vector<std::string>& aNames, std::vector<std::string>& aPaths)
 {
@@ -397,6 +432,14 @@ void GameDiskFiles::getFilesAndPathsOfSounds(const std::string& sTheDir, bool bD
 	getFilesAndPaths(sTheDir, bDoSubdirs, aNames, aPaths, [&](const std::string& sFile)
 	{
 		return isSoundFile(sFile);
+	});
+}
+void GameDiskFiles::getFilesAndPathsOfFonts(const std::string& sTheDir, bool bDoSubdirs
+											, std::vector<std::string>& aNames, std::vector<std::string>& aPaths)
+{
+	getFilesAndPaths(sTheDir, bDoSubdirs, aNames, aPaths, [&](const std::string& sFile)
+	{
+		return isFontFile(sFile);
 	});
 }
 const std::vector< std::pair<std::string, File> >& GameDiskFiles::getDefaultImageFiles()
@@ -443,6 +486,31 @@ const std::vector< std::pair<std::string, File> >& GameDiskFiles::getDefaultSoun
 		for (const auto& sDir : aDirs) {
 			if (sDir != m_sAppName) {
 				getFilesAndPathsOfSounds(s_sDefaultSoundsFolder + "/" + sDir, true, aAllNames, aAllPaths);
+			}
+		}
+		assert(aAllNames.size() == aAllPaths.size());
+		loadResourceFiles(oFileData, aAllNames, aAllPaths);
+		oFileData.m_bLoaded = true;
+	}
+	return oFileData.m_aResourceFiles;
+}
+const std::vector< std::pair<std::string, File> >& GameDiskFiles::getDefaultFontFiles()
+{
+//std::cout << "GameDiskFiles::getDefaultFontFiles()" << '\n';
+	ResourceFileData& oFileData = m_oDefaultFontsData;
+	if (!oFileData.m_bLoaded) {
+		std::vector<std::string> aAllNames;
+		std::vector<std::string> aAllPaths;
+		// ex.: first "common/sounds/jointris" with recursive subfolders
+		getFilesAndPathsOfFonts(s_sDefaultFontsFolder + "/" + m_sAppName, true, aAllNames, aAllPaths);
+		// then "common/sounds" without subfolders
+		getFilesAndPathsOfFonts(s_sDefaultFontsFolder, false, aAllNames, aAllPaths);
+		// then "common/sounds/xxx" with recursive subfolders
+		std::vector<std::string> aDirs;
+		getDirSubTreeFiles(s_sDefaultFontsFolder, true, false, false, aDirs);
+		for (const auto& sDir : aDirs) {
+			if (sDir != m_sAppName) {
+				getFilesAndPathsOfFonts(s_sDefaultFontsFolder + "/" + sDir, true, aAllNames, aAllPaths);
 			}
 		}
 		assert(aAllNames.size() == aAllPaths.size());
@@ -549,6 +617,13 @@ void GameDiskFiles::removeNonSoundFiles(std::vector<std::string>& aFiles)
 		return ! isSoundFile(sFile);
 	}), aFiles.end());
 }
+void GameDiskFiles::removeNonFontFiles(std::vector<std::string>& aFiles)
+{
+	aFiles.erase(std::remove_if(aFiles.begin(), aFiles.end(), [&](const std::string& sFile)
+	{
+		return ! isFontFile(sFile);
+	}), aFiles.end());
+}
 bool GameDiskFiles::isImageFile(const std::string& sFile)
 {
 	const int32_t nTotExts = sizeof(s_aImageFileExt) / sizeof(s_aImageFileExt[0]);
@@ -565,6 +640,17 @@ bool GameDiskFiles::isSoundFile(const std::string& sFile)
 	const int32_t nTotExts = sizeof(s_aSoundFileExt) / sizeof(s_aSoundFileExt[0]);
 	for (int32_t nIdx = 0; nIdx < nTotExts; ++nIdx) {
 		const std::string::value_type* p0Ext = s_aSoundFileExt[nIdx];
+		if (Glib::str_has_suffix(Glib::ustring{sFile}.uppercase(), Glib::ustring{p0Ext}.uppercase())) {
+			return true;
+		}
+	}
+	return false;
+}
+bool GameDiskFiles::isFontFile(const std::string& sFile)
+{
+	const int32_t nTotExts = sizeof(s_aFontFileExt) / sizeof(s_aFontFileExt[0]);
+	for (int32_t nIdx = 0; nIdx < nTotExts; ++nIdx) {
+		const std::string::value_type* p0Ext = s_aFontFileExt[nIdx];
 		if (Glib::str_has_suffix(Glib::ustring{sFile}.uppercase(), Glib::ustring{p0Ext}.uppercase())) {
 			return true;
 		}

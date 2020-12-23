@@ -44,6 +44,7 @@ static const std::string s_sModifierTextSizeFactorAttr = "sizeFactor";
 static const std::string s_sModifierTextUseTileColorAttr = "useTileColor";
 static const std::string s_sModifierTextUseTileFontAttr = "useTileFont";
 static const std::string s_sModifierTextAddToCharAttr = "addToChar";
+static const std::string s_sModifierTextStretchAttr = "stretch";
 
 XmlTextModifierParser::XmlTextModifierParser()
 : XmlModifierParser(s_sModifierTextNodeName)
@@ -73,6 +74,12 @@ unique_ptr<StdThemeModifier> XmlTextModifierParser::parseModifier(ThemeCtx& oCtx
 	}
 
 	getXmlTraitsParser()->parseFont(oCtx, p0Element, oInit.m_oFont);
+	//
+	const auto oPairStretch = getXmlConditionalParser()->getAttributeValue(oCtx, p0Element, s_sModifierTextStretchAttr);
+	if (oPairStretch.first) {
+		const std::string& sStretch = oPairStretch.second;
+		oInit.m_bStretch = XmlUtil::strToBool(oCtx, p0Element, s_sModifierTextStretchAttr, sStretch);
+	}
 	//
 	const auto oPairSizeFactor = getXmlConditionalParser()->getAttributeValue(oCtx, p0Element, s_sModifierTextSizeFactorAttr);
 	if (oPairSizeFactor.first) {

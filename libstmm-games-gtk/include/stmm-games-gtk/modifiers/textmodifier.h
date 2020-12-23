@@ -52,17 +52,17 @@ class StdTheme;
 class TextModifier : public StdThemeModifier
 {
 public:
-	// sText if empty() then draws the tile char (but only if !isEmpty() and !isCharIndex())
-	// bUseTileColor if true the tile color (if defined) is used, otherwise see oColor
-	// oColor  if isEmpty(), black or white will be chosen depending on tile color
+	/** Initialization data.
+	 */
 	struct Init
 	{
 		std::string m_sText; /**< The (very short) text. If m_sText.empty() draws the tile char (but only if is defined and !isCharIndex()). */
+		bool m_bStretch = false; /**< Whether the text is stretched over the whole tile. Default is false. */
 		bool m_bUseTileColor = false; /**< If true the text color is defined by the tile color. If false use m_oColor. Default is false. */
+		bool m_bUseTileFont = false; /**< If true the text font is defined by the tile font. If false use m_oFont. Default is false. */
 		TileColor m_oColor; /**< The color to use if m_bUseTileColor is false. If empty the color will be either black or white,
 							 * depending on the tile color (white on a dark color, black on a light color). */
 		double m_fFontSize1 = 0.78; /**< The font size in tiles. Must be &gt; `0.0` and &lt;= `1.0`. Default is `0.78`. */
-		bool m_bUseTileFont = false; /**< If true the text font is defined by the tile font. If false use m_oFont. Default is false. */
 		TileFont m_oFont; /**< The font to use if m_bUseTileFont is false. If empty the font will be the theme default font. */
 		int32_t m_nAddToChar = 0; /**< Added to char if TileChar of the drawn tile is !isEmpty() and !isCharIndex(). Default is 0.*/
 	};
@@ -85,6 +85,7 @@ private:
 	double m_fR1, m_fG1, m_fB1, m_fA1;
 	double m_fFontSize1;
 	bool m_bUseTileFont;
+	bool m_bStretch;
 	TileFont m_oFont;
 private:
 	TextModifier() = delete;

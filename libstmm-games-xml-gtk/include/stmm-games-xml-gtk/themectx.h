@@ -34,18 +34,21 @@
 
 namespace stmg { class AppConfig; }
 namespace stmg { class StdTheme; }
+namespace stmg { class ThemeExtraData; }
 namespace xmlpp { class Element; }
 
 namespace stmg
 {
 
 using std::unique_ptr;
+using std::shared_ptr;
 
 ////////////////////////////////////////////////////////////////////////////////
 class ThemeCtx : public ConditionalCtx
 {
 public:
-	ThemeCtx(const shared_ptr<AppConfig>& refAppConfig, StdTheme& oTheme, const std::string& sThemeName, File oFile, const xmlpp::Element* p0RootElement);
+	ThemeCtx(const shared_ptr<AppConfig>& refAppConfig, StdTheme& oTheme
+			, const std::string& sThemeName, File oFile, const xmlpp::Element* p0RootElement);
 
 	ThemeCtx(ThemeCtx&& oSource) = default;
 
@@ -60,12 +63,14 @@ protected:
 	std::string err(const std::string& sErr) override;
 private:
 	friend class XmlThemeParser;
+	friend class XmlThemeLoader;
 	StdTheme& m_oTheme;
 	const std::string m_sCtxThemeName;
 	const File m_oCtxThemeFile;
 	const xmlpp::Element* m_p0RootElement;
 	NamedObjIndex<const xmlpp::Element*> m_oLocalPainterNames;
 	int32_t m_nThemeNr; // set by XmlThemeParser
+	shared_ptr<ThemeExtraData> m_refThemeExtraData; // accessed by XmlThemeLoader and XmlThemeParser
 private:
 	ThemeCtx() = delete;
 };

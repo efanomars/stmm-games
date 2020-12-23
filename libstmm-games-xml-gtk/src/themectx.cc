@@ -31,8 +31,8 @@ namespace xmlpp { class Element; }
 namespace stmg
 {
 
-ThemeCtx::ThemeCtx(const shared_ptr<AppConfig>& refAppConfig, StdTheme& oTheme, const std::string& sThemeName
-					, File oFile, const xmlpp::Element* p0RootElement)
+ThemeCtx::ThemeCtx(const shared_ptr<AppConfig>& refAppConfig, StdTheme& oTheme
+					, const std::string& sThemeName, File oFile, const xmlpp::Element* p0RootElement)
 : ConditionalCtx(refAppConfig, oTheme.getNamed())
 , m_oTheme(oTheme)
 , m_sCtxThemeName(sThemeName)

@@ -26,6 +26,7 @@
 	</Colors>
 	<Fonts>
 		<DefaultFont define="Arial Bold"/>
+		<Font name="Cartoon" fontFile="wds011402.ttf"/>
 	</Fonts>
 	<Images>
 		<Image imgId="Background0" imgFile="background0.svg"/>

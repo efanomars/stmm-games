@@ -202,6 +202,7 @@ public:
 	void getColorRgb(const TileColor& oColor, uint8_t& nR, uint8_t& nG, uint8_t& nB) const noexcept;
 
 	/** Set the default font.
+	 * If the default font is already set, does nothing.
 	 * @param sFontDesc The font name. Cannot be empty.
 	 */
 	void setDefaultFont(const std::string& sFontDesc) noexcept;
@@ -508,7 +509,7 @@ private:
 	std::vector<TileColor> m_aPal256;
 	std::map<int32_t, TileColor> m_oPalRest; //TODO unordered_map
 
-	std::vector<std::string> m_aNamedFontIdx;
+	std::vector<std::string> m_aNamedFontDesc; // Size: m_oNamed.fonts().size()
 	std::string m_sDefaultFont;
 
 	// The known image file names

@@ -139,8 +139,12 @@ set(STMMI_SOURCES
         #
         "${STMMI_SOURCES_DIR}/xmlgtkutil/xmlelapsedmapperparser.cc"
         #
+        "${STMMI_SOURCES_DIR}/fontconfigloader.h"
+        "${STMMI_SOURCES_DIR}/fontconfigloader.cc"
         "${STMMI_SOURCES_DIR}/gamediskfiles.cc"
         "${STMMI_SOURCES_DIR}/themectx.cc"
+        "${STMMI_SOURCES_DIR}/themeextradata.h"
+        "${STMMI_SOURCES_DIR}/themeextradata.cc"
         "${STMMI_SOURCES_DIR}/xmlmodifierparser.cc"
         "${STMMI_SOURCES_DIR}/xmlstdmodifierparsers.cc"
         "${STMMI_SOURCES_DIR}/xmlstdthanimationparsers.cc"
@@ -221,6 +225,8 @@ set(STMMI_DATA_FILES
         "${STMMI_DATA_DIR}/themes/common/sounds/tac.mp3"
         "${STMMI_DATA_DIR}/themes/common/sounds/toc.mp3"
         "${STMMI_DATA_DIR}/themes/common/sounds/wrong.mp3"
+        #
+        "${STMMI_DATA_DIR}/themes/common/fonts/wds011402.ttf"
         #
         "${STMMI_DATA_DIR}/themes/simple.thm/images/bomb.svg"
         "${STMMI_DATA_DIR}/themes/simple.thm/images/cmdframe-b.svg"

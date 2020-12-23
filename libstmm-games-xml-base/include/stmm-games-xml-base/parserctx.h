@@ -185,7 +185,7 @@ public:
 	/** The line number within a document of an element or attribute.
 	 * @param p0Element The element. Cannot be null.
 	 * @param sAttr The attribute name. If empty or not found the element's line number is returned.
-	 * @return The line number.
+	 * @return The line number or -1 if unknown.
 	 */
 	static int32_t getLine(const xmlpp::Element* p0Element, const std::string& sAttr);
 
@@ -211,14 +211,7 @@ protected:
 		std::vector<std::string> m_aValidAttrNames;
 	};
 protected:
-	std::vector<Checker>::iterator getChecker(const xmlpp::Element* p0Element)
-	{
-		std::vector<Checker>::iterator itFindChecker = std::find_if(m_aCheckers.begin(), m_aCheckers.end(), [&](const Checker& oChecker)
-		{
-			return (oChecker.m_p0Element == p0Element);
-		});
-		return itFindChecker;
-	}
+	std::vector<Checker>::iterator getChecker(const xmlpp::Element* p0Element);
 protected:
 	const shared_ptr<AppConfig> m_refAppConfig;
 	shared_ptr<AppPreferences> m_refAppPreferences;

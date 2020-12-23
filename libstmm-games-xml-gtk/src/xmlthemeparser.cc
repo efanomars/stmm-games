@@ -23,6 +23,7 @@
 #include "xmlmodifierparser.h"
 #include "themectx.h"
 #include "xmlthwidgetfactoryparser.h"
+#include "themeextradata.h"
 
 #include <stmm-games-xml-base/xmlutil/xmlstrconv.h>
 #include <stmm-games-xml-base/parserctx.h>
@@ -73,9 +74,16 @@ static const std::string s_sColorsStdColorsNodeName = "StdColor";
 
 static const std::string s_sFontsNodeName = "Fonts";
 static const std::string s_sFontsFontNodeName = "Font";
-static const std::string s_sFontsDefaultNodeName = "DefaultFont";
 static const std::string s_sFontsFontNameAttr = "name";
 static const std::string s_sFontsFontDefineAttr = "define";
+static const std::string s_sFontsFontFileAttr = "fontFile";
+static const std::string s_sFontsDefaultNodeName = "DefaultFont";
+static const std::string s_sFontsDefaultFontUsesAttr = "use";
+static const std::string s_sFontsDefaultFontDefineAttr = "define";
+static const std::string s_sFontsDefaultFontFileAttr = "fontFile";
+static const std::string s_sFontsAliasFontNodeName = "AliasFont";
+static const std::string s_sFontsAliasFontNameAttr = "name";
+static const std::string s_sFontsAliasFontUsesAttr = "use";
 
 static const std::string s_sImagesNodeName = "Images";
 static const std::string s_sImageArraysNodeName = "ImageArrays";
@@ -187,6 +195,7 @@ void XmlThemeParser::parseXmlTheme(const std::vector< unique_ptr<ThemeCtx> >& aC
 	int32_t nThemeNr = 0;
 	for (auto& refCtx : aCtxs) {
 		assert(refCtx);
+		assert(refCtx->m_nThemeNr == nThemeNr);
 		const xmlpp::Element* p0RootElement = refCtx->m_p0RootElement;
 		//
 		refCtx->addChecker(p0RootElement);
@@ -195,7 +204,6 @@ void XmlThemeParser::parseXmlTheme(const std::vector< unique_ptr<ThemeCtx> >& aC
 		//
 		parseRoot(*refCtx, p0RootElement, sThemeName);
 		assert(sThemeName == refCtx->m_sCtxThemeName);
-		refCtx->m_nThemeNr = nThemeNr;
 		++nThemeNr;
 	}
 
@@ -470,45 +478,177 @@ void XmlThemeParser::parseColorsStdColors(ThemeCtx& oCtx, const xmlpp::Element* 
 	}
 	oCtx.removeChecker(p0Element, true);
 }
-
 void XmlThemeParser::parseFonts(ThemeCtx& oCtx, const xmlpp::Element* p0Element)
 {
 	oCtx.addChecker(p0Element);
-	m_oXmlConditionalParser.visitNamedElementChildren(oCtx, p0Element, s_sFontsFontNodeName, [&](const xmlpp::Element* p0Font)
+	m_oXmlConditionalParser.visitElementChildren(oCtx, p0Element, [&](const xmlpp::Element* p0Font)
 	{
-		parseFontsFont(oCtx, p0Font, false);
+		const std::string sName = p0Font->get_name();
+		if (sName == s_sFontsFontNodeName) {
+			parseFontsFont(oCtx, p0Font);
+		} else if (sName == s_sFontsDefaultNodeName) {
+			parseFontsDefaultFont(oCtx, p0Font);
+		} else if (sName == s_sFontsAliasFontNodeName) {
+			parseFontsAliasFont(oCtx, p0Font);
+		} else {
+			throw XmlCommonErrors::errorElementInvalid(oCtx, p0Element, sName);
+		}
 	});
-	m_oXmlConditionalParser.visitNamedElementChildren(oCtx, p0Element, s_sFontsDefaultNodeName, [&](const xmlpp::Element* p0Font)
-	{
-		parseFontsFont(oCtx, p0Font, true);
-	});
-	oCtx.removeChecker(p0Element, true);
+	oCtx.removeChecker(p0Element, false, true);
 }
-void XmlThemeParser::parseFontsFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element, bool bDefault)
+void XmlThemeParser::parseFontsFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element)
 {
 //std::cout << "XmlThemeParser::parseFontsFont()" << '\n';
 	oCtx.addChecker(p0Element);
 	StdTheme& oTheme = oCtx.theme();
+
 	std::string sFontName;
-	if (!bDefault) {
-		const auto oPairFontName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsFontNameAttr);
-		if (!oPairFontName.first) {
-			throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sFontsFontNameAttr);
-		}
-		sFontName = std::move(oPairFontName.second);
-		XmlCommonParser::validateName(oCtx, p0Element, s_sFontsFontNameAttr, sFontName, false);
+	const auto oPairFontName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsFontNameAttr);
+	if (! oPairFontName.first) {
+		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sFontsFontNameAttr);
 	}
+	sFontName = std::move(oPairFontName.second);
+	XmlCommonParser::validateName(oCtx, p0Element, s_sFontsFontNameAttr, sFontName, false);
+
+	std::string sFontDefine;
 	const auto oPairFontDefine = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsFontDefineAttr);
-	if (! oPairFontDefine.first) {
-		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sFontsFontDefineAttr);
+	if (oPairFontDefine.first) {
+		sFontDefine = oPairFontDefine.second;
+		if (sFontDefine.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0Element, s_sFontsFontDefineAttr);
+		}
 	}
-	const std::string& sFontDefine = oPairFontDefine.second;
-	if (bDefault) {
-		oTheme.setDefaultFont(sFontDefine);
-	} else {
-		oTheme.addFontName(sFontName, sFontDefine);
+
+	const auto oPairFontFile = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsFontFileAttr);
+	if (oPairFontFile.first) {
+		const std::string& sFontFile = oPairFontFile.second;
+		if (sFontFile.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0Element, s_sFontsFontFileAttr);
+		}
+		std::string sFontDefine2;
+		const auto itPair = oCtx.m_refThemeExtraData->m_oFontFileDefs.find(sFontFile);
+		if (itPair != oCtx.m_refThemeExtraData->m_oFontFileDefs.end()) {
+			sFontDefine2 = itPair->second;
+			if (! sFontDefine2.empty()) {
+				sFontDefine = sFontDefine2;
+			}
+		} else {
+			throw XmlCommonErrors::error(oCtx, p0Element, s_sFontsFontFileAttr
+										, Util::stringCompose("Font file '%1' not found", sFontFile));
+		}
 	}
+
+//std::cout << "XmlThemeParser::parseFontsFont()  sFontName=" << sFontName << "  sFontDefine=" << sFontDefine << '\n';
+	oTheme.addFontName(sFontName, sFontDefine);
+
 	oCtx.removeChecker(p0Element, true);
 }
+void XmlThemeParser::parseFontsDefaultFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element)
+{
+//std::cout << "XmlThemeParser::parseFontsDefaultFont()" << '\n';
+	oCtx.addChecker(p0Element);
+	StdTheme& oTheme = oCtx.theme();
+
+	std::string sFontUses;
+	const auto oPairFontUses = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsDefaultFontUsesAttr);
+	if (oPairFontUses.first) {
+		sFontUses = std::move(oPairFontUses.second);
+		if (sFontUses.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0Element, s_sFontsDefaultFontUsesAttr);
+		}
+	}
+
+	std::string sFontDefine;
+	const auto oPairFontDefine = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsDefaultFontDefineAttr);
+	if (oPairFontDefine.first) {
+		if (! sFontUses.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBothBeDefined(oCtx, p0Element, s_sFontsDefaultFontUsesAttr, s_sFontsDefaultFontDefineAttr);
+		}
+		sFontDefine = std::move(oPairFontDefine.second);
+		if (sFontDefine.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0Element, s_sFontsDefaultFontDefineAttr);
+		}
+	}
+
+	const auto oPairFontFile = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsDefaultFontFileAttr);
+	if (oPairFontFile.first) {
+		if (! sFontUses.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBothBeDefined(oCtx, p0Element, s_sFontsDefaultFontUsesAttr, s_sFontsDefaultFontFileAttr);
+		}
+		const std::string& sFontFile = oPairFontFile.second;
+		if (sFontFile.empty()) {
+			throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0Element, s_sFontsDefaultFontFileAttr);
+		}
+		std::string sFontDefine2;
+		const auto itPair = oCtx.m_refThemeExtraData->m_oFontFileDefs.find(sFontFile);
+		if (itPair != oCtx.m_refThemeExtraData->m_oFontFileDefs.end()) {
+			sFontDefine2 = itPair->second;
+			if (! sFontDefine2.empty()) {
+				sFontDefine = sFontDefine2;
+			}
+		} else {
+			throw XmlCommonErrors::error(oCtx, p0Element, s_sFontsDefaultFontFileAttr
+										, Util::stringCompose("Font file '%1' not found", sFontFile));
+		}
+	}
+
+	if (oCtx.m_refThemeExtraData->m_sDefaultFontName.empty()) {
+		if (sFontUses.empty()) {
+			oTheme.setDefaultFont(sFontDefine);
+		} else {
+			oCtx.m_refThemeExtraData->m_sDefaultFontName = sFontUses;
+			oCtx.m_refThemeExtraData->m_nDefaultThemeNr = oCtx.m_nThemeNr;
+			oCtx.m_refThemeExtraData->m_p0DefaultElement = p0Element;
+		}
+	}
+
+	oCtx.removeChecker(p0Element, true);
+}
+void XmlThemeParser::parseFontsAliasFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element)
+{
+	oCtx.addChecker(p0Element);
+	StdTheme& oTheme = oCtx.theme();
+//std::cout << "XmlThemeParser::parseFontsAliasFont 1  ---> " << p0Element->get_line() << '\n';
+
+	std::string sFontName;
+	const auto oPairFontName = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsAliasFontNameAttr);
+	if (! oPairFontName.first) {
+		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sFontsAliasFontNameAttr);
+	}
+	sFontName = std::move(oPairFontName.second);
+	XmlCommonParser::validateName(oCtx, p0Element, s_sFontsAliasFontNameAttr, sFontName, false);
+
+	std::string sFontUses;
+	const auto oPairFontUses = m_oXmlConditionalParser.getAttributeValue(oCtx, p0Element, s_sFontsAliasFontUsesAttr);
+	if (! oPairFontUses.first) {
+		throw XmlCommonErrors::errorAttrNotFound(oCtx, p0Element, s_sFontsAliasFontUsesAttr);
+	}
+	sFontUses = std::move(oPairFontUses.second);
+	if (sFontUses.empty()) {
+		throw XmlCommonErrors::errorAttrCannotBeEmpty(oCtx, p0Element, s_sFontsAliasFontUsesAttr);
+	}
+
+	if (sFontName == sFontUses) {
+		throw XmlCommonErrors::error(oCtx, p0Element, s_sFontsAliasFontNameAttr
+									, Util::stringCompose("Self alias '%1'", sFontName));
+	}
+
+	std::string sDefine;
+	const bool bDefined = oTheme.getNamedFont(sFontUses, sDefine);
+	if (bDefined) {
+		oTheme.addFontName(sFontName, sDefine);
+	} else {
+		// Note: if a alias name is already defined nothing is inserted
+		int32_t nThemeNr = oCtx.m_nThemeNr;
+		const xmlpp::Element* p0TmpElement = p0Element;
+		auto oTuple = std::make_tuple<int32_t, const xmlpp::Element*, std::string>(std::move(nThemeNr), std::move(p0TmpElement), std::move(sFontUses));
+		oCtx.m_refThemeExtraData->m_oFontAliases.insert(std::make_pair(sFontName, std::move(oTuple)));
+	}
+
+	oCtx.removeChecker(p0Element, true);
+
+//std::cout << "XmlThemeParser::parseFontsAliasFont 2  ---> " << p0Element->get_line() << '\n';
+}
+//std::cout << "XmlThemeParser::parseFontsDefaultFont()" << '\n';
 
 } // namespace stmg

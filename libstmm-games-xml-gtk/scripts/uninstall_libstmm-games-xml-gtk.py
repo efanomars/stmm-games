@@ -80,6 +80,7 @@ def main():
 		subprocess.check_call("{} rm -r -f {}/share/stmm-games/themes/simple.thm".format(sSudo, sInstallDir).split())
 		subprocess.check_call("{} rm -r -f {}/share/stmm-games/themes/common/images".format(sSudo, sInstallDir).split())
 		subprocess.check_call("{} rm -r -f {}/share/stmm-games/themes/common/sounds".format(sSudo, sInstallDir).split())
+		subprocess.check_call("{} rm -r -f {}/share/stmm-games/themes/common/fonts".format(sSudo, sInstallDir).split())
 
 	if not oArgs.bNoClean:
 		os.chdir("..")

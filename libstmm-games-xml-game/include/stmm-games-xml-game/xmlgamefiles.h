@@ -29,6 +29,8 @@
 namespace stmg
 {
 
+/** Interface locating xml files related to games.
+ */
 class XmlGameFiles
 {
 public:

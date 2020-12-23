@@ -78,7 +78,10 @@ private:
 	void parseColorsStdColors(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
 
 	void parseFonts(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
-	void parseFontsFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element, bool bDefault);
+	void parseFontsFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
+	void parseFontsDefaultFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
+	void parseFontsAliasFont(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
+	//void parseFontsDefine(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
 
 	void parsePainters(ThemeCtx& oCtx, const xmlpp::Element* p0Element);
 	void parsePaintersPainter(ThemeCtx& oCtx, const xmlpp::Element* p0Element);

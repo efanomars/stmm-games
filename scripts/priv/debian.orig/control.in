@@ -12,6 +12,7 @@ Build-Depends: debhelper (>= 9)
              , libgtkmm-3.0-dev (>= @STMM_GAMES_GTK_REQ_GTKMM_VERSION@)
              , librsvg2-dev (>= @STMM_GAMES_GTK_REQ_LIBRSVG_VERSION@)
              , libxml++2.6-dev (>= @STMM_GAMES_XML_BASE_REQ_LIBXMLPP_VERSION@)
+             , libfontconfig1-dev (>= @STMM_GAMES_XML_GTK_REQ_FONTCONFIG_VERSION@)
 Standards-Version: 3.9.8
 Section: libs
 Homepage: @STMMI_WEBSITE_SECTION@/stmm-games
@@ -215,6 +216,7 @@ Package: libstmm-games-xml-gtk@STMM_GAMES_XML_GTK_MAJOR_VERSION@
 Architecture: any
 Depends: libstmm-games-xml-game@STMM_GAMES_XML_GAME_MAJOR_VERSION@ (>= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_XML_GAME_VERSION@)
        , libstmm-games-gtk@STMM_GAMES_GTK_MAJOR_VERSION@ (>= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_GTK_VERSION@)
+       , libfontconfig1 (>= @STMM_GAMES_XML_GTK_REQ_FONTCONFIG_VERSION@)
        , ${misc:Depends}, ${shlibs:Depends}
 Description: C++ 2D games library - xml theme loader for gtk
  Extensible 2D game library for C++ (C++14).
@@ -228,6 +230,7 @@ Architecture: any
 Depends: libstmm-games-xml-gtk@STMM_GAMES_XML_GTK_MAJOR_VERSION@ (= ${binary:Version})
        , libstmm-games-xml-game-dev (>= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_XML_GAME_VERSION@)
        , libstmm-games-gtk-dev (>= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_GTK_VERSION@)
+       , libfontconfig1-dev (>= @STMM_GAMES_XML_GTK_REQ_FONTCONFIG_VERSION@)
        , ${misc:Depends}
 Suggests: libstmm-games-doc
 Description: C++ 2D games library - xml theme loader for gtk (develop)

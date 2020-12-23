@@ -10,7 +10,7 @@ Description: C++ games library - xml theme loader
 Version: @STMM_GAMES_XML_GTK_VERSION@
 URL: http://www.efanomars.com/libraries/stmm-games
 # Beware! The space between the library name and the comparison (>=) is necessary!
-Requires: stmm-games-xml-game >= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_XML_GAME_VERSION@  stmm-games-gtk >= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_GTK_VERSION@
+Requires: stmm-games-xml-game >= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_XML_GAME_VERSION@  stmm-games-gtk >= @STMM_GAMES_XML_GTK_REQ_STMM_GAMES_GTK_VERSION@  fontconfig >= @STMM_GAMES_XML_GTK_REQ_FONTCONFIG_VERSION@
 Conflicts:
 Libs: -L${libdir} -lstmm-games-xml-gtk
 Cflags: -I${includedir}/stmm-games-xml-gtk -I${includedir}

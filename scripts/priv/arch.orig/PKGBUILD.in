@@ -11,7 +11,7 @@ license=('LGPL3')
 depends=(
     'stmm-input-au>=@STMM_GAMES_REQ_STMM_INPUT_AU_VERSION@'
     'stmm-input>=@STMM_GAMES_GTK_REQ_STMM_INPUT_GTK_VERSION@'
-    'gtkmm3' 'librsvg' 'libxml++2.6')
+    'gtkmm3' 'librsvg' 'libxml++2.6' 'fontconfig')
 makedepends=('cmake' 'doxygen' 'graphviz' 'python')
 optdepends=()
 

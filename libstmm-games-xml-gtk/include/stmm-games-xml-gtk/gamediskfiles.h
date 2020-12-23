@@ -60,7 +60,7 @@ public:
 	 *     /usr/local/share/stmm-games/themes                       # for generic themes
 	 *
 	 * A theme is a folder named after the theme with suffix `.thm` containing
-	 * files `theme.xml` and thumbnail.png and folders `images` and `sounds`
+	 * files `theme.xml` and thumbnail.png and folders `images`, `sounds` and `fonts`
 	 *
 	 * Example: generic theme `foo`
 	 *
@@ -70,15 +70,19 @@ public:
 	 *     /usr/share/stmm-games/themes/foo.thm/images/mybar.jpg
 	 *     /usr/share/stmm-games/themes/foo.thm/sounds
 	 *     /usr/share/stmm-games/themes/foo.thm/sounds/yourbang.mp3
+	 *     /usr/share/stmm-games/themes/foo.thm/fonts
+	 *     /usr/share/stmm-games/themes/foo.thm/fonts/skripto.ttf
 	 *
-	 * All themes also automatically have access to common images and sounds.
+	 * All themes also automatically have access to common images, sounds and fonts.
 	 *
-	 * Example: common images and sounds
+	 * Example: common images, sounds and fonts
 	 *
 	 *     /usr/share/stmm-games/themes/common/images
-	 *     /usr/share/stmm-games/themes/common/sounds/background.jpg
+	 *     /usr/share/stmm-games/themes/common/images/background.jpg
 	 *     /usr/share/stmm-games/themes/common/sounds
 	 *     /usr/share/stmm-games/themes/common/sounds/test.wav
+	 *     /usr/share/stmm-games/themes/common/fonts
+	 *     /usr/share/stmm-games/themes/common/fonts/parial.ttf
 	 *
 	 * A game is defined by an xml file and a corresponding picture.
 	 *
@@ -104,6 +108,7 @@ public:
 	 *     /tmp/mytheme/thumbnail.png   # 128x128 pixel
 	 *     /tmp/mytheme/images
 	 *     /tmp/mytheme/sounds
+	 *     /tmp/mytheme/fonts
 	 *
 	 * @param sAppName The app's name. Cannot be empty.
 	 * @param bIncludeHomeLocal Whether the user's home directory is also considered as a standard location for games and themes.
@@ -168,6 +173,12 @@ public:
 	 * @return The sound files. Are all defined.
 	 */
 	const std::vector< std::pair<std::string, File> >& getThemeSoundFiles(const File& oThemeFile);
+	/** The theme's font files.
+	 *
+	 * @param oThemeFile The theme file. Must be defined.
+	 * @return The font files. Are all defined.
+	 */
+	const std::vector< std::pair<std::string, File> >& getThemeFontFiles(const File& oThemeFile);
 	/** The theme's thumbnail.
 	 * @param oThemeFile The theme file. Must be defined.
 	 * @return The thumbnail file or undefined if not found.
@@ -181,6 +192,10 @@ public:
 	 * @return The shared sound files. Must all be defined.
 	 */
 	const std::vector< std::pair<std::string, File> >& getDefaultSoundFiles();
+	/** The font files shared by all themes.
+	 * @return The shared font files. Must all be defined.
+	 */
+	const std::vector< std::pair<std::string, File> >& getDefaultFontFiles();
 
 	/** The base path for preferences and highscores.
 	 * Example: '/home/user/.local/share/stmm-games'.
@@ -240,6 +255,7 @@ private:
 	void getThemeFiles(const std::string& sThemesFolder, std::vector<std::string>& aFiles);
 	static void removeNonImageFiles(std::vector<std::string>& aFiles);
 	static void removeNonSoundFiles(std::vector<std::string>& aFiles);
+	static void removeNonFontFiles(std::vector<std::string>& aFiles);
 	ResourceFileData& getResourceData(const std::string& sResource, std::map<std::string, ResourceFileData>& oThemeResourceData);
 	void loadResourceFiles(ResourceFileData& oFileData, const std::vector<std::string>& aNames, const std::vector<std::string>& aPaths);
 
@@ -252,6 +268,8 @@ private:
 	void getFilesAndPathsOfImages(const std::string& sTheDir, bool bDoSubdirs
 								, std::vector<std::string>& aNames, std::vector<std::string>& aPaths);
 	void getFilesAndPathsOfSounds(const std::string& sTheDir, bool bDoSubdirs
+								, std::vector<std::string>& aNames, std::vector<std::string>& aPaths);
+	void getFilesAndPathsOfFonts(const std::string& sTheDir, bool bDoSubdirs
 								, std::vector<std::string>& aNames, std::vector<std::string>& aPaths);
 	template<class Filter>
 	void getFilesAndPaths(const std::string& sTheDir, bool bDoSubdirs
@@ -285,6 +303,7 @@ private:
 
 	static bool isImageFile(const std::string& sFile);
 	static bool isSoundFile(const std::string& sFile);
+	static bool isFontFile(const std::string& sFile);
 
 private:
 	std::string m_sAppName;
@@ -318,11 +337,14 @@ private:
 
 	std::map<std::string, ResourceFileData> m_oThemeImagesData; // Key: theme.xml full path (utf8, not file system encoding)
 	std::map<std::string, ResourceFileData> m_oThemeSoundsData; // Key: theme.xml full path (utf8, not file system encoding)
+	std::map<std::string, ResourceFileData> m_oThemeFontsData; // Key: theme.xml full path (utf8, not file system encoding)
 	ResourceFileData m_oDefaultImagesData;
 	ResourceFileData m_oDefaultSoundsData;
+	ResourceFileData m_oDefaultFontsData;
 
 	static const std::string::value_type* s_aImageFileExt[];
 	static const std::string::value_type* s_aSoundFileExt[];
+	static const std::string::value_type* s_aFontFileExt[];
 
 	static const File s_oEmptyFile;
 private:

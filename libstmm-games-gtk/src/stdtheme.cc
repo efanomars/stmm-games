@@ -347,23 +347,22 @@ void StdTheme::getColorRgb(const TileColor& oColor
 void StdTheme::addFontName(const std::string& sFontName, const std::string& sFontDesc) noexcept
 {
 	assert(!sFontName.empty());
-	const std::string sUFontName = Glib::ustring{sFontName}.uppercase();
-	const int32_t nTotNamed = static_cast<int32_t>(m_aNamedFontIdx.size());
+	const int32_t nTotNamed = static_cast<int32_t>(m_aNamedFontDesc.size());
 	NamedIndex& oNamedFonts = m_oNamed.fonts();
-	int32_t nIdx = oNamedFonts.getIndex(sUFontName);
+	int32_t nIdx = oNamedFonts.getIndex(sFontName);
 	if (nIdx >= 0) {
 		if (nIdx < nTotNamed) {
-			if (!m_aNamedFontIdx[nIdx].empty()) {
+			if (!m_aNamedFontDesc[nIdx].empty()) {
 				return; // redefinition is ignored
 			}
 		}
 	} else {
-		nIdx = oNamedFonts.addName(sUFontName);
+		nIdx = oNamedFonts.addName(sFontName);
 	}
 	if (nIdx >= nTotNamed) {
-		m_aNamedFontIdx.resize(nIdx + 1);
+		m_aNamedFontDesc.resize(nIdx + 1);
 	}
-	m_aNamedFontIdx[nIdx] = sFontDesc;
+	m_aNamedFontDesc[nIdx] = sFontDesc;
 }
 void StdTheme::setDefaultFont(const std::string& sFontDesc) noexcept
 {
@@ -375,8 +374,7 @@ void StdTheme::setDefaultFont(const std::string& sFontDesc) noexcept
 bool StdTheme::getNamedFont(const std::string& sFontName, std::string& sFontDesc) noexcept
 {
 	assert(!sFontName.empty());
-	const std::string sUFontName = Glib::ustring{sFontName}.uppercase();
-	const int32_t nIdx = m_oNamed.fonts().getIndex(sUFontName);
+	const int32_t nIdx = m_oNamed.fonts().getIndex(sFontName);
 	if (nIdx < 0) {
 		return false;
 	}
@@ -385,11 +383,11 @@ bool StdTheme::getNamedFont(const std::string& sFontName, std::string& sFontDesc
 bool StdTheme::getNamedFont(int32_t nFontIdx, std::string& sFontDesc) noexcept
 {
 	assert(nFontIdx >= 0);
-	const int32_t nTotNamed = static_cast<int32_t>(m_aNamedFontIdx.size());
+	const int32_t nTotNamed = static_cast<int32_t>(m_aNamedFontDesc.size());
 	if (nFontIdx >= nTotNamed) {
 		return false;
 	}
-	sFontDesc = m_aNamedFontIdx[nFontIdx];
+	sFontDesc = m_aNamedFontDesc[nFontIdx];
 	return !sFontDesc.empty();
 }
 bool StdTheme::isDefaultFontDefined() const noexcept
@@ -408,9 +406,9 @@ const std::string& StdTheme::getFontDesc(int32_t nFontIdx) const noexcept
 {
 	assert(nFontIdx >= -1);
 	if (nFontIdx >= 0) {
-		const int32_t nTotNamed = static_cast<int32_t>(m_aNamedFontIdx.size());
+		const int32_t nTotNamed = static_cast<int32_t>(m_aNamedFontDesc.size());
 		if (nFontIdx < nTotNamed) {
-			const std::string& sNamedFont = m_aNamedFontIdx[nFontIdx];
+			const std::string& sNamedFont = m_aNamedFontDesc[nFontIdx];
 			if (!sNamedFont.empty()) {
 				return sNamedFont;
 			}

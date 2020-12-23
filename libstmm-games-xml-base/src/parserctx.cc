@@ -59,6 +59,15 @@ void ParserCtx::dump() const
 }
 #endif //NDEBUG
 
+std::vector<ParserCtx::Checker>::iterator ParserCtx::getChecker(const xmlpp::Element* p0Element)
+{
+	std::vector<Checker>::iterator itFindChecker = std::find_if(m_aCheckers.begin(), m_aCheckers.end(), [&](const Checker& oChecker)
+	{
+		return (oChecker.m_p0Element == p0Element);
+	});
+	return itFindChecker;
+}
+
 void ParserCtx::addChecker(const xmlpp::Element* p0Element)
 {
 //std::cout << "ParserCtx::addChecker    adr: " << reinterpret_cast<int64_t>(p0Element) << "  name: " << p0Element->get_name();

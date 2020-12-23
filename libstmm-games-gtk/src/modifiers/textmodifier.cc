@@ -32,6 +32,7 @@
 
 #include <cassert>
 #include <utility>
+#include <algorithm>
 
 #include <stdint.h>
 
@@ -53,6 +54,7 @@ TextModifier::TextModifier(StdTheme* p1Owner, Init&& oInit) noexcept
 , m_fA1(1.)
 , m_fFontSize1(oInit.m_fFontSize1)
 , m_bUseTileFont(oInit.m_bUseTileFont)
+, m_bStretch(oInit.m_bStretch)
 , m_oFont(oInit.m_oFont)
 {
 	if ((m_fFontSize1 <= 0.0) || (m_fFontSize1 > 1.0)) {
@@ -100,18 +102,6 @@ StdThemeModifier::FLOW_CONTROL TextModifier::drawTile(const Cairo::RefPtr<Cairo:
 		sText = m_sText;
 	}
 	//
-	const std::string& sFontDesc = [&]()
-	{
-		const TileFont& oFont = (m_bUseTileFont ? oTile.getTileFont() : m_oFont);
-		if (!oFont.isEmpty()) {
-			const int32_t nFontIdx = oFont.getFontIndex();
-			assert(nFontIdx >= 0);
-			return owner()->getFontDesc(nFontIdx);
-		} else {
-			return owner()->getDefaultFont();
-		}
-	}();
-
 	const NSize oSize = oDc.getTileSize();
 	const int32_t& nW = oSize.m_nW;
 	const int32_t& nH = oSize.m_nH;
@@ -123,6 +113,19 @@ StdThemeModifier::FLOW_CONTROL TextModifier::drawTile(const Cairo::RefPtr<Cairo:
 		m_p0CacheContext = refFontContext.operator->();
 		//
 		m_refFontLayout = Pango::Layout::create(refFontContext);
+		const std::string& sFontDesc = [&]()
+		{
+			const TileFont& oFont = (m_bUseTileFont ? oTile.getTileFont() : m_oFont);
+			if (!oFont.isEmpty()) {
+				const int32_t nFontIdx = oFont.getFontIndex();
+//std::cout << "      TextModifier::drawTile nFontIdx: " << nFontIdx << '\n';
+				assert(nFontIdx >= 0);
+				return owner()->getFontDesc(nFontIdx);
+			} else {
+				return owner()->getDefaultFont();
+			}
+		}();
+//std::cout << "      TextModifier::drawTile sFontDesc: " << sFontDesc << '\n';
 		m_refFont = std::make_unique<Pango::FontDescription>(sFontDesc);
 		m_refFontLayout->set_font_description(*(m_refFont));
 	}
@@ -137,7 +140,14 @@ StdThemeModifier::FLOW_CONTROL TextModifier::drawTile(const Cairo::RefPtr<Cairo:
 	refCc->translate(1.0 * nW / 2, 1.0 * nH / 2);
 	const double fFractionW = 0.74 * m_fFontSize1;
 	const double fFractionH = 0.8 * m_fFontSize1;
-	refCc->scale(fFractionW * nW / nTextW, fFractionH * nH / nTextH);
+	const double fScaleX = fFractionW * nW / nTextW;
+	const double fScaleY = fFractionH * nH / nTextH;
+	if (! m_bStretch) {
+		const double fScale = std::min(fScaleX, fScaleY);
+		refCc->scale(fScale, fScale);
+	} else {
+		refCc->scale(fScaleX, fScaleY);
+	}
 	refCc->translate(-1.0 * nTextW / 2, -1.0 * nTextH / 2);
 
 	if (m_bUseTileColor || m_bCalcColor) {
@@ -146,14 +156,14 @@ StdThemeModifier::FLOW_CONTROL TextModifier::drawTile(const Cairo::RefPtr<Cairo:
 		const double fR1 = TileColor::colorUint8ToDouble1(nR);
 		const double fG1 = TileColor::colorUint8ToDouble1(nG);
 		const double fB1 = TileColor::colorUint8ToDouble1(nB);
-		const double fA1 = 1.0; // Alpha can be done with Alpher
+		const double fA1 = 1.0; // Alpha can be done with AlphaModifier
 		if (m_bUseTileColor) {
 			assert(!m_bCalcColor);
 			refCc->set_source_rgba(fR1, fG1, fB1, fA1);
 		} else { // m_bCalcColor
 			assert(m_bCalcColor);
-			const double dLum = ((fR1 * 299) + (fG1 * 587) + (fB1 * 114)) / 1000;
-			if (dLum > 0.45) {
+			const double fLum = ((fR1 * 299) + (fG1 * 587) + (fB1 * 114)) / 1000;
+			if (fLum > 0.45) {
 				refCc->set_source_rgba(0.0, 0.0, 0.0, fA1); // black
 			} else {
 				refCc->set_source_rgba(1.0, 1.0, 1.0, fA1); // white

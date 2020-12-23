@@ -1,3 +1,12 @@
+stmm-games (0.31) unstable; urgency=low
+
+  * Allow loading of custom fonts (ttf and otf) through fontconfig
+  * Theme can define font aliases
+  * TextModifier no longer stretches characters
+  * Increase minor version
+
+ -- Stefano Marsili <efanomars@gmx.ch>  Wed, 23 Dec 2020 19:29:39 +0100
+
 stmm-games (0.30) unstable; urgency=low
 
   * ScrollerEvent: add inhibitors

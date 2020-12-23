@@ -25,6 +25,8 @@
 #include "xmlthanimationfactoryparser.h"
 #include "xmlmodifierparser.h"
 #include "themectx.h"
+#include "themeextradata.h"
+#include "fontconfigloader.h"
 
 #include <stmm-games-xml-base/parserctx.h>
 
@@ -45,6 +47,7 @@
 #include <exception>
 #include <algorithm>
 #include <utility>
+#include <unordered_set>
 
 #include <stdint.h>
 
@@ -71,6 +74,11 @@ XmlThemeLoader::XmlThemeLoader(Init&& oInit)
 	}
 	for (auto& refThWidgetParser : oInit.m_aThWidgetParsers) {
 		m_refXmlThemeParser->addXmlThWidgetFactoryParser(std::move(refThWidgetParser));
+	}
+	m_refFontConfigLoader = FontConfigLoader::create();
+	if (! m_refFontConfigLoader) {
+		std::cout << "XmlThemeLoader: could not create FontConfigLoader" << '\n';
+		std::cout << "-> theme font files wont be used" << '\n';
 	}
 }
 XmlThemeLoader::~XmlThemeLoader()
@@ -318,17 +326,22 @@ void XmlThemeLoader::parseXmlTheme(StdTheme& oStdTheme)
 
 	const int32_t nTotThemes = static_cast<int32_t>(m_aPreSortedThemeNames.size());
 //std::cout << "XmlThemeLoader::parseXmlTheme()    nTotThemes=" << nTotThemes << '\n';
-	std::vector<xmlpp::DomParser> aDomParsers{static_cast<std::size_t>(nTotThemes)};
-	{
+	std::vector<xmlpp::DomParser> aDomParsers{static_cast<std::vector<xmlpp::DomParser>::size_type>(nTotThemes)};
+
+	{ // Do not remove this! Segmentation fault!
+
+	auto refThemeExtraData = std::make_shared<ThemeExtraData>();
+
 	std::vector< unique_ptr<ThemeCtx> > aCtxs;
-	//aCtx.resize(nTotThemes);
-	for (int32_t nIdx = 0; nIdx < nTotThemes; ++nIdx) {
-		const std::string& sName = m_aPreSortedThemeNames[nIdx];
-		xmlpp::DomParser& oDomParser = aDomParsers[nIdx];
-		//oParser.set_validate();
+	aCtxs.reserve(nTotThemes);
+	{
+	for (int32_t nThemeNr = 0; nThemeNr < nTotThemes; ++nThemeNr) {
+		const std::string& sName = m_aPreSortedThemeNames[nThemeNr];
+		xmlpp::DomParser& oDomParser = aDomParsers[nThemeNr];
+		//oDomParser.set_validate();
 		//We just want the text to be resolved/unescaped automatically.
 		oDomParser.set_substitute_entities();
-//if (nIdx > 0) {
+//if (nThemeNr > 0) {
 //std::cout << "XmlThemeLoader::parseXmlTheme()        extended theme sName=" << sName << '\n';
 //}
 		const File& oThemeFile = m_oNamedThemeInfos[sName].m_oThemeFile;
@@ -344,6 +357,9 @@ void XmlThemeLoader::parseXmlTheme(StdTheme& oStdTheme)
 		}
 //std::cout << "XmlThemeLoader::parseXmlTheme()   sName=" << sName << "   sFile=" << sFile << '\n';
 		aCtxs.emplace_back(std::make_unique<ThemeCtx>(m_refAppConfig, oStdTheme, sName, oThemeFile, p0RootElement));
+		auto& oThemeCtx = *aCtxs.back();
+		oThemeCtx.m_nThemeNr = nThemeNr;
+		oThemeCtx.m_refThemeExtraData = refThemeExtraData;
 
 		const auto& aImageFiles = m_refGameDiskFiles->getThemeImageFiles(oThemeFile);
 		for (auto& oPairThemeFile : aImageFiles) {
@@ -360,6 +376,17 @@ void XmlThemeLoader::parseXmlTheme(StdTheme& oStdTheme)
 			assert(oThemeFile.isDefined() && !oThemeFile.isBuffered());
 			oStdTheme.addKnownSoundFile(sThemeFileName, oThemeFile);
 //std::cout << "XmlThemeLoader::parseXmlTheme()    sound      sThemeFileName=" << sThemeFileName << '\n';
+		}
+		if (m_refFontConfigLoader) {
+			const auto& aFontFiles = m_refGameDiskFiles->getThemeFontFiles(oThemeFile);
+			for (auto& oPairThemeFile : aFontFiles) {
+				const std::string& sThemeFileName = oPairThemeFile.first;
+				const File& oThemeFile = oPairThemeFile.second;
+				assert(oThemeFile.isDefined() && !oThemeFile.isBuffered());
+				const std::string sFontDefine = m_refFontConfigLoader->addAppFontFile(oThemeFile.getFullPath());
+				oThemeCtx.m_refThemeExtraData->m_oFontFileDefs.insert(std::make_pair(sThemeFileName, sFontDefine));
+//std::cout << "XmlThemeLoader::parseXmlTheme()    font      sThemeFileName=" << sThemeFileName << '\n';
+			}
 		}
 	}
 	const auto& aDefaultImageFiles = m_refGameDiskFiles->getDefaultImageFiles();
@@ -378,9 +405,69 @@ void XmlThemeLoader::parseXmlTheme(StdTheme& oStdTheme)
 		oStdTheme.addKnownSoundFile(sThemeFileName, oThemeFile);
 //std::cout << "XmlThemeLoader::parseXmlTheme() common sound         sThemeFileName=" << sThemeFileName << '\n';
 	}
+	if (m_refFontConfigLoader) {
+		const auto& aDefaultFontFiles = m_refGameDiskFiles->getDefaultFontFiles();
+		for (auto& oPairThemeFile : aDefaultFontFiles) {
+			const std::string& sThemeFileName = oPairThemeFile.first;
+			const File& oThemeFile = oPairThemeFile.second;
+			assert(oThemeFile.isDefined() && !oThemeFile.isBuffered());
+			const std::string sFontDefine = m_refFontConfigLoader->addAppFontFile(oThemeFile.getFullPath());
+			refThemeExtraData->m_oFontFileDefs.insert(std::make_pair(sThemeFileName, sFontDefine));
+//std::cout << "XmlThemeLoader::parseXmlTheme() common font         sThemeFileName=" << sThemeFileName << '\n';
+		}
+	}	
 	//
 	m_refXmlThemeParser->parseXmlTheme(aCtxs);
+
+	// Resolve font aliases
+	auto& oAliases = refThemeExtraData->m_oFontAliases;
+//std::cout << "XmlThemeLoader::parseXmlTheme()  oAliases.size()=" << oAliases.size() << '\n';
+	if (! oAliases.empty()) {
+		std::unordered_set<std::string> oVisited;
+
+		using traverserType=std::function<void(const std::string&, int32_t, const xmlpp::Element*)>;
+		traverserType* p0Traverse = nullptr;
+		traverserType oTraverse = [&](const std::string& sName, int32_t nThemeNr, const xmlpp::Element* p0Element)
+		{
+			if (oVisited.count(sName) == 1) {
+				throw XmlCommonErrors::error(*(aCtxs[nThemeNr]), p0Element, "", Util::stringCompose("Font alias '%1' circular definition", sName));
+			}
+			oVisited.insert(sName);
+			const auto itFind = oAliases.find(sName);
+			if (itFind == oAliases.end()) {
+				assert(p0Element != nullptr);
+				throw XmlCommonErrors::error(*(aCtxs[nThemeNr]), p0Element, "", Util::stringCompose("Aliased font named '%1' not found", sName));
+			}
+			const auto& oTuple = itFind->second;
+			const std::string& sUse = std::get<2>(oTuple);
+			std::string sDefine;
+			bool bDefined = oStdTheme.getNamedFont(sUse, sDefine);
+			if (! bDefined) {
+				(*p0Traverse)(sUse, std::get<0>(oTuple), std::get<1>(oTuple));
+				bDefined = oStdTheme.getNamedFont(sUse, sDefine);
+				assert(bDefined);
+			}
+			oStdTheme.addFontName(sName, sDefine);
+		};
+		p0Traverse = &oTraverse;
+		const auto& oPair = *oAliases.begin();
+		oTraverse(oPair.first, std::get<0>(oPair.second), std::get<1>(oPair.second));
 	}
+
+	const std::string& sDefaultFontName = refThemeExtraData->m_sDefaultFontName;
+	if (! sDefaultFontName.empty()) {
+		std::string sDefine;
+		bool bDefined = oStdTheme.getNamedFont(sDefaultFontName, sDefine);
+		if (! bDefined) {
+			throw XmlCommonErrors::error(*(aCtxs[refThemeExtraData->m_nDefaultThemeNr]), refThemeExtraData->m_p0DefaultElement, ""
+										, Util::stringCompose("Default font named '%1' not found", sDefaultFontName));
+		}
+		oStdTheme.setDefaultFont(sDefine);
+	}
+
+	}
+	} // Do not remove this! Segmentation fault!
 }
+
 
 } // namespace stmg

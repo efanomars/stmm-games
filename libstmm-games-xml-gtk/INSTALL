@@ -7,6 +7,7 @@ Requirements
 g++ compiler or compatible (>= C++14)
 libstmm-games-gtk
 libstmm-games-xml-game
+libfontconfig1-dev
 
 Instructions
 ------------
